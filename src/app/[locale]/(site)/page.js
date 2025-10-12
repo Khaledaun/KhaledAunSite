@@ -1,4 +1,4 @@
-import { setRequestLocale } from 'next-intl/server';
+import { unstable_setRequestLocale } from 'next-intl/server';
 import Header from '@/components/site/Header';
 import Hero from '@/components/site/Hero';
 import About from '@/components/site/About';
@@ -12,7 +12,7 @@ import Script from 'next/script';
 
 export default function Home({params: {locale}}) {
   // Enable static rendering
-  setRequestLocale(locale);
+  unstable_setRequestLocale(locale);
   
   const organizationJsonLd = {
     '@context': 'https://schema.org',

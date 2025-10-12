@@ -1,8 +1,12 @@
 {
   "name": "@khaledaun/auth",
   "version": "1.0.0",
+  "private": true,
   "main": "index.ts",
+  "types": "index.ts",
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.39.0",
+    "@khaledaun/db": "workspace:*",
+    "next": "^14.2.5"
   }
 }

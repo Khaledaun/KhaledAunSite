@@ -1,11 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-
-// --- Diagnostic Code ---
-console.log('--- Checking Environment Variables ---');
-console.log('Checking Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-console.log('Checking Service Key:', process.env.SUPABASE_SERVICE_ROLE_KEY);
-console.log('------------------------------------');
-// --- End Diagnostic Code ---
+import { cookies } from 'next/headers';
+import { prisma } from '@khaledaun/db';
+import { isAdmin, type Role } from './roles';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'mock-service-key';
@@ -17,37 +13,71 @@ if ((!supabaseUrl || !supabaseServiceKey) && process.env.NODE_ENV === 'productio
 
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-// Simple auth functions for build compatibility
+// Phase 6 Lite: User interface matching Prisma
 export interface User {
   id: string;
   email: string;
-  role: string;
+  name?: string | null;
+  role: Role;
 }
 
-export async function getUser(authHeader: string | null): Promise<User | null> {
-  // Stub implementation - in production this would validate JWT
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+/**
+ * Get the current session user from cookies/headers
+ * Phase 6 Lite: Simple implementation, can be enhanced later
+ */
+export async function getSessionUser(): Promise<User | null> {
+  try {
+    // For Phase 6 Lite, we'll use a simple cookie-based session
+    // In production, integrate with your auth provider (Supabase Auth, NextAuth, etc.)
+    const cookieStore = cookies();
+    const sessionCookie = cookieStore.get('session-user-id');
+    
+    if (!sessionCookie?.value) {
+      return null;
+    }
+
+    // Look up user in database
+    const user = await prisma.user.findUnique({
+      where: { id: sessionCookie.value },
+      select: { id: true, email: true, name: true, role: true }
+    });
+
+    return user;
+  } catch (error) {
+    console.error('Error getting session user:', error);
     return null;
   }
-  
-  // Mock user for development
-  return {
-    id: 'mock-user-id',
-    email: 'admin@example.com',
-    role: 'admin'
-  };
 }
 
-export async function requireAdmin(authHeader: string | null): Promise<User> {
-  const user = await getUser(authHeader);
+/**
+ * Require admin role for API routes and server actions
+ * Returns user or throws error
+ */
+export async function requireAdmin(): Promise<User> {
+  const user = await getSessionUser();
   
   if (!user) {
     throw new Error('UNAUTHORIZED');
   }
   
-  if (user.role !== 'admin') {
+  if (!isAdmin(user.role)) {
     throw new Error('FORBIDDEN');
   }
   
   return user;
 }
+
+/**
+ * Check if user is admin (returns boolean, doesn't throw)
+ */
+export async function checkIsAdmin(): Promise<boolean> {
+  try {
+    const user = await getSessionUser();
+    return user ? isAdmin(user.role) : false;
+  } catch {
+    return false;
+  }
+}
+
+// Re-export role utilities
+export * from './roles';

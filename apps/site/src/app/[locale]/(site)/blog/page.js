@@ -1,5 +1,4 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
-import { getTranslations } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 import { draftMode } from 'next/headers';
@@ -10,22 +9,27 @@ export const metadata = {
 };
 
 async function getPosts(showDrafts = false) {
-  const where = showDrafts ? {} : { status: 'PUBLISHED' };
-  
-  return await prisma.post.findMany({
-    where,
-    include: {
-      author: {
-        select: { name: true, email: true }
-      }
-    },
-    orderBy: { publishedAt: 'desc' }
-  });
+  try {
+    const where = showDrafts ? {} : { status: 'PUBLISHED' };
+    
+    return await prisma.post.findMany({
+      where,
+      include: {
+        author: {
+          select: { name: true, email: true }
+        }
+      },
+      orderBy: { publishedAt: 'desc' }
+    });
+  } catch (error) {
+    console.warn('Unable to fetch posts (database not available):', error.message);
+    // Return empty array if database is not available
+    return [];
+  }
 }
 
 export default async function BlogPage({ params: { locale } }) {
   unstable_setRequestLocale(locale);
-  const t = await getTranslations('blog');
   const { isEnabled: isDraftMode } = draftMode();
   
   const posts = await getPosts(isDraftMode);

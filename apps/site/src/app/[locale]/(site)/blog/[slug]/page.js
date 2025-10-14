@@ -5,41 +5,54 @@ import { draftMode } from 'next/headers';
 import Link from 'next/link';
 
 export async function generateMetadata({ params: { slug, locale } }) {
-  const post = await prisma.post.findUnique({
-    where: { slug },
-    select: { title: true, excerpt: true }
-  });
+  try {
+    const post = await prisma.post.findUnique({
+      where: { slug },
+      select: { title: true, excerpt: true }
+    });
 
-  if (!post) {
+    if (!post) {
+      return {
+        title: 'Post Not Found'
+      };
+    }
+
     return {
-      title: 'Post Not Found'
+      title: post.title,
+      description: post.excerpt || `Read ${post.title} on Khaled Aun's blog`,
+    };
+  } catch (error) {
+    console.warn('Unable to generate metadata (database not available):', error.message);
+    return {
+      title: 'Blog Post',
+      description: 'Read the latest article on Khaled Aun\'s blog'
     };
   }
-
-  return {
-    title: post.title,
-    description: post.excerpt || `Read ${post.title} on Khaled Aun's blog`,
-  };
 }
 
 async function getPost(slug, showDrafts = false) {
-  const where = { slug };
-  
-  const post = await prisma.post.findUnique({
-    where,
-    include: {
-      author: {
-        select: { name: true, email: true }
+  try {
+    const where = { slug };
+    
+    const post = await prisma.post.findUnique({
+      where,
+      include: {
+        author: {
+          select: { name: true, email: true }
+        }
       }
+    });
+    
+    // If draft mode is off and post is draft, return null
+    if (post && post.status === 'DRAFT' && !showDrafts) {
+      return null;
     }
-  });
-  
-  // If draft mode is off and post is draft, return null
-  if (post && post.status === 'DRAFT' && !showDrafts) {
+    
+    return post;
+  } catch (error) {
+    console.warn('Unable to fetch post (database not available):', error.message);
     return null;
   }
-  
-  return post;
 }
 
 export default async function BlogPostPage({ params: { slug, locale }, searchParams }) {
@@ -133,14 +146,21 @@ export default async function BlogPostPage({ params: { slug, locale }, searchPar
 
 // Generate static params for published posts (ISR)
 export async function generateStaticParams() {
-  const posts = await prisma.post.findMany({
-    where: { status: 'PUBLISHED' },
-    select: { slug: true }
-  });
+  try {
+    // If database is not available (e.g., during build without DATABASE_URL), return empty array
+    const posts = await prisma.post.findMany({
+      where: { status: 'PUBLISHED' },
+      select: { slug: true }
+    });
 
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+    return posts.map((post) => ({
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.warn('Unable to generate static params for blog posts (database not available):', error.message);
+    // Return empty array - pages will be generated on-demand (SSR)
+    return [];
+  }
 }
 
 // Enable ISR with revalidation

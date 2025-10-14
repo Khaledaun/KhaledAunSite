@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@khaledaun/auth": "workspace:*",
+    "@khaledaun/db": "workspace:*",
+    "@khaledaun/schemas": "workspace:*",
+    "@khaledaun/utils": "workspace:*",
     "@sentry/nextjs": "^7.100.0",
     "@supabase/supabase-js": "^2.44.4",
     "@supabase/ssr": "^0.1.0",

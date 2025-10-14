@@ -6,33 +6,47 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic'; // Always fetch fresh data for preview
 
 export async function generateMetadata({ params: { id } }) {
-  const post = await prisma.post.findUnique({
-    where: { id },
-    select: { title: true, excerpt: true }
-  });
+  try {
+    const post = await prisma.post.findUnique({
+      where: { id },
+      select: { title: true, excerpt: true }
+    });
 
-  if (!post) {
+    if (!post) {
+      return {
+        title: 'Post Not Found'
+      };
+    }
+
     return {
-      title: 'Post Not Found'
+      title: `Preview: ${post.title}`,
+      description: post.excerpt || `Preview of ${post.title}`,
+      robots: 'noindex, nofollow', // Don't index preview pages
+    };
+  } catch (error) {
+    console.warn('Unable to generate preview metadata (database not available):', error.message);
+    return {
+      title: 'Preview',
+      description: 'Preview post',
+      robots: 'noindex, nofollow'
     };
   }
-
-  return {
-    title: `Preview: ${post.title}`,
-    description: post.excerpt || `Preview of ${post.title}`,
-    robots: 'noindex, nofollow', // Don't index preview pages
-  };
 }
 
 async function getPostById(id) {
-  return await prisma.post.findUnique({
-    where: { id },
-    include: {
-      author: {
-        select: { name: true, email: true }
+  try {
+    return await prisma.post.findUnique({
+      where: { id },
+      include: {
+        author: {
+          select: { name: true, email: true }
+        }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.warn('Unable to fetch post (database not available):', error.message);
+    return null;
+  }
 }
 
 export default async function PreviewPostPage({ params: { id, locale } }) {

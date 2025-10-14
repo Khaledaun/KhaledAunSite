@@ -78,6 +78,22 @@ export default function PostsPage() {
     }
   };
 
+  const handlePreview = async (postId: string) => {
+    try {
+      // Get signed preview URL from API
+      const response = await fetch(`/api/admin/posts/${postId}/preview-url`);
+      
+      if (!response.ok) throw new Error('Failed to generate preview URL');
+      
+      const data = await response.json();
+      
+      // Open in new window
+      window.open(data.previewUrl, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to generate preview');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -188,14 +204,12 @@ export default function PostsPage() {
                         >
                           Publish
                         </button>
-                        <a
-                          href={`${process.env.NEXT_PUBLIC_SITE_URL}/preview?id=${post.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => handlePreview(post.id)}
                           className="text-purple-600 hover:text-purple-900"
                         >
                           Preview
-                        </a>
+                        </button>
                       </>
                     )}
                     {post.status === 'PUBLISHED' && (

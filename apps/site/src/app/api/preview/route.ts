@@ -1,5 +1,6 @@
 import { draftMode } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyPreview } from '@khaledaun/utils/preview';
 
 /**
  * Preview API Route for Phase 6 Lite
@@ -16,13 +17,13 @@ export async function GET(request: NextRequest) {
     return new NextResponse('Missing id parameter', { status: 400 });
   }
   
-  // Phase 6 Lite: Simple token validation (optional)
-  // In production, verify token against a server secret or session
-  // For now, we'll allow preview in development mode or with any token
-  const isAuthorized = process.env.NODE_ENV === 'development' || token;
-  
-  if (!isAuthorized) {
-    return new NextResponse('Unauthorized', { status: 401 });
+  // Production: verify signed token
+  if (process.env.NODE_ENV === 'production') {
+    if (!token) return new NextResponse('Unauthorized', { status: 401 });
+    const payload = verifyPreview(token);
+    if (!payload || payload.id !== id) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
   }
   
   // Enable Draft Mode

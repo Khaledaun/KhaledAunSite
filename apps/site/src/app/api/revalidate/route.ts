@@ -9,13 +9,22 @@ import { revalidatePath } from 'next/cache';
  */
 export async function POST(request: NextRequest) {
   try {
-    // Verify secret (in production, always validate this)
-    const secret = request.headers.get('x-revalidate-secret');
-    const expectedSecret = process.env.REVALIDATE_SECRET || 'dev-secret';
+    // PRODUCTION: Always verify secret
+    const secret = request.headers.get('x-reval-secret');
+    const expectedSecret = process.env.REVALIDATE_SECRET;
     
-    if (secret !== expectedSecret && process.env.NODE_ENV === 'production') {
+    if (!expectedSecret) {
+      console.error('REVALIDATE_SECRET not configured');
       return NextResponse.json(
-        { error: 'Invalid secret' },
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+    
+    if (secret !== expectedSecret) {
+      console.warn('Invalid revalidation secret attempt');
+      return NextResponse.json(
+        { error: 'Unauthorized - Invalid secret' },
         { status: 401 }
       );
     }

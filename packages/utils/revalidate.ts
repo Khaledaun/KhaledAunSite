@@ -4,15 +4,20 @@
  */
 
 export async function revalidatePost(slug: string): Promise<void> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-  const secret = process.env.REVALIDATE_SECRET || 'dev-secret';
+  const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
+  const secret = process.env.REVALIDATE_SECRET;
+
+  if (!secret) {
+    console.error('REVALIDATE_SECRET not configured - skipping revalidation');
+    return;
+  }
 
   try {
     const response = await fetch(`${siteUrl}/api/revalidate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-revalidate-secret': secret,
+        'x-reval-secret': secret,
       },
       body: JSON.stringify({ slug }),
     });
@@ -29,15 +34,20 @@ export async function revalidatePost(slug: string): Promise<void> {
 }
 
 export async function revalidateBlog(): Promise<void> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-  const secret = process.env.REVALIDATE_SECRET || 'dev-secret';
+  const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
+  const secret = process.env.REVALIDATE_SECRET;
+
+  if (!secret) {
+    console.error('REVALIDATE_SECRET not configured - skipping revalidation');
+    return;
+  }
 
   try {
     const response = await fetch(`${siteUrl}/api/revalidate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-revalidate-secret': secret,
+        'x-reval-secret': secret,
       },
       body: JSON.stringify({}), // No slug = just revalidate blog index
     });

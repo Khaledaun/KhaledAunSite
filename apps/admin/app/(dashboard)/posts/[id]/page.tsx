@@ -85,6 +85,22 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const handlePreview = async () => {
+    try {
+      // Get signed preview URL from API
+      const response = await fetch(`/api/admin/posts/${params.id}/preview-url`);
+      
+      if (!response.ok) throw new Error('Failed to generate preview URL');
+      
+      const data = await response.json();
+      
+      // Open in new window
+      window.open(data.previewUrl, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to generate preview');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -124,14 +140,12 @@ export default function EditPostPage({ params }: { params: { id: string } }) {
           <div className="space-x-2">
             {post.status === 'DRAFT' && (
               <>
-                <a
-                  href={`${process.env.NEXT_PUBLIC_SITE_URL}/preview?id=${post.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={handlePreview}
                   className="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
                 >
                   Preview Draft
-                </a>
+                </button>
                 <button
                   onClick={handlePublish}
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"

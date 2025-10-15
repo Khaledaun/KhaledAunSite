@@ -10,7 +10,7 @@ export default function AboutDennis() {
   const t = useTranslations('About');
   
   const expertiseData = [
-    { title: t('litigation'), Icon: Icon.Scale },
+    { title: t('litigation'), Icon: Icon.Briefcase },
     { title: t('arbitration'), Icon: Icon.Users },
     { title: t('crossBorder'), Icon: Icon.Globe },
     { title: t('conflictPrevention'), Icon: Icon.Shield },

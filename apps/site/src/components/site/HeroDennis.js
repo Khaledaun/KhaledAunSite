@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useTranslations } from 'next-intl';
 
 export default function HeroDennis({ locale }) {
-  const t = useTranslations('hero');
+  const t = useTranslations('Hero');
 
   const titles = locale === 'ar' 
     ? ['خالد عون', 1000, 'مستشار قانوني', 1000, 'خبير استراتيجية أعمال', 1000, 'مؤسس شركات', 1000]

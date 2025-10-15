@@ -3,11 +3,10 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Link as ScrollLink } from 'react-scroll';
 import * as Unicons from "@iconscout/react-unicons";
-import Image from "next/image";
 import { useTranslations } from 'next-intl';
 
 export default function Navbar({ locale }) {
-  const t = useTranslations('navigation');
+  const t = useTranslations('Navigation');
   const [stickyNavbar, setStickyNavbar] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

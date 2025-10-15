@@ -12,7 +12,7 @@ export default function ServicesDennis() {
     {
       title: t('litigation'),
       desc: t('litigationDesc'),
-      Icon: Icon.Scale
+      Icon: Icon.Briefcase
     },
     {
       title: t('arbitration'),

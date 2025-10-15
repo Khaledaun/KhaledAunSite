@@ -22,7 +22,7 @@ export default function Switcher() {
     });
   }
 
-  function changeMode(mode, event) {
+  function changeMode(mode) {
     switch (mode) {
       case 'mode':
         if (document.documentElement.className.includes("dark")) {
@@ -45,7 +45,7 @@ export default function Switcher() {
             type="checkbox" 
             className="checkbox opacity-0 absolute" 
             id="chk" 
-            onClick={(event) => changeMode('mode', event)} 
+            onClick={() => changeMode('mode')} 
           />
           <label 
             className="label bg-slate-900 dark:bg-white shadow dark:shadow-gray-800 cursor-pointer rounded-full flex justify-between items-center p-1 w-14 h-8" 

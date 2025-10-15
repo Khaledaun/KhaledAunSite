@@ -1,18 +1,25 @@
 {
   "Hero": {
+    "greeting": "Hey! I'm",
+    "description": "Expert legal counsel for complex business challenges and growth opportunities. Specialized in international law, business strategy, and helping companies expand globally.",
     "headline": "Strategy in Legal Conflicts. Vision to Expand and Grow.",
     "subheadline": "Expert legal counsel for complex business challenges and growth opportunities.",
+    "hireCTA": "Hire Me",
+    "downloadCV": "Download CV",
     "bookConsultation": "Book a Consultation",
     "viewVentures": "View Ventures",
     "yearsExperience": "Years Experience",
     "casesResolved": "Cases Resolved",
     "successRate": "Success Rate",
     "expertise": "Legal Expertise",
+    "role": "Legal Counsel",
     "specialization": "Strategy & Growth"
   },
   "Navigation": {
     "home": "Home",
     "about": "About",
+    "services": "Services",
+    "experience": "Experience",
     "ventures": "Ventures",
     "insights": "Insights",
     "contact": "Contact",

@@ -51,9 +51,9 @@ export default async function LocaleLayout({children, params: {locale}}) {
     <html 
       dir={locale === 'ar' ? 'rtl' : 'ltr'} 
       lang={locale}
-      className={`dark ${inter.variable} ${poppins.variable}`}
+      className={`${inter.variable} ${poppins.variable}`}
     >
-      <body className="font-body bg-brand-navy text-white">
+      <body className="font-poppins text-base text-black dark:text-white dark:bg-slate-900">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-brand-gold text-brand-navy px-4 py-2 rounded z-50"

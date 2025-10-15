@@ -1,0 +1,78 @@
+@font-face {
+  font-family: "Material Design Icons";
+  src: url("materialdesignicons-webfont.eot?v=7.2.96");
+  src: url("materialdesignicons-webfont.eot?#iefix&v=7.2.96") format("embedded-opentype"),
+       url("materialdesignicons-webfont.woff2?v=7.2.96") format("woff2"),
+       url("materialdesignicons-webfont.woff?v=7.2.96") format("woff"),
+       url("materialdesignicons-webfont.ttf?v=7.2.96") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.mdi:before,
+.mdi-set {
+  display: inline-block;
+  font: normal normal normal 24px/1 "Material Design Icons";
+  font-size: inherit;
+  text-rendering: auto;
+  line-height: inherit;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mdi-menu::before {
+  content: "\F0349";
+}
+
+.mdi-arrow-down::before {
+  content: "\F0045";
+}
+
+.mdi-arrow-up::before {
+  content: "\F005D";
+}
+
+.mdi-close::before {
+  content: "\F0156";
+}
+
+.mdi-dribbble::before {
+  content: "\F01A9";
+}
+
+.mdi-behance::before {
+  content: "\F00DB";
+}
+
+.mdi-instagram::before {
+  content: "\F02FE";
+}
+
+.mdi-facebook::before {
+  content: "\F020C";
+}
+
+.mdi-twitter::before {
+  content: "\F0544";
+}
+
+.mdi-linkedin::before {
+  content: "\F033B";
+}
+
+.mdi-github::before {
+  content: "\F02A4";
+}
+
+.mdi-email::before {
+  content: "\F01EE";
+}
+
+.mdi-phone::before {
+  content: "\F03F2";
+}
+
+.mdi-map-marker::before {
+  content: "\F0352";
+}
+

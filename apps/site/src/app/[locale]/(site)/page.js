@@ -1,6 +1,6 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
-import Header from '@/components/site/Header';
-import Hero from '@/components/site/Hero';
+import Navbar from '@/components/site/Navbar';
+import HeroDennis from '@/components/site/HeroDennis';
 import About from '@/components/site/About';
 import Services from '@/components/site/Services';
 import ExperienceTimeline from '@/components/site/ExperienceTimeline';
@@ -47,9 +47,9 @@ export default function Home({params: {locale}}) {
           __html: JSON.stringify(organizationJsonLd)
         }}
       />
-      <Header />
+      <Navbar locale={locale} />
       <main id="main-content">
-        <Hero />
+        <HeroDennis locale={locale} />
         <About />
         <Services />
         <ExperienceTimeline />

@@ -1,12 +1,13 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
 import Navbar from '@/components/site/Navbar';
 import HeroDennis from '@/components/site/HeroDennis';
-import About from '@/components/site/About';
-import Services from '@/components/site/Services';
+import AboutDennis from '@/components/site/AboutDennis';
+import ServicesDennis from '@/components/site/ServicesDennis';
 import ExperienceTimeline from '@/components/site/ExperienceTimeline';
 import LinkedInSection from '@/components/site/LinkedInSection';
 import VenturesStrip from '@/components/site/VenturesStrip';
-import Footer from '@/components/site/Footer';
+import FooterDennis from '@/components/site/FooterDennis';
+import Switcher from '@/components/site/Switcher';
 import ConsultationModal from '@/components/common/ConsultationModal';
 import Script from 'next/script';
 
@@ -50,13 +51,14 @@ export default function Home({params: {locale}}) {
       <Navbar locale={locale} />
       <main id="main-content">
         <HeroDennis locale={locale} />
-        <About />
-        <Services />
+        <AboutDennis />
+        <ServicesDennis />
         <ExperienceTimeline />
         <LinkedInSection />
         <VenturesStrip />
       </main>
-      <Footer />
+      <FooterDennis locale={locale} />
+      <Switcher />
       <ConsultationModal />
     </>
   );

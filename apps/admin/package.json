@@ -8,8 +8,7 @@
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run",
-    "vercel-build": "prisma generate && next build",
-    "postinstall": "prisma generate || true"
+    "vercel-build": "cd ../../packages/db && pnpm db:generate && cd ../../apps/admin && next build"
   },
   "dependencies": {
     "@khaledaun/auth": "workspace:*",

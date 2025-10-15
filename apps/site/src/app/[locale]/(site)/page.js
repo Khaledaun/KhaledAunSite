@@ -3,8 +3,8 @@ import Navbar from '@/components/site/Navbar';
 import HeroDennis from '@/components/site/HeroDennis';
 import AboutDennis from '@/components/site/AboutDennis';
 import ServicesDennis from '@/components/site/ServicesDennis';
-import ExperienceTimeline from '@/components/site/ExperienceTimeline';
-import LinkedInSection from '@/components/site/LinkedInSection';
+import ExperienceTimelineDennis from '@/components/site/ExperienceTimelineDennis';
+import ContactDennis from '@/components/site/ContactDennis';
 import VenturesStrip from '@/components/site/VenturesStrip';
 import FooterDennis from '@/components/site/FooterDennis';
 import Switcher from '@/components/site/Switcher';
@@ -53,9 +53,9 @@ export default function Home({params: {locale}}) {
         <HeroDennis locale={locale} />
         <AboutDennis />
         <ServicesDennis />
-        <ExperienceTimeline />
-        <LinkedInSection />
+        <ExperienceTimelineDennis />
         <VenturesStrip />
+        <ContactDennis />
       </main>
       <FooterDennis locale={locale} />
       <Switcher />

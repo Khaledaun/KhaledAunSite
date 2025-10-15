@@ -7,10 +7,15 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "vercel-build": "prisma generate && next build",
+    "postinstall": "prisma generate || true"
   },
   "dependencies": {
     "@khaledaun/auth": "workspace:*",
+    "@khaledaun/db": "workspace:*",
+    "@khaledaun/schemas": "workspace:*",
+    "@khaledaun/utils": "workspace:*",
     "@sentry/nextjs": "^7.100.0",
     "@supabase/supabase-js": "^2.44.4",
     "@supabase/ssr": "^0.1.0",

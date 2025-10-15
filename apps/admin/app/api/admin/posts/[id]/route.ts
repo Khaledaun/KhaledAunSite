@@ -1,122 +1,192 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin, supabaseAdmin as supabase } from '@khaledaun/auth';
+import { requireAdmin } from '@khaledaun/auth';
+import { prisma } from '@khaledaun/db';
+import { PostUpdateSchema } from '@khaledaun/schemas';
+import { ZodError } from 'zod';
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+/**
+ * GET /api/admin/posts/[id]
+ * Get a single post by ID
+ */
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const user = await requireAdmin(authHeader);
+    const user = await requireAdmin();
     
-    // In a real implementation, this would delete the post from the database
-    // The RLS policies would prevent editors from deleting posts
-    return NextResponse.json({
-      message: `Post ${params.id} deleted successfully`,
-      user: user
+    const post = await prisma.post.findUnique({
+      where: { id: params.id },
+      include: {
+        author: {
+          select: { id: true, email: true, name: true }
+        }
+      }
     });
+    
+    if (!post) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      );
+    }
+    
+    return NextResponse.json({ post });
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'UNAUTHORIZED') {
-        return NextResponse.json(
-          { error: 'Unauthorized - Invalid or missing JWT token' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
       if (error.message === 'FORBIDDEN') {
-        return NextResponse.json(
-          { error: 'Forbidden - Admin role required' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'Forbidden - Admin role required' }, { status: 403 });
       }
     }
     
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error fetching post:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+/**
+ * PUT /api/admin/posts/[id]
+ * Update a post (title, slug, excerpt, content)
+ */
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const user = await requireAdmin(authHeader);
-    
+    const user = await requireAdmin();
     const body = await request.json();
-    const { status, riskLevel } = body;
     
-    // HITL Business Logic: Validate high-risk posts moving to READY status
-    if (status === 'READY' && riskLevel === 'HIGH') {
-      // Check if post has required approved artifacts
-      const hasApprovedOutline = await checkApprovedArtifact(params.id, 'outline_final');
-      const hasApprovedFacts = await checkApprovedArtifact(params.id, 'facts');
+    // Validate input with Zod
+    const validated = PostUpdateSchema.parse(body);
+    
+    // Check if post exists
+    const existing = await prisma.post.findUnique({
+      where: { id: params.id }
+    });
+    
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      );
+    }
+    
+    // If slug is being changed, check for collision
+    if (validated.slug && validated.slug !== existing.slug) {
+      const slugTaken = await prisma.post.findUnique({
+        where: { slug: validated.slug }
+      });
       
-      if (!hasApprovedOutline || !hasApprovedFacts) {
+      if (slugTaken) {
         return NextResponse.json(
-          { 
-            error: 'Cannot move high-risk post to READY status without approved outline and facts',
-            details: {
-              hasApprovedOutline,
-              hasApprovedFacts,
-              required: 'Both outline_final and facts artifacts must be APPROVED'
-            }
-          },
-          { status: 400 }
+          { error: 'Slug already exists', field: 'slug' },
+          { status: 409 }
         );
       }
     }
     
-    // In a real implementation, this would update the post in the database
-    return NextResponse.json({
-      message: `Post ${params.id} updated successfully`,
-      user: user,
-      post: { id: params.id, ...body }
+    // Update post
+    const post = await prisma.post.update({
+      where: { id: params.id },
+      data: validated,
+      include: {
+        author: {
+          select: { id: true, email: true, name: true }
+        }
+      }
     });
+    
+    // Create audit trail
+    await prisma.audit.create({
+      data: {
+        entity: 'Post',
+        entityId: post.id,
+        action: 'UPDATE',
+        payload: validated,
+        actorId: user.id
+      }
+    });
+    
+    return NextResponse.json({ post });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', issues: error.errors },
+        { status: 400 }
+      );
+    }
+    
     if (error instanceof Error) {
       if (error.message === 'UNAUTHORIZED') {
-        return NextResponse.json(
-          { error: 'Unauthorized - Invalid or missing JWT token' },
-          { status: 401 }
-        );
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
       if (error.message === 'FORBIDDEN') {
-        return NextResponse.json(
-          { error: 'Forbidden - Admin role required' },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: 'Forbidden - Admin role required' }, { status: 403 });
       }
     }
     
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error updating post:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-async function checkApprovedArtifact(postId: string, artifactType: string): Promise<boolean> {
+/**
+ * DELETE /api/admin/posts/[id]
+ * Delete a post
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    if (!supabase) {
-      // Mock validation for testing - simulate having approved artifacts
-      console.log(`Mock: Checking ${artifactType} for post ${postId}`);
-      return Math.random() > 0.5; // Random approval for testing
+    const user = await requireAdmin();
+    
+    // Check if post exists
+    const existing = await prisma.post.findUnique({
+      where: { id: params.id }
+    });
+    
+    if (!existing) {
+      return NextResponse.json(
+        { error: 'Post not found' },
+        { status: 404 }
+      );
     }
-
-    const { data, error } = await supabase
-      .from('ai_artifacts')
-      .select('id, status')
-      .eq('postId', postId)
-      .eq('type', artifactType)
-      .eq('status', 'APPROVED')
-      .limit(1);
-
-    if (error) {
-      console.error(`Error checking ${artifactType} artifact:`, error);
-      return false;
-    }
-
-    return data && data.length > 0;
+    
+    // Delete post (cascade will handle related records)
+    await prisma.post.delete({
+      where: { id: params.id }
+    });
+    
+    // Create audit trail
+    await prisma.audit.create({
+      data: {
+        entity: 'Post',
+        entityId: params.id,
+        action: 'DELETE',
+        payload: {
+          title: existing.title,
+          slug: existing.slug
+        },
+        actorId: user.id
+      }
+    });
+    
+    return NextResponse.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error(`Error in checkApprovedArtifact:`, error);
-    return false;
+    if (error instanceof Error) {
+      if (error.message === 'UNAUTHORIZED') {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      if (error.message === 'FORBIDDEN') {
+        return NextResponse.json({ error: 'Forbidden - Admin role required' }, { status: 403 });
+      }
+    }
+    
+    console.error('Error deleting post:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

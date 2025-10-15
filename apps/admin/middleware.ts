@@ -70,6 +70,17 @@ function rateLimit(ip: string): boolean {
   return true;
 }
 
+// Phase 6 Lite: Admin authentication check
+function checkAdminAuth(request: NextRequest): boolean {
+  // For Phase 6 Lite, check for session cookie
+  const sessionUserId = request.cookies.get('session-user-id');
+  
+  // In Phase 6 Lite, we assume if there's a valid session cookie, they're authenticated
+  // In production, you'd verify the session and check role in the database
+  // For development, we'll be permissive but still check for the cookie
+  return !!sessionUserId || process.env.NODE_ENV === 'development';
+}
+
 // CORS function
 function handleCORS(request: NextRequest): NextResponse | null {
   const origin = request.headers.get('origin');
@@ -110,6 +121,21 @@ export function middleware(request: NextRequest) {
     pathname === '/favicon.ico'
   ) {
     return NextResponse.next();
+  }
+  
+  // Phase 6 Lite: Protect admin dashboard and API routes
+  const isAdminRoute = pathname.startsWith('/api/admin') || pathname.match(/^\/((?!api|_next|static|favicon).+)/);
+  
+  if (isAdminRoute && !checkAdminAuth(request)) {
+    // For Phase 6 Lite, redirect to a simple unauthorized page or return 401
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse(
+        JSON.stringify({ error: 'Unauthorized', message: 'Admin access required' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+    // For UI routes, redirect to public site
+    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001/en', request.url));
   }
   
   // Handle CORS

@@ -1,22 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@khaledaun/auth';
+import { prisma } from '@khaledaun/db';
+import { PostCreateSchema } from '@khaledaun/schemas';
+import { ZodError } from 'zod';
 
+/**
+ * GET /api/admin/posts
+ * List all posts (for admin dashboard)
+ */
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const user = await requireAdmin(authHeader);
+    const user = await requireAdmin();
     
-    // In a real implementation, this would fetch posts from the database
-    return NextResponse.json({
-      message: 'Posts retrieved successfully',
-      user: user,
-      posts: [] // placeholder
+    const posts = await prisma.post.findMany({
+      include: {
+        author: {
+          select: { id: true, email: true, name: true }
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
     });
+    
+    return NextResponse.json({ posts });
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === 'UNAUTHORIZED') {
         return NextResponse.json(
-          { error: 'Unauthorized - Invalid or missing JWT token' },
+          { error: 'Unauthorized' },
           { status: 401 }
         );
       }
@@ -28,6 +38,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
+    console.error('Error fetching posts:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -35,24 +46,72 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/admin/posts
+ * Create a new post (draft by default)
+ */
 export async function POST(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    const user = await requireAdmin(authHeader);
-    
+    const user = await requireAdmin();
     const body = await request.json();
     
-    // In a real implementation, this would create a post in the database
-    return NextResponse.json({
-      message: 'Post created successfully',
-      user: user,
-      post: { id: 'new-post-id', ...body }
+    // Validate input with Zod
+    const validated = PostCreateSchema.parse(body);
+    
+    // Check for slug collision
+    const existing = await prisma.post.findUnique({
+      where: { slug: validated.slug }
     });
+    
+    if (existing) {
+      return NextResponse.json(
+        { error: 'Slug already exists', field: 'slug' },
+        { status: 409 }
+      );
+    }
+    
+    // Create post
+    const post = await prisma.post.create({
+      data: {
+        ...validated,
+        authorId: user.id,
+        status: 'DRAFT'
+      },
+      include: {
+        author: {
+          select: { id: true, email: true, name: true }
+        }
+      }
+    });
+    
+    // Create audit trail
+    await prisma.audit.create({
+      data: {
+        entity: 'Post',
+        entityId: post.id,
+        action: 'CREATE',
+        payload: {
+          title: post.title,
+          slug: post.slug,
+          status: post.status
+        },
+        actorId: user.id
+      }
+    });
+    
+    return NextResponse.json({ post }, { status: 201 });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', issues: error.errors },
+        { status: 400 }
+      );
+    }
+    
     if (error instanceof Error) {
       if (error.message === 'UNAUTHORIZED') {
         return NextResponse.json(
-          { error: 'Unauthorized - Invalid or missing JWT token' },
+          { error: 'Unauthorized' },
           { status: 401 }
         );
       }
@@ -64,6 +123,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    console.error('Error creating post:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

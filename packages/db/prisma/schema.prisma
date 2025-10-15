@@ -69,19 +69,64 @@ model AIArtifact {
   @@map("ai_artifacts")
 }
 
-// Additional models needed for RLS testing
+// Phase 6 Lite: User & Role
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts     Post[]   @relation("UserPosts")
+  audits    Audit[]  @relation("UserAudits")
+
+  @@map("users")
+}
+
+// Phase 6 Lite: Post (single-language, simplified)
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Post {
   id          String      @id @default(cuid())
   title       String
-  content     String?
-  status      String      @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED, READY
-  riskLevel   String      @default("LOW") // LOW, MEDIUM, HIGH
-  authorId    String
+  slug        String      @unique
+  excerpt     String?
+  content     String      // markdown or serialized JSON
+  status      PostStatus  @default(DRAFT)
+  publishedAt DateTime?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+
+  authorId    String
+  author      User        @relation("UserPosts", fields: [authorId], references: [id])
+
   PostMedia   PostMedia[]
 
   @@map("posts")
+}
+
+// Phase 6 Lite: Audit trail
+model Audit {
+  id        String   @id @default(cuid())
+  entity    String   // "Post", "User", etc.
+  entityId  String
+  action    String   // "CREATE", "UPDATE", "PUBLISH", "DELETE"
+  payload   Json?
+  actorId   String?
+  actor     User?    @relation("UserAudits", fields: [actorId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("audits")
 }
 
 model Lead {

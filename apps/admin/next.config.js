@@ -3,7 +3,7 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: []
   },
-  transpilePackages: ['@khaledaun/auth'],
+  transpilePackages: ['@khaledaun/auth', '@khaledaun/db', '@khaledaun/schemas', '@khaledaun/utils'],
   trailingSlash: false,
   async headers() {
     return [

@@ -6,14 +6,17 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "vercel-build": "prisma generate && next build",
+    "postinstall": "prisma generate || true"
   },
   "dependencies": {
     "next": "14.2.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "next-intl": "3.0.0",
-    "lucide-react": "0.263.1"
+    "lucide-react": "0.263.1",
+    "@khaledaun/db": "workspace:*"
   },
   "devDependencies": {
     "eslint": "8.0.0",

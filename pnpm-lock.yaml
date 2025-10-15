@@ -63,6 +63,15 @@ importers:
       '@khaledaun/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@khaledaun/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@khaledaun/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+      '@khaledaun/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@sentry/nextjs':
         specifier: ^7.100.0
         version: 7.120.4(next@14.2.5(@playwright/test@1.56.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react@18.2.0)
@@ -115,6 +124,9 @@ importers:
 
   apps/site:
     dependencies:
+      '@khaledaun/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       lucide-react:
         specifier: 0.263.1
         version: 0.263.1(react@18.2.0)
@@ -149,9 +161,36 @@ importers:
 
   packages/auth:
     dependencies:
+      '@khaledaun/db':
+        specifier: workspace:*
+        version: link:../db
       '@supabase/supabase-js':
         specifier: ^2.39.0
         version: 2.75.0
+      next:
+        specifier: ^14.2.5
+        version: 14.2.5(@playwright/test@1.56.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+
+  packages/db:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.17.0
+        version: 5.22.0(prisma@5.22.0)
+    devDependencies:
+      prisma:
+        specifier: ^5.17.0
+        version: 5.22.0
+      tsx:
+        specifier: ^4.16.2
+        version: 4.20.6
+
+  packages/schemas:
+    dependencies:
+      zod:
+        specifier: ^3.22.0
+        version: 3.25.76
+
+  packages/utils: {}
 
 packages:
 

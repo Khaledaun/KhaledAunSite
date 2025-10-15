@@ -12,7 +12,16 @@ const nextConfig = {
       'images.unsplash.com',
       'via.placeholder.com'
     ]
-  }
+  },
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/en',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

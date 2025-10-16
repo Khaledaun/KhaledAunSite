@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { draftMode } from 'next/headers';
 import Link from 'next/link';
 
-export async function generateMetadata({ params: { slug, locale } }) {
+export async function generateMetadata({ params: { slug } }) {
   try {
     const post = await prisma.post.findUnique({
       where: { slug },

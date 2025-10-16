@@ -13,8 +13,10 @@ export default function HeroDennis({ locale }) {
       ? ['خبير التقاضي', 1000, 'مستشار حل ومنع النزاعات', 1000, 'محكم معتمد (CiArb)', 1000, 'مستشار قانوني عبر الحدود', 1000]
       : ['Litigation Expert', 1000, 'Conflict Resolution and Prevention Advisor', 1000, 'Certified Arbitrator (CiArb)', 1000, 'Cross Border Legal Counsel', 1000]
   );
+  const [heroMedia, setHeroMedia] = useState(null);
 
   useEffect(() => {
+    // Fetch hero titles
     fetch('/api/hero-titles')
       .then(res => res.json())
       .then(data => {
@@ -27,7 +29,111 @@ export default function HeroDennis({ locale }) {
         }
       })
       .catch(err => console.error('Error fetching hero titles:', err));
+
+    // Fetch hero media
+    fetch('/api/hero-media')
+      .then(res => res.json())
+      .then(data => {
+        if (data.media) {
+          setHeroMedia(data.media);
+        }
+      })
+      .catch(err => console.error('Error fetching hero media:', err));
   }, [locale]);
+
+  const extractYouTubeId = (url) => {
+    const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    return match ? match[1] : null;
+  };
+
+  const extractVimeoId = (url) => {
+    const match = url.match(/vimeo\.com\/(?:.*\/)?(\d+)/);
+    return match ? match[1] : null;
+  };
+
+  const renderHeroMedia = () => {
+    if (!heroMedia || heroMedia.type === 'IMAGE' || !heroMedia.videoUrl) {
+      // Default to image
+      return (
+        <Image 
+          height={600} 
+          width={600} 
+          src={heroMedia?.imageUrl || "/images/hero/khaled-portrait.jpg"}
+          alt="Khaled Aun"
+          className="rounded-lg shadow-lg"
+          priority
+        />
+      );
+    }
+
+    // Render video
+    if (heroMedia.type === 'VIDEO') {
+      if (heroMedia.videoType === 'youtube') {
+        const videoId = extractYouTubeId(heroMedia.videoUrl);
+        if (videoId) {
+          return (
+            <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
+              <iframe
+                width="100%"
+                height="100%"
+                src={`https://www.youtube.com/embed/${videoId}${heroMedia.autoplay ? '?autoplay=1&mute=1&loop=1&playlist=' + videoId : ''}`}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+          );
+        }
+      }
+
+      if (heroMedia.videoType === 'vimeo') {
+        const videoId = extractVimeoId(heroMedia.videoUrl);
+        if (videoId) {
+          return (
+            <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
+              <iframe
+                src={`https://player.vimeo.com/video/${videoId}${heroMedia.autoplay ? '?autoplay=1&muted=1&loop=1&background=1' : ''}`}
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                allow="autoplay; fullscreen; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              ></iframe>
+            </div>
+          );
+        }
+      }
+
+      if (heroMedia.videoType === 'selfhosted' && heroMedia.videoUrl) {
+        return (
+          <video
+            src={heroMedia.videoUrl}
+            autoPlay={heroMedia.autoplay}
+            muted={heroMedia.autoplay}
+            loop={heroMedia.autoplay}
+            controls={!heroMedia.autoplay}
+            className="w-full rounded-lg shadow-lg"
+          >
+            Your browser does not support the video tag.
+          </video>
+        );
+      }
+    }
+
+    // Fallback to default image
+    return (
+      <Image 
+        height={600} 
+        width={600} 
+        src="/images/hero/khaled-portrait.jpg"
+        alt="Khaled Aun"
+        className="rounded-lg shadow-lg"
+        priority
+      />
+    );
+  };
 
   return (
     <>
@@ -61,14 +167,7 @@ export default function HeroDennis({ locale }) {
             </div>
 
             <div className="relative">
-              <Image 
-                height={600} 
-                width={600} 
-                src="/images/hero/khaled-portrait.jpg" 
-                alt="Khaled Aun"
-                className="rounded-lg shadow-lg"
-                priority
-              />
+              {renderHeroMedia()}
 
               <div className="absolute lg:bottom-20 md:bottom-10 bottom-2 ltr:md:-left-5 ltr:left-2 rtl:md:-right-5 rtl:right-2 p-4 rounded-lg shadow-md dark:shadow-gray-800 bg-white dark:bg-slate-900 m-3 w-44 text-center">
                 <span className="text-3xl font-medium mb-0">

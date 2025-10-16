@@ -28,7 +28,7 @@ export default function AboutDennis() {
             <div className="relative">
               <div className="absolute inset-0 border dark:border-gray-800 rounded-full -mt-[10px] -ms-3 h-[100%] w-[100%] -z-1"></div>
               <Image 
-                src="/images/hero/khaled-portrait.jpg" 
+                src="/images/hero/khaled-about.jpg" 
                 alt="Khaled Aun - Legal Counsel" 
                 height={0} 
                 width={0} 
@@ -43,7 +43,7 @@ export default function AboutDennis() {
                   <CountUp
                     start={0}
                     className="counter-value font-bold"
-                    end={15}
+                    end={12}
                     duration={2.75}
                   />+
                 </span>

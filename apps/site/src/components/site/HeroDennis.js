@@ -59,7 +59,7 @@ export default function HeroDennis({ locale }) {
                   <CountUp
                     start={0}
                     className="counter-value"
-                    end={15}
+                    end={12}
                     duration={2.75}
                   />+
                 </span>

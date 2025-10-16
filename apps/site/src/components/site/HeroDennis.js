@@ -1,5 +1,5 @@
 'use client'
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { TypeAnimation } from 'react-type-animation';
 import CountUp from 'react-countup';
@@ -8,10 +8,26 @@ import { useTranslations } from 'next-intl';
 
 export default function HeroDennis({ locale }) {
   const t = useTranslations('Hero');
+  const [titles, setTitles] = useState(
+    locale === 'ar' 
+      ? ['خبير التقاضي', 1000, 'مستشار حل ومنع النزاعات', 1000, 'محكم معتمد (CiArb)', 1000, 'مستشار قانوني عبر الحدود', 1000]
+      : ['Litigation Expert', 1000, 'Conflict Resolution and Prevention Advisor', 1000, 'Certified Arbitrator (CiArb)', 1000, 'Cross Border Legal Counsel', 1000]
+  );
 
-  const titles = locale === 'ar' 
-    ? ['خبير التقاضي', 1000, 'مستشار حل ومنع النزاعات', 1000, 'محكم معتمد (CiArb)', 1000, 'مستشار قانوني عبر الحدود', 1000]
-    : ['Litigation Expert', 1000, 'Conflict Resolution and Prevention Advisor', 1000, 'Certified Arbitrator (CiArb)', 1000, 'Cross Border Legal Counsel', 1000];
+  useEffect(() => {
+    fetch('/api/hero-titles')
+      .then(res => res.json())
+      .then(data => {
+        if (data.titles && data.titles.length > 0) {
+          const sequence = data.titles.flatMap(title => [
+            locale === 'ar' ? title.titleAr : title.titleEn,
+            1000
+          ]);
+          setTitles(sequence);
+        }
+      })
+      .catch(err => console.error('Error fetching hero titles:', err));
+  }, [locale]);
 
   return (
     <>

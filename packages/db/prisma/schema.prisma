@@ -155,3 +155,62 @@ model JobRun {
 
   @@map("job_runs")
 }
+
+// CMS: Hero Rotating Titles
+model HeroTitle {
+  id        String   @id @default(cuid())
+  titleEn   String   // English title
+  titleAr   String   // Arabic title
+  order     Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_titles")
+}
+
+// CMS: Professional Experience
+model Experience {
+  id          String              @id @default(cuid())
+  company     String
+  role        String
+  startDate   String              // e.g., "2019"
+  endDate     String?             // e.g., "2023" or null for "Present"
+  description String              // Rich text/HTML
+  order       Int                 @default(0)
+  enabled     Boolean             @default(true)
+  logoUrl     String?             // Company logo
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  images      ExperienceImage[]
+
+  @@map("experiences")
+}
+
+// CMS: Experience Images (landmarks, offices, etc.)
+model ExperienceImage {
+  id           String     @id @default(cuid())
+  experienceId String
+  url          String     // Image URL
+  caption      String?    // Optional caption
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now())
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@map("experience_images")
+}
+
+// CMS: Hero Media (Video or Image)
+model HeroMedia {
+  id          String   @id @default(cuid())
+  type        String   // "IMAGE" or "VIDEO"
+  imageUrl    String?  // Hero image URL
+  videoUrl    String?  // YouTube/Vimeo URL or self-hosted
+  videoType   String?  // "youtube", "vimeo", "selfhosted"
+  enabled     Boolean  @default(true)
+  autoplay    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hero_media")
+}

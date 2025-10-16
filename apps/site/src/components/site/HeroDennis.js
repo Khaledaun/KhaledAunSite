@@ -10,8 +10,8 @@ export default function HeroDennis({ locale }) {
   const t = useTranslations('Hero');
 
   const titles = locale === 'ar' 
-    ? ['خالد عون', 1000, 'مستشار قانوني', 1000, 'خبير استراتيجية أعمال', 1000, 'مؤسس شركات', 1000]
-    : ['Khaled Aun', 1000, 'Legal Counsel', 1000, 'Business Strategist', 1000, 'Entrepreneur', 1000];
+    ? ['خبير التقاضي', 1000, 'مستشار حل ومنع النزاعات', 1000, 'محكم معتمد (CiArb)', 1000, 'مستشار قانوني عبر الحدود', 1000]
+    : ['Litigation Expert', 1000, 'Conflict Resolution and Prevention Advisor', 1000, 'Certified Arbitrator (CiArb)', 1000, 'Cross Border Legal Counsel', 1000];
 
   return (
     <>

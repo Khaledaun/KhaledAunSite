@@ -1,12 +1,13 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
-import Header from '@/components/site/Header';
-import Hero from '@/components/site/Hero';
-import About from '@/components/site/About';
-import Services from '@/components/site/Services';
-import ExperienceTimeline from '@/components/site/ExperienceTimeline';
-import LinkedInSection from '@/components/site/LinkedInSection';
+import Navbar from '@/components/site/Navbar';
+import HeroDennis from '@/components/site/HeroDennis';
+import AboutDennis from '@/components/site/AboutDennis';
+import ServicesDennis from '@/components/site/ServicesDennis';
+import ExperienceTimelineDennis from '@/components/site/ExperienceTimelineDennis';
+import ContactDennis from '@/components/site/ContactDennis';
 import VenturesStrip from '@/components/site/VenturesStrip';
-import Footer from '@/components/site/Footer';
+import FooterDennis from '@/components/site/FooterDennis';
+import Switcher from '@/components/site/Switcher';
 import ConsultationModal from '@/components/common/ConsultationModal';
 import Script from 'next/script';
 
@@ -47,16 +48,17 @@ export default function Home({params: {locale}}) {
           __html: JSON.stringify(organizationJsonLd)
         }}
       />
-      <Header />
+      <Navbar locale={locale} />
       <main id="main-content">
-        <Hero />
-        <About />
-        <Services />
-        <ExperienceTimeline />
-        <LinkedInSection />
+        <HeroDennis locale={locale} />
+        <AboutDennis />
+        <ServicesDennis />
+        <ExperienceTimelineDennis />
         <VenturesStrip />
+        <ContactDennis />
       </main>
-      <Footer />
+      <FooterDennis locale={locale} />
+      <Switcher />
       <ConsultationModal />
     </>
   );

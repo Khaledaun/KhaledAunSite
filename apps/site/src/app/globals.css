@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Material Design Icons */
+@import url('/fonts/materialdesignicons.css');
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -9,7 +12,7 @@
   }
   
   body {
-    @apply bg-brand-navy text-white;
+    @apply bg-white dark:bg-slate-900 text-black dark:text-white;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -17,17 +20,63 @@
   }
   
   *:focus {
-    @apply outline-none ring-2 ring-brand-gold ring-offset-2 ring-offset-brand-navy;
+    @apply outline-none ring-2 ring-brand-gold ring-offset-2 ring-offset-white dark:ring-offset-slate-900;
   }
 }
 
 @layer components {
+  /* Dennis Button Styles */
+  .btn {
+    @apply px-5 py-2 text-sm font-semibold tracking-wide inline-block duration-500 ease-in-out;
+  }
+  
+  .btn-icon {
+    @apply flex items-center justify-center;
+  }
+  
+  .btn-sm {
+    @apply h-9 w-9;
+  }
+  
   .btn-primary {
-    @apply bg-brand-gold hover:bg-brand-gold/90 text-brand-navy font-semibold px-6 py-3 rounded-lg transition-colors duration-200;
+    @apply bg-brand-gold hover:bg-brand-gold/90 text-white border-brand-gold hover:border-brand-gold/90 font-semibold px-6 py-3 rounded-md transition-all duration-200;
   }
   
   .btn-secondary {
-    @apply bg-transparent border-2 border-brand-gold text-brand-gold hover:bg-brand-gold hover:text-brand-navy font-semibold px-6 py-3 rounded-lg transition-colors duration-200;
+    @apply bg-brand-gold/10 hover:bg-brand-gold border-brand-gold/10 hover:border-brand-gold text-brand-gold hover:text-white font-semibold px-6 py-3 rounded-md transition-all duration-200;
+  }
+
+  /* Dennis Navbar Styles */
+  .navbar {
+    @apply fixed w-full top-0 z-999 transition-all duration-500;
+  }
+  
+  .navbar.is-sticky {
+    @apply bg-white dark:bg-slate-900 shadow-md dark:shadow-gray-800;
+  }
+  
+  .navbar-brand {
+    @apply text-2xl font-bold;
+  }
+  
+  .navigation {
+    @apply flex-1;
+  }
+  
+  .navbar-nav {
+    @apply flex flex-col lg_992:flex-row list-none mb-0;
+  }
+  
+  .nav-item {
+    @apply relative;
+  }
+  
+  .nav-link {
+    @apply block py-2 px-4 text-dark dark:text-white hover:text-brand-gold dark:hover:text-brand-gold transition-colors duration-300 cursor-pointer;
+  }
+  
+  .nav-link.active {
+    @apply text-brand-gold;
   }
 
   .section-padding {
@@ -46,5 +95,30 @@
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Dark mode switcher animations */
+.checkbox:checked + .label .ball {
+  transform: translateX(24px);
+}
+
+.ball {
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Back to top button animation */
+.back-to-top {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

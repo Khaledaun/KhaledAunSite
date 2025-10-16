@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001',
     trace: 'on-first-retry',
   },
   projects: [
@@ -17,10 +17,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
+  // In CI, apps are started manually by the workflow for better logging
+  // In local dev, uncomment webServer to auto-start the admin app
+  webServer: process.env.CI ? undefined : {
     command: 'cd apps/admin && npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120 * 1000,
   },
 });

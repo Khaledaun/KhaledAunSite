@@ -8,7 +8,7 @@ export default function LinkedInSection() {
   const t = useTranslations('LinkedIn');
   
   // Phase 8 Full: Fetch LinkedIn wall embed from database
-  const [wallEmbedHtml, setWallEmbedHtml] = useState<string | null>(null);
+  const [wallEmbedHtml, setWallEmbedHtml] = useState(null);
   const [isWallEnabled, setIsWallEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   

@@ -81,3 +81,6 @@ export async function checkIsAdmin(): Promise<boolean> {
 
 // Re-export role utilities
 export * from './roles';
+
+// Re-export permission utilities
+export * from './permissions';

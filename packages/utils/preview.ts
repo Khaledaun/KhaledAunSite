@@ -7,6 +7,7 @@ import crypto from 'crypto';
 
 interface PreviewPayload {
   id: string;
+  locale?: string; // Phase 6 Full: EN/AR locale
   exp: number; // Unix timestamp
 }
 
@@ -57,8 +58,7 @@ export function verifyPreview(token: string): PreviewPayload | null {
     }
     
     // Check expiration
-    const now = Math.floor(Date.now() / 1000);
-    if (payload.exp < now) {
+    if (payload.exp < Date.now()) {
       console.warn('Preview token expired');
       return null;
     }

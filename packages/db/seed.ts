@@ -3,9 +3,22 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Seeding database for Phase 6 Lite...');
+  console.log('🌱 Seeding database for Phase 6 Full...');
 
-  // Create admin user
+  // Create OWNER user
+  const owner = await prisma.user.upsert({
+    where: { email: 'owner@khaledaun.com' },
+    update: {},
+    create: {
+      email: 'owner@khaledaun.com',
+      name: 'Site Owner',
+      role: 'OWNER',
+    },
+  });
+
+  console.log('✅ Owner user created:', owner.email);
+
+  // Create ADMIN user
   const admin = await prisma.user.upsert({
     where: { email: 'admin@khaledaun.com' },
     update: {},
@@ -17,6 +30,45 @@ async function main() {
   });
 
   console.log('✅ Admin user created:', admin.email);
+
+  // Create EDITOR user
+  const editor = await prisma.user.upsert({
+    where: { email: 'editor@khaledaun.com' },
+    update: {},
+    create: {
+      email: 'editor@khaledaun.com',
+      name: 'Content Editor',
+      role: 'EDITOR',
+    },
+  });
+
+  console.log('✅ Editor user created:', editor.email);
+
+  // Create AUTHOR user
+  const author = await prisma.user.upsert({
+    where: { email: 'author@khaledaun.com' },
+    update: {},
+    create: {
+      email: 'author@khaledaun.com',
+      name: 'Content Author',
+      role: 'AUTHOR',
+    },
+  });
+
+  console.log('✅ Author user created:', author.email);
+
+  // Create REVIEWER user
+  const reviewer = await prisma.user.upsert({
+    where: { email: 'reviewer@khaledaun.com' },
+    update: {},
+    create: {
+      email: 'reviewer@khaledaun.com',
+      name: 'Content Reviewer',
+      role: 'REVIEWER',
+    },
+  });
+
+  console.log('✅ Reviewer user created:', reviewer.email);
 
   // Create a sample draft post
   const draftPost = await prisma.post.upsert({
@@ -61,6 +113,20 @@ You can edit this post in the admin dashboard at \`/admin/posts\`.`,
   });
 
   console.log('✅ Audit trail created for draft post');
+
+  // Phase 8 Full: Seed a disabled social embed for testing
+  const linkedinEmbed = await prisma.socialEmbed.upsert({
+    where: { key: 'LINKEDIN_WALL' },
+    update: {},
+    create: {
+      key: 'LINKEDIN_WALL',
+      html: '<!-- Placeholder: Add LinkedIn embed code here -->',
+      enabled: false,
+      updatedBy: admin.id,
+    },
+  });
+
+  console.log('✅ Social embed placeholder created:', linkedinEmbed.key);
 
   console.log('🎉 Seeding completed successfully!');
 }

@@ -1,21 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@khaledaun/auth';
+import { getSessionUser, requirePermission } from '@khaledaun/auth';
 import { prisma } from '@khaledaun/db';
 
 /**
  * POST /api/admin/posts/[id]/publish
  * Publish a post (sets status to PUBLISHED, publishedAt to now, triggers ISR)
+ * Phase 6 Full: EDITOR+ can publish
  */
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const user = await requireAdmin();
+    const user = await getSessionUser();
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
+    // Check permission: EDITOR+ can publish
+    requirePermission(user, 'publish');
     
     // Check if post exists and is in DRAFT status
     const existing = await prisma.post.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
+      include: {
+        translations: true
+      }
     });
     
     if (!existing) {
@@ -28,6 +42,25 @@ export async function POST(
     if (existing.status === 'PUBLISHED') {
       return NextResponse.json(
         { error: 'Post is already published' },
+        { status: 400 }
+      );
+    }
+    
+    // Phase 6 Full: Check for AR requirement
+    const requireAR = process.env.REQUIRE_AR_FOR_PUBLISH === 'true';
+    const hasEN = existing.translations.some(t => t.locale === 'en');
+    const hasAR = existing.translations.some(t => t.locale === 'ar');
+    
+    if (!hasEN) {
+      return NextResponse.json(
+        { error: 'English translation is required before publishing' },
+        { status: 400 }
+      );
+    }
+    
+    if (requireAR && !hasAR) {
+      return NextResponse.json(
+        { error: 'Arabic translation is required before publishing (REQUIRE_AR_FOR_PUBLISH is enabled)' },
         { status: 400 }
       );
     }
@@ -61,16 +94,22 @@ export async function POST(
       }
     });
     
-    // Trigger ISR revalidation
+    // Phase 6 Full: Trigger ISR revalidation for each translation
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/api/revalidate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-revalidate-secret': process.env.REVALIDATE_SECRET || 'dev-secret'
-        },
-        body: JSON.stringify({ slug: post.slug })
-      });
+      // Revalidate each translation's slug individually
+      for (const translation of post.translations) {
+        await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001'}/api/revalidate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-revalidate-secret': process.env.REVALIDATE_SECRET || 'dev-secret'
+          },
+          body: JSON.stringify({ 
+            locale: translation.locale, 
+            slug: translation.slug 
+          })
+        });
+      }
     } catch (revalidateError) {
       console.error('Error triggering revalidation:', revalidateError);
       // Don't fail the publish if revalidation fails

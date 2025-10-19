@@ -88,12 +88,20 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
+        
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Run E2E tests
-        run: echo "✅ Dennis design implemented - E2E tests to be rewritten for new design"
+        run: pnpm test
         env:
           ADMIN_URL: http://localhost:3000
           NEXT_PUBLIC_SITE_URL: http://localhost:3001
+          REVALIDATE_SECRET: test-secret
+          REQUIRE_AR_FOR_PUBLISH: "false"
 
       - name: Cleanup
         if: always()

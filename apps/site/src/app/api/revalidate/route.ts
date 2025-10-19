@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
 /**
- * Revalidation API for Phase 6 Lite
+ * Revalidation API for Phase 6 Full
  * POST /api/revalidate
- * Body: { slug: string }
- * Headers: x-revalidate-secret: <secret>
+ * Supports multiple body formats:
+ *   { path: '/en/blog/post-slug' } - Specific path
+ *   { locale: 'en', slug: 'post-slug' } - Per-locale slug
+ *   { slug: 'post-slug' } - Both locales (backward compat)
+ * Headers: x-reval-secret: <secret>
  */
 export async function POST(request: NextRequest) {
   try {
-    // PRODUCTION: Always verify secret
+    // Verify secret
     const secret = request.headers.get('x-reval-secret');
     const expectedSecret = process.env.REVALIDATE_SECRET;
     
@@ -30,23 +33,54 @@ export async function POST(request: NextRequest) {
     }
     
     const body = await request.json();
-    const { slug } = body;
+    const revalidatedPaths: string[] = [];
     
-    // Revalidate the blog index
-    revalidatePath('/en/blog');
-    revalidatePath('/ar/blog');
-    
-    // Revalidate the specific post if slug is provided
-    if (slug) {
-      revalidatePath(`/en/blog/${slug}`);
-      revalidatePath(`/ar/blog/${slug}`);
+    // Format 1: Specific path
+    if (body.path) {
+      revalidatePath(body.path);
+      revalidatedPaths.push(body.path);
+    }
+    // Format 2: Per-locale slug
+    else if (body.locale && body.slug) {
+      const locale = body.locale;
+      if (locale !== 'en' && locale !== 'ar') {
+        return NextResponse.json(
+          { error: 'Invalid locale. Must be "en" or "ar"' },
+          { status: 400 }
+        );
+      }
+      
+      // Revalidate blog index for this locale
+      revalidatePath(`/${locale}/blog`);
+      revalidatedPaths.push(`/${locale}/blog`);
+      
+      // Revalidate specific post
+      revalidatePath(`/${locale}/blog/${body.slug}`);
+      revalidatedPaths.push(`/${locale}/blog/${body.slug}`);
+    }
+    // Format 3: Slug only (backward compat - both locales)
+    else if (body.slug) {
+      // Revalidate blog indices
+      revalidatePath('/en/blog');
+      revalidatePath('/ar/blog');
+      revalidatedPaths.push('/en/blog', '/ar/blog');
+      
+      // Revalidate specific post in both locales
+      revalidatePath(`/en/blog/${body.slug}`);
+      revalidatePath(`/ar/blog/${body.slug}`);
+      revalidatedPaths.push(`/en/blog/${body.slug}`, `/ar/blog/${body.slug}`);
+    }
+    // No valid format provided
+    else {
+      return NextResponse.json(
+        { error: 'Invalid body. Provide either: { path }, { locale, slug }, or { slug }' },
+        { status: 400 }
+      );
     }
     
     return NextResponse.json({ 
       revalidated: true,
-      paths: slug 
-        ? ['/en/blog', '/ar/blog', `/en/blog/${slug}`, `/ar/blog/${slug}`]
-        : ['/en/blog', '/ar/blog']
+      paths: revalidatedPaths
     });
   } catch (error) {
     console.error('Revalidation error:', error);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@khaledaun/auth';
+import { getSessionUser, requirePermission } from '@khaledaun/auth';
 import { prisma } from '@khaledaun/db';
 import { PostCreateSchema } from '@khaledaun/schemas';
 import { ZodError } from 'zod';
@@ -7,15 +7,30 @@ import { ZodError } from 'zod';
 /**
  * GET /api/admin/posts
  * List all posts (for admin dashboard)
+ * Phase 6 Full: AUTHORs see only their posts, others see all
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAdmin();
+    const user = await getSessionUser();
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
+    // AUTHORs can only see their own posts
+    const where = user.role === 'AUTHOR' ? { authorId: user.id } : {};
     
     const posts = await prisma.post.findMany({
+      where,
       include: {
         author: {
-          select: { id: true, email: true, name: true }
+          select: { id: true, email: true, name: true, role: true }
+        },
+        translations: {
+          select: { id: true, locale: true, title: true, slug: true }
         }
       },
       orderBy: { updatedAt: 'desc' }
@@ -32,7 +47,7 @@ export async function GET(request: NextRequest) {
       }
       if (error.message === 'FORBIDDEN') {
         return NextResponse.json(
-          { error: 'Forbidden - Admin role required' },
+          { error: 'Forbidden' },
           { status: 403 }
         );
       }
@@ -49,10 +64,22 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/admin/posts
  * Create a new post (draft by default)
+ * Phase 6 Full: AUTHOR+ can create posts
  */
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAdmin();
+    const user = await getSessionUser();
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    
+    // Check permission: AUTHOR+ can create posts
+    requirePermission(user, 'createPost');
+    
     const body = await request.json();
     
     // Validate input with Zod
@@ -79,7 +106,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         author: {
-          select: { id: true, email: true, name: true }
+          select: { id: true, email: true, name: true, role: true }
         }
       }
     });
@@ -117,7 +144,7 @@ export async function POST(request: NextRequest) {
       }
       if (error.message === 'FORBIDDEN') {
         return NextResponse.json(
-          { error: 'Forbidden - Admin role required' },
+          { error: 'Forbidden - You do not have permission to create posts' },
           { status: 403 }
         );
       }

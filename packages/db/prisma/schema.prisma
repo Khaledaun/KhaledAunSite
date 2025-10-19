@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // Source-of-Truth Models as specified in requirements
@@ -69,10 +70,20 @@ model AIArtifact {
   @@map("ai_artifacts")
 }
 
-// Phase 6 Lite: User & Role
+// Phase 6 Full: Locale for i18n support
+enum Locale {
+  en
+  ar
+}
+
+// Phase 6 Full: User & Role (expanded for RBAC)
 enum Role {
   USER
-  ADMIN
+  AUTHOR    // Can create and edit own posts, submit for review
+  REVIEWER  // Can approve/reject posts
+  EDITOR    // Can edit any post and publish
+  OWNER     // Full access (site owner)
+  ADMIN     // Full access (admin)
 }
 
 model User {
@@ -90,7 +101,7 @@ model User {
   @@map("users")
 }
 
-// Phase 6 Lite: Post (single-language, simplified)
+// Phase 6 Full: Post (multilingual with translations)
 enum PostStatus {
   DRAFT
   PUBLISHED
@@ -98,10 +109,13 @@ enum PostStatus {
 
 model Post {
   id          String      @id @default(cuid())
-  title       String
-  slug        String      @unique
-  excerpt     String?
-  content     String      // markdown or serialized JSON
+  // NOTE: title, slug, excerpt, content moved to PostTranslation
+  // Keeping these fields temporarily for backwards compatibility during migration
+  title       String      // TODO: Remove after backfill
+  slug        String      @unique // TODO: Remove after backfill
+  excerpt     String?     // TODO: Remove after backfill
+  content     String      // TODO: Remove after backfill
+  
   status      PostStatus  @default(DRAFT)
   publishedAt DateTime?
   createdAt   DateTime    @default(now())
@@ -110,9 +124,31 @@ model Post {
   authorId    String
   author      User        @relation("UserPosts", fields: [authorId], references: [id])
 
-  PostMedia   PostMedia[]
+  translations PostTranslation[] // Phase 6 Full: i18n support
+  PostMedia    PostMedia[]
 
   @@map("posts")
+}
+
+// Phase 6 Full: Post translations for multilingual content
+model PostTranslation {
+  id        String   @id @default(cuid())
+  postId    String
+  locale    Locale
+  title     String
+  slug      String
+  excerpt   String?
+  content   String   // markdown or serialized JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Ensure each post has only one translation per locale
+  @@unique([postId, locale])
+  // Ensure slugs are unique per locale
+  @@unique([locale, slug])
+  @@map("post_translations")
 }
 
 // Phase 6 Lite: Audit trail
@@ -154,6 +190,19 @@ model JobRun {
   updatedAt   DateTime @updatedAt
 
   @@map("job_runs")
+}
+
+// Phase 8 Full: Social Media Embeds
+model SocialEmbed {
+  id        String   @id @default(cuid())
+  key       String   @unique            // e.g. "LINKEDIN_WALL"
+  html      String                      // sanitized embed HTML
+  enabled   Boolean  @default(true)
+  updatedBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("social_embeds")
 }
 
 // CMS: Hero Rotating Titles

@@ -1,15 +1,39 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Linkedin, ExternalLink, Calendar, MessageSquare } from 'lucide-react';
 
 export default function LinkedInSection() {
   const t = useTranslations('LinkedIn');
-
-  // Check if LinkedIn wall embed is enabled
-  const isWallEnabled = process.env.NEXT_PUBLIC_FF_SOCIAL_WALL === 'true';
-  const wallEmbedHtml = process.env.NEXT_PUBLIC_LINKEDIN_WALL_EMBED_HTML;
+  
+  // Phase 8 Full: Fetch LinkedIn wall embed from database
+  const [wallEmbedHtml, setWallEmbedHtml] = useState<string | null>(null);
+  const [isWallEnabled, setIsWallEnabled] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const linkedinProfileUrl = process.env.NEXT_PUBLIC_LINKEDIN_PROFILE_URL || 'https://linkedin.com/in/khaledaun';
+  
+  useEffect(() => {
+    // Fetch LinkedIn wall embed from API
+    fetch('/api/social-embed/LINKEDIN_WALL')
+      .then(res => res.json())
+      .then(data => {
+        if (data.embed && data.embed.html) {
+          setWallEmbedHtml(data.embed.html);
+          setIsWallEnabled(true);
+        } else {
+          setIsWallEnabled(false);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to fetch LinkedIn embed:', err);
+        setIsWallEnabled(false);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   // Sample LinkedIn posts (in real implementation, these would come from an API)
   const samplePosts = [
@@ -35,6 +59,16 @@ export default function LinkedInSection() {
       url: `${linkedinProfileUrl}/posts/3`
     }
   ];
+
+  // Hide entire section while loading or if no content
+  if (isLoading) {
+    return null;
+  }
+  
+  // If wall is disabled, don't render anything (Phase 8 Full requirement)
+  if (!isWallEnabled && !wallEmbedHtml) {
+    return null;
+  }
 
   return (
     <section id="linkedin" data-testid="linkedin" className="section-padding bg-brand-ink">

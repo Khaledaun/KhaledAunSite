@@ -1,57 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdmin } from '@khaledaun/auth';
-import { prisma } from '@khaledaun/db';
-import { generatePreviewUrl } from '@khaledaun/utils/preview';
+import { getSessionUser } from '@khaledaun/auth';
+import { signPreview } from '@khaledaun/utils/preview';
 
 /**
  * GET /api/admin/posts/[id]/preview-url
- * Generate a signed preview URL for a draft post
+ * Generate a signed preview URL for a post
+ * Phase 6 Full: Supports ?locale=en|ar parameter
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin();
+    const user = await getSessionUser();
     
-    // Verify post exists
-    const post = await prisma.post.findUnique({
-      where: { id: params.id },
-      select: { id: true, title: true, status: true }
-    });
-    
-    if (!post) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Post not found' },
-        { status: 404 }
+        { error: 'Unauthorized' },
+        { status: 401 }
       );
     }
     
-    // Generate signed preview URL (valid for 60 minutes)
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
-    const previewUrl = generatePreviewUrl(post.id, siteUrl, 60);
+    const { searchParams } = new URL(request.url);
+    const locale = searchParams.get('locale') || 'en';
     
-    return NextResponse.json({
-      previewUrl,
-      expiresIn: 3600, // seconds
-      post: {
-        id: post.id,
-        title: post.title,
-        status: post.status
-      }
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.message === 'UNAUTHORIZED') {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-      }
-      if (error.message === 'FORBIDDEN') {
-        return NextResponse.json({ error: 'Forbidden - Admin role required' }, { status: 403 });
-      }
+    if (locale !== 'en' && locale !== 'ar') {
+      return NextResponse.json(
+        { error: 'Invalid locale. Must be "en" or "ar"' },
+        { status: 400 }
+      );
     }
     
+    // Generate signed token with locale
+    const token = signPreview({ 
+      id: params.id,
+      locale,
+      exp: Date.now() + 3600000 // 1 hour
+    });
+    
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001';
+    const previewUrl = `${siteUrl}/api/preview?id=${params.id}&locale=${locale}&token=${token}`;
+    
+    return NextResponse.json({ previewUrl });
+  } catch (error) {
     console.error('Error generating preview URL:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
-

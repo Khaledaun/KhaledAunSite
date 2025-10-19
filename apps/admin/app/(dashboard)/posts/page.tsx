@@ -14,6 +14,12 @@ interface Post {
     name: string | null;
     email: string;
   };
+  translations?: Array<{
+    id: string;
+    locale: 'en' | 'ar';
+    title: string;
+    slug: string;
+  }>;
 }
 
 export default function PostsPage() {
@@ -150,6 +156,9 @@ export default function PostsPage() {
                   Title
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Translations
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -164,12 +173,26 @@ export default function PostsPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {posts.map((post) => (
+              {posts.map((post) => {
+                const hasEN = post.translations?.some(t => t.locale === 'en');
+                const hasAR = post.translations?.some(t => t.locale === 'ar');
+                
+                return (
                 <tr key={post.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{post.title}</div>
                       <div className="text-sm text-gray-500">{post.slug}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-xs ${hasEN ? 'text-green-600' : 'text-gray-400'}`} title={hasEN ? 'English translation available' : 'No English translation'}>
+                        {hasEN ? '✅' : '🔴'} EN
+                      </span>
+                      <span className={`text-xs ${hasAR ? 'text-green-600' : 'text-gray-400'}`} title={hasAR ? 'Arabic translation available' : 'No Arabic translation'}>
+                        {hasAR ? '✅' : '🔴'} AR
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -230,7 +253,8 @@ export default function PostsPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3001",
-    "build": "cd ../../packages/db && pnpm db:generate && cd ../../apps/site && next build",
+    "build": "cd ../../packages/db && npm run db:generate && cd ../../apps/site && next build",
     "start": "next start -p 3001",
     "lint": "next lint"
   },
   "dependencies": {
     "@iconscout/react-unicons": "^2.2.5",
-    "@khaledaun/db": "workspace:*",
+    "@khaledaun/db": "file:../../packages/db",
     "lucide-react": "0.263.1",
     "next": "14.2.5",
     "next-intl": "3.0.0",

@@ -4,16 +4,16 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cd ../../packages/db && pnpm db:generate && cd ../../apps/admin && next build",
+    "build": "cd ../../packages/db && npm run db:generate && cd ../../apps/admin && next build",
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@khaledaun/auth": "workspace:*",
-    "@khaledaun/db": "workspace:*",
-    "@khaledaun/schemas": "workspace:*",
-    "@khaledaun/utils": "workspace:*",
+    "@khaledaun/auth": "file:../../packages/auth",
+    "@khaledaun/db": "file:../../packages/db",
+    "@khaledaun/schemas": "file:../../packages/schemas",
+    "@khaledaun/utils": "file:../../packages/utils",
     "@sentry/nextjs": "^7.100.0",
     "@supabase/supabase-js": "^2.44.4",
     "@supabase/ssr": "^0.1.0",

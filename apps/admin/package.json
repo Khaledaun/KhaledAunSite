@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cd ../../packages/db && npm run db:generate && cd ../../apps/admin && next build",
+    "build": "cd ../../packages/db && npx prisma generate && cd ../../apps/admin && next build",
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run"

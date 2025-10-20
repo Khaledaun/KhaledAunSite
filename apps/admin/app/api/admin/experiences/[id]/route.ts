@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const experience = await prisma.experience.findUnique({
       where: { id: params.id },
@@ -39,7 +39,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const body = await request.json();
     const { company, role, startDate, endDate, description, order, enabled, logoUrl } = body;
@@ -79,7 +79,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     await prisma.experience.delete({
       where: { id: params.id },

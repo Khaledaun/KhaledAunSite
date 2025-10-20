@@ -5,7 +5,7 @@ import { requireAdmin } from '@khaledaun/auth';
 // GET - List all hero titles
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const titles = await prisma.heroTitle.findMany({
       orderBy: { order: 'asc' },
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new hero title
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const body = await request.json();
     const { titleEn, titleAr, order, enabled } = body;

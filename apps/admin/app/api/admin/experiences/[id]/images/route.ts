@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const body = await request.json();
     const { url, caption, order } = body;
@@ -54,7 +54,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const { searchParams } = new URL(request.url);
     const imageId = searchParams.get('imageId');

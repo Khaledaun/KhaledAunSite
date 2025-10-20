@@ -5,7 +5,7 @@ import { requireAdmin } from '@khaledaun/auth';
 // GET - List all experiences
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const experiences = await prisma.experience.findMany({
       include: {
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new experience
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const body = await request.json();
     const { company, role, startDate, endDate, description, order, enabled, logoUrl } = body;

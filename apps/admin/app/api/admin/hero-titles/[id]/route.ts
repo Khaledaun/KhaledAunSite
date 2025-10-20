@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const title = await prisma.heroTitle.findUnique({
       where: { id: params.id },
@@ -34,7 +34,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const body = await request.json();
     const { titleEn, titleAr, order, enabled } = body;
@@ -65,7 +65,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     await prisma.heroTitle.delete({
       where: { id: params.id },

@@ -5,7 +5,7 @@ import { requireAdmin } from '@khaledaun/auth';
 // GET - Get hero media settings
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const media = await prisma.heroMedia.findFirst({
       where: { enabled: true },
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 // POST - Create or update hero media
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin(request);
+    await requireAdmin();
 
     const body = await request.json();
     const { type, imageUrl, videoUrl, videoType, autoplay } = body;

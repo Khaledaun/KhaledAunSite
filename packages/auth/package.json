@@ -6,6 +6,7 @@
   "types": "index.ts",
   "dependencies": {
     "@khaledaun/db": "file:../db",
-    "@supabase/supabase-js": "^2.44.4"
+    "@supabase/supabase-js": "^2.44.4",
+    "@prisma/client": "^5.17.0"
   }
 }

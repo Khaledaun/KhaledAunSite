@@ -9,6 +9,13 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Add monorepo root node_modules to resolve paths
     config.resolve.modules.push('../../node_modules');
+    
+    // Handle Prisma client resolution
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@prisma/client': require.resolve('@prisma/client'),
+    };
+    
     return config;
   },
 };

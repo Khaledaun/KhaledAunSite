@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cd ../../packages/db && npx prisma generate && cd ../../apps/admin && next build",
+    "build": "prisma generate --schema ../../packages/db/prisma/schema.prisma && next build",
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run"
@@ -29,6 +29,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "18.3.26",
     "@types/react-dom": "^18.2.0",
+    "prisma": "^5.17.0",
     "@types/sanitize-html": "^2.11.0",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0",

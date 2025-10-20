@@ -73,47 +73,6 @@ export function sanitizeSocialEmbed(html: string): string {
     allowVulnerableTags: false,
     // Drop scripts and dangerous tags entirely
     disallowedTagsMode: 'discard',
-    // Remove event handlers
-    allowedAttributes: {
-      ...sanitizeHtml.defaults.allowedAttributes,
-      iframe: [
-        'src',
-        'width',
-        'height',
-        'frameborder',
-        'allow',
-        'allowfullscreen',
-        'title',
-        'style',
-        'class',
-      ],
-      a: [
-        'href',
-        'target',
-        'rel',
-        'class',
-      ],
-      div: [
-        'class',
-        'id',
-        'data-*',
-        'style',
-      ],
-      span: [
-        'class',
-        'id',
-        'data-*',
-      ],
-      p: [
-        'class',
-        'id',
-      ],
-      blockquote: [
-        'class',
-        'cite',
-        'data-*',
-      ],
-    },
     // Explicitly disallow script-like attributes
     parser: {
       decodeEntities: true,

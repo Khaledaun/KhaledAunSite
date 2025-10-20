@@ -10,10 +10,10 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@khaledaun/auth": "file:../../packages/auth",
-    "@khaledaun/db": "file:../../packages/db",
-    "@khaledaun/schemas": "file:../../packages/schemas",
-    "@khaledaun/utils": "file:../../packages/utils",
+    "@khaledaun/auth": "workspace:*",
+    "@khaledaun/db": "workspace:*",
+    "@khaledaun/schemas": "workspace:*",
+    "@khaledaun/utils": "workspace:*",
     "@prisma/client": "^5.17.0",
     "@sentry/nextjs": "^7.100.0",
     "@supabase/ssr": "^0.1.0",

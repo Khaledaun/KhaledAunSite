@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@iconscout/react-unicons": "^2.2.5",
-    "@khaledaun/db": "file:../../packages/db",
+    "@khaledaun/db": "workspace:*",
     "lucide-react": "0.263.1",
     "next": "14.2.5",
     "next-intl": "3.0.0",

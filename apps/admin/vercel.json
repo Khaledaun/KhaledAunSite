@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile && cd apps/admin",
-  "buildCommand": "cd ../.. && pnpm --filter @khaledaun/admin build"
+  "installCommand": "npm install --prefix ../.. && npm install",
+  "buildCommand": "npm run build"
 }
 

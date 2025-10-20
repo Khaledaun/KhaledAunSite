@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
-import { prisma } from '@khaledaun/db';
+import { PrismaClient } from '@prisma/client';
 import { isAdmin, type Role } from './roles';
+
+// Create Prisma client instance (replaces @khaledaun/db import)
+const prisma = new PrismaClient();
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'mock-service-key';

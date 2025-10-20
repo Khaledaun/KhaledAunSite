@@ -96,15 +96,45 @@ Create a deployment branch where workspace packages are pre-bundled:
 
 Given time constraints and the need to get production deployed, **Option A (flatten dependencies)** is the most practical immediate solution. We can refactor to Option B later as a Phase 6.5 improvement.
 
-## Current Status (Commit eeb05a6)
+## Additional Attempts
 
-- ❌ Build failing with "Module not found: Can't resolve '@khaledaun/db'"
-- ✅ npm install succeeds
+### Attempt 12: Explicit webpack aliases (Commit e6f3355)
+- Added webpack resolve.alias for all workspace packages
+- Used absolute paths with path.resolve
+- **Result**: Still module not found - aliases not applied before transpilation
+
+### Attempt 13: Enhanced webpack aliases (Commit 72b64fb)
+- Added exact aliases with `$` suffix for main package imports
+- Added directory aliases for subpath imports  
+- Enabled symlink resolution (`config.resolve.symlinks = true`)
+- Added both root and local node_modules to `resolve.modules`
+- **Result**: Module not found - webpack still can't resolve transitive deps
+
+## Conclusion
+
+After 13 deployment attempts, the fundamental issue is clear: **Vercel's build environment with npm cannot reliably resolve transitive dependencies in monorepo workspace packages with file: protocol**.
+
+The problem:
+- `apps/admin` imports `@khaledaun/auth` (works via file: symlink)
+- `packages/auth` imports `@khaledaun/db` (fails - webpack can't follow the chain)
+- webpack aliases don't help because they're not applied during transpilation
+
+## Solution: Flatten Dependencies (Option A)
+
+Implement immediate solution to unblock production deployment.
+
+## Current Status (Commit 72b64fb)
+
+- 🔄 Build in progress
+- ✅ npm install succeeds  
 - ✅ Prisma generate succeeds
-- ❌ Next.js build fails during webpack compilation
+- ⏳ Next.js build with enhanced webpack configuration
 
-## Next Steps
+## If Current Attempt Fails
 
-1. Implement Option A: Flatten dependencies for admin app
-2. Document the approach in README
-3. Add to backlog: Refactor to Turborepo (Phase 6.5 or Phase 10)
+Implement Option A (flatten dependencies) as the pragmatic solution:
+1. Copy workspace package code directly into apps/admin/lib/
+2. Remove workspace dependencies
+3. Update all imports to use relative paths
+4. Deploy and validate
+5. Add to backlog: Refactor to Turborepo (Phase 10)

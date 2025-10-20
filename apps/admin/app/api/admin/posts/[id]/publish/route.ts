@@ -75,6 +75,9 @@ export async function POST(
       include: {
         author: {
           select: { id: true, email: true, name: true }
+        },
+        translations: {
+          select: { locale: true, slug: true }
         }
       }
     });

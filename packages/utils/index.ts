@@ -12,5 +12,6 @@ export * from './sanitize';
 export * from './ai-content';
 export * from './url-extractor';
 
-// Phase 1 Strategic UX: Encryption
+// Phase 1 Strategic UX: Encryption & AI Config
 export * from './encryption';
+export * from './ai-config-service';

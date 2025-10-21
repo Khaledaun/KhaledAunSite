@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@khaledaun/db';
 import { requireAdmin } from '@khaledaun/auth';
 import { decrypt } from '@khaledaun/utils';
-import { openai } from '@ai-sdk/openai';
-import { anthropic } from '@ai-sdk/anthropic';
 import { generateText } from 'ai';
 
 /**
@@ -78,7 +76,6 @@ export async function POST(
       }
 
       return NextResponse.json({
-        success: true,
         message: 'Configuration test successful',
         ...testResult,
       });

@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@khaledaun/db';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-load Supabase client to avoid build-time errors
+let supabaseInstance: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (!supabaseInstance) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase configuration missing');
+    }
+    
+    supabaseInstance = createClient(supabaseUrl, supabaseKey);
+  }
+  return supabaseInstance;
+}
 
 // Update schema
 const updateSchema = z.object({
@@ -147,6 +158,7 @@ export async function DELETE(
     }
 
     // Delete from Supabase Storage
+    const supabase = getSupabaseClient();
     const { error: storageError } = await supabase.storage
       .from('media')
       .remove([existingMedia.filename]);
@@ -158,6 +170,7 @@ export async function DELETE(
     // Delete thumbnail if exists
     if (existingMedia.thumbnailUrl) {
       const thumbnailFilename = existingMedia.filename.replace(/\.[^.]+$/, '-thumb.jpg');
+      const supabase = getSupabaseClient();
       await supabase.storage.from('media').remove([thumbnailFilename]);
     }
 

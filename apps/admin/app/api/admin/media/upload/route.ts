@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         processedBuffer = await image
           .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
           .jpeg({ quality: 85 })
-          .toBuffer();
+          .toBuffer() as Buffer;
 
         // Create thumbnail
         const thumbnailBuffer = await sharp(buffer)

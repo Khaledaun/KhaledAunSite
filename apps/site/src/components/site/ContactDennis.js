@@ -1,11 +1,50 @@
 'use client'
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from 'next-intl';
 import * as Unicons from '@iconscout/react-unicons'
 
 export default function ContactDennis() {
   const t = useTranslations('Consultation');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+  });
+  const [status, setStatus] = useState({ type: '', message: '' });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setStatus({ type: '', message: '' });
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus({ type: 'success', message: data.message });
+        setFormData({ name: '', email: '', phone: '', message: '' });
+      } else {
+        setStatus({ type: 'error', message: data.error || 'Something went wrong' });
+      }
+    } catch (error) {
+      setStatus({ type: 'error', message: 'Failed to send message. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   return (
     <section className="relative md:py-24 py-16 bg-gray-50 dark:bg-slate-800" id="contact">
@@ -22,13 +61,26 @@ export default function ContactDennis() {
         <div className="grid grid-cols-1 lg:grid-cols-12 md:grid-cols-2 mt-8 items-center gap-[30px]">
           <div className="lg:col-span-8">
             <div className="p-6 rounded-md shadow bg-white dark:bg-slate-900">
-              <form>
+              <form onSubmit={handleSubmit}>
+                {status.message && (
+                  <div className={`mb-5 p-4 rounded ${
+                    status.type === 'success' 
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200' 
+                      : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200'
+                  }`}>
+                    {status.message}
+                  </div>
+                )}
+                
                 <div className="grid lg:grid-cols-12 lg:gap-5">
                   <div className="lg:col-span-6 mb-5">
                     <input 
                       name="name" 
                       id="name" 
                       type="text" 
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
                       className="form-input w-full py-2 px-3 border border-inherit dark:border-gray-800 dark:bg-slate-900 dark:text-slate-200 rounded h-10 outline-none bg-transparent focus:border-brand-gold/50 dark:focus:border-brand-gold/50 focus:shadow-none focus:ring-0 text-[15px]" 
                       placeholder={t('namePlaceholder')}
                     />
@@ -39,6 +91,9 @@ export default function ContactDennis() {
                       name="email" 
                       id="email" 
                       type="email" 
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                       className="form-input w-full py-2 px-3 border border-inherit dark:border-gray-800 dark:bg-slate-900 dark:text-slate-200 rounded h-10 outline-none bg-transparent focus:border-brand-gold/50 dark:focus:border-brand-gold/50 focus:shadow-none focus:ring-0 text-[15px]" 
                       placeholder={t('emailPlaceholder')}
                     />
@@ -50,6 +105,8 @@ export default function ContactDennis() {
                     <input 
                       name="phone" 
                       id="phone" 
+                      value={formData.phone}
+                      onChange={handleChange}
                       className="form-input w-full py-2 px-3 border border-inherit dark:border-gray-800 dark:bg-slate-900 dark:text-slate-200 rounded h-10 outline-none bg-transparent focus:border-brand-gold/50 dark:focus:border-brand-gold/50 focus:shadow-none focus:ring-0 text-[15px]" 
                       placeholder={t('phonePlaceholder')}
                     />
@@ -59,6 +116,9 @@ export default function ContactDennis() {
                     <textarea 
                       name="message" 
                       id="message" 
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
                       className="form-input w-full py-2 px-3 border border-inherit dark:border-gray-800 dark:bg-slate-900 dark:text-slate-200 rounded h-28 outline-none bg-transparent focus:border-brand-gold/50 dark:focus:border-brand-gold/50 focus:shadow-none focus:ring-0 text-[15px]" 
                       placeholder={t('messagePlaceholder')}
                     ></textarea>
@@ -66,11 +126,10 @@ export default function ContactDennis() {
                 </div>
                 <button 
                   type="submit" 
-                  id="submit" 
-                  name="send" 
-                  className="btn bg-brand-gold hover:bg-brand-gold/90 border-brand-gold hover:border-brand-gold/90 text-white rounded-md h-11 justify-center flex items-center"
+                  disabled={loading}
+                  className="btn bg-brand-gold hover:bg-brand-gold/90 border-brand-gold hover:border-brand-gold/90 text-white rounded-md h-11 justify-center flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {t('sendMessage')}
+                  {loading ? 'Sending...' : t('sendMessage')}
                 </button>
               </form>
             </div>

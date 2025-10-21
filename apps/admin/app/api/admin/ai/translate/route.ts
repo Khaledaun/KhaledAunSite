@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@khaledaun/db';
 import { translateContent } from '@khaledaun/utils';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 const translateSchema = z.object({
   text: z.string(),

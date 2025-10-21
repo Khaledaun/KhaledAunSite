@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@khaledaun/db';
 import { generateContent, generateOutline, generateSEOMetadata, improveContent, generateIdeas } from '@khaledaun/utils';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 // Validation schemas
 const generateContentSchema = z.object({

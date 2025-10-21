@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@khaledaun/db';
 import { createClient } from '@supabase/supabase-js';
 import sharp from 'sharp';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 // Initialize Supabase client
 const supabase = createClient(

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@khaledaun/db';
 import { extractFromURL, validateURL } from '@khaledaun/utils';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
 
 const extractSchema = z.object({
   url: z.string().url(),

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 
 // Rate limiting store (in production, use Redis or similar)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
@@ -10,7 +11,9 @@ const RATE_LIMIT_WINDOW_MS = parseInt(process.env.RATE_LIMIT_WINDOW_MS || '90000
 // CORS configuration
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
   'http://localhost:3000',
-  'https://localhost:3000'
+  'https://localhost:3000',
+  'https://www.khaledaun.com',
+  'https://khaledaun.com'
 ];
 
 // Security headers configuration
@@ -70,15 +73,34 @@ function rateLimit(ip: string): boolean {
   return true;
 }
 
-// Phase 6 Lite: Admin authentication check
-function checkAdminAuth(request: NextRequest): boolean {
-  // For Phase 6 Lite, check for session cookie
-  const sessionUserId = request.cookies.get('session-user-id');
-  
-  // In Phase 6 Lite, we assume if there's a valid session cookie, they're authenticated
-  // In production, you'd verify the session and check role in the database
-  // For development, we'll be permissive but still check for the cookie
-  return !!sessionUserId || process.env.NODE_ENV === 'development';
+// Admin authentication check using Supabase
+async function checkAdminAuth(request: NextRequest, response: NextResponse): Promise<boolean> {
+  try {
+    const supabase = createMiddlewareClient({ req: request, res: response });
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return false;
+    }
+    
+    // Check if user has admin role
+    const { data: user } = await supabase
+      .from('User')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+    
+    if (!user) {
+      return false;
+    }
+    
+    // Allow ADMIN, EDITOR, REVIEWER, AUTHOR roles
+    const allowedRoles = ['OWNER', 'ADMIN', 'EDITOR', 'REVIEWER', 'AUTHOR'];
+    return allowedRoles.includes(user.role);
+  } catch (error) {
+    console.error('Auth check error:', error);
+    return false;
+  }
 }
 
 // CORS function
@@ -110,7 +132,7 @@ function handleCORS(request: NextRequest): NextResponse | null {
 }
 
 // Main middleware function
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
   // Skip middleware for static files and API health checks
@@ -118,24 +140,35 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/static/') ||
     pathname === '/api/health' ||
-    pathname === '/favicon.ico'
+    pathname === '/favicon.ico' ||
+    pathname === '/api/auth' // Allow auth endpoints
   ) {
     return NextResponse.next();
   }
   
-  // Phase 6 Lite: Protect admin dashboard and API routes
-  const isAdminRoute = pathname.startsWith('/api/admin') || pathname.match(/^\/((?!api|_next|static|favicon).+)/);
+  // Create response early for Supabase middleware
+  const response = NextResponse.next();
   
-  if (isAdminRoute && !checkAdminAuth(request)) {
-    // For Phase 6 Lite, redirect to a simple unauthorized page or return 401
-    if (pathname.startsWith('/api/')) {
-      return new NextResponse(
-        JSON.stringify({ error: 'Unauthorized', message: 'Admin access required' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
-      );
+  // Protect admin dashboard and API routes
+  const isAdminRoute = pathname.startsWith('/api/admin') || pathname.match(/^\/((?!api|_next|static|favicon|auth).+)/);
+  
+  if (isAdminRoute) {
+    const isAuthenticated = await checkAdminAuth(request, response);
+    
+    if (!isAuthenticated) {
+      // For API routes, return 401
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'Unauthorized', message: 'Admin access required' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // For UI routes, redirect to Supabase auth
+      const redirectUrl = new URL('/auth/login', request.url);
+      redirectUrl.searchParams.set('redirectTo', pathname);
+      return NextResponse.redirect(redirectUrl);
     }
-    // For UI routes, redirect to public site
-    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3001/en', request.url));
   }
   
   // Handle CORS
@@ -168,9 +201,6 @@ export function middleware(request: NextRequest) {
       );
     }
   }
-  
-  // Create response with security headers
-  const response = NextResponse.next();
   
   // Apply security headers
   Object.entries(SECURITY_HEADERS).forEach(([key, value]) => {

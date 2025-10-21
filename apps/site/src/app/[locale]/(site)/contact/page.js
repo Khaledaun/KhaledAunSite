@@ -1,4 +1,6 @@
 import { unstable_setRequestLocale } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
+import ContactForm from '@/components/site/ContactForm';
 
 export default async function ContactPage({params: {locale}}) {
   // Enable static rendering
@@ -13,18 +15,12 @@ export default async function ContactPage({params: {locale}}) {
               Contact
             </h1>
             <div className="bg-white p-8 rounded-lg shadow-lg">
-              <p className="text-lg text-brand-ink mb-6 text-center">
+              <p className="text-lg text-brand-ink mb-8 text-center">
                 Get in touch for legal consultation and business growth opportunities.
               </p>
-              <div className="text-center">
-                <a 
-                  href="mailto:contact@khaledaun.com" 
-                  className="btn-primary"
-                  aria-label="Send email to contact@khaledaun.com"
-                >
-                  Get In Touch
-                </a>
-              </div>
+              
+              {/* Contact Form */}
+              <ContactForm />
             </div>
           </div>
         </div>

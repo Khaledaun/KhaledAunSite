@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             url: true,
-            altText: true,
+            alt: true,
           },
         },
       },

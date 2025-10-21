@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
         const thumbnailBuffer = await sharp(buffer)
           .resize(400, 400, { fit: 'cover' })
           .jpeg({ quality: 80 })
-          .toBuffer();
+          .toBuffer() as Buffer;
 
         const thumbnailFilename = filename.replace(/\.[^.]+$/, '-thumb.jpg');
 

@@ -256,7 +256,7 @@ export function quickValidate(title: string, content: string): string[] {
   }
 
   const $ = load(content);
-  const textContent = $.text();
+  const textContent = $.root().text();
   const wordCount = textContent.split(/\s+/).filter((w) => w.length > 0).length;
 
   if (wordCount < 50) {

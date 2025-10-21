@@ -3,8 +3,8 @@
  * Manages AI provider configurations from database
  */
 
-import { openai } from '@ai-sdk/openai';
-import { anthropic } from '@ai-sdk/anthropic';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateText, LanguageModel } from 'ai';
 import { decrypt } from './encryption';
 
@@ -31,11 +31,15 @@ export function getModelFromConfig(config: AIConfigData): LanguageModel {
   const apiKey = decrypt(config.apiKey);
 
   switch (config.provider) {
-    case 'OPENAI':
-      return openai(config.model, { apiKey });
+    case 'OPENAI': {
+      const openai = createOpenAI({ apiKey });
+      return openai(config.model);
+    }
 
-    case 'ANTHROPIC':
-      return anthropic(config.model, { apiKey });
+    case 'ANTHROPIC': {
+      const anthropic = createAnthropic({ apiKey });
+      return anthropic(config.model);
+    }
 
     case 'COHERE':
     case 'CUSTOM':

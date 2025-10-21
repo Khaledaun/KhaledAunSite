@@ -38,7 +38,9 @@ export async function POST(
     try {
       switch (config.provider) {
         case 'OPENAI': {
-          const model = openai(config.model, { apiKey });
+          const { createOpenAI } = await import('@ai-sdk/openai');
+          const openaiProvider = createOpenAI({ apiKey });
+          const model = openaiProvider(config.model);
           const { text } = await generateText({
             model,
             prompt: 'Say "Hello, I am working!" in one sentence.',
@@ -49,7 +51,9 @@ export async function POST(
         }
 
         case 'ANTHROPIC': {
-          const model = anthropic(config.model, { apiKey });
+          const { createAnthropic } = await import('@ai-sdk/anthropic');
+          const anthropicProvider = createAnthropic({ apiKey });
+          const model = anthropicProvider(config.model);
           const { text } = await generateText({
             model,
             prompt: 'Say "Hello, I am working!" in one sentence.',

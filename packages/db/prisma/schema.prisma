@@ -25,19 +25,48 @@ model SEOEntry {
   @@map("seo_entries")
 }
 
+// Phase 6.5: Enhanced Media Asset for rich media library
 model MediaAsset {
-  id          String      @id @default(cuid())
-  filename    String
-  url         String
-  mimeType    String
-  size        Int
-  alt         String?
-  caption     String?
-  status      String      @default("ACTIVE")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  PostMedia   PostMedia[]
+  id              String      @id @default(cuid())
+  filename        String      // Unique filename in storage
+  originalName    String      // Original uploaded filename
+  url             String      // Public URL from Supabase Storage
+  thumbnailUrl    String?     // Optimized thumbnail URL
+  mimeType        String      // MIME type (image/jpeg, video/mp4, etc.)
+  size            Int         // File size in bytes
+  
+  // Image/Video metadata
+  width           Int?        // Width in pixels (for images/videos)
+  height          Int?        // Height in pixels (for images/videos)
+  duration        Int?        // Duration in seconds (for videos)
+  
+  // Content metadata
+  alt             String?     // Alt text for accessibility
+  caption         String?     // Caption/description
+  
+  // Organization
+  folder          String?     // Folder/category (e.g., "blog", "avatars")
+  tags            String[]    // Searchable tags
+  
+  // Ownership & RBAC
+  uploadedBy      String
+  uploader        User        @relation("UploadedMedia", fields: [uploadedBy], references: [id])
+  
+  // Status
+  status          String      @default("ACTIVE") // ACTIVE, ARCHIVED, DELETED
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  PostMedia       PostMedia[]
+  featuredInPosts Post[]      @relation("FeaturedImage")
 
+  @@index([uploadedBy])
+  @@index([folder])
+  @@index([mimeType])
+  @@index([status])
   @@map("media_assets")
 }
 
@@ -54,6 +83,27 @@ model PostMedia {
   @@map("post_media")
 }
 
+// Phase 7: AI Content Generation Models
+
+enum AIModel {
+  GPT4
+  GPT4_TURBO
+  CLAUDE3_OPUS
+  CLAUDE3_SONNET
+  CLAUDE3_HAIKU
+  GEMINI_PRO
+}
+
+enum AIGenerationType {
+  CONTENT_DRAFT      // Full article generation
+  CONTENT_OUTLINE    // Article outline
+  CONTENT_IDEAS      // Content ideas/topics
+  TRANSLATION        // EN → AR translation
+  SEO_METADATA       // Title, description, keywords
+  CONTENT_IMPROVE    // Enhance existing content
+  URL_EXTRACTION     // Extract content from URL
+}
+
 model AIArtifact {
   id          String   @id @default(cuid())
   type        String   // "outline_options", "outline_final", "facts", "content", etc.
@@ -68,6 +118,84 @@ model AIArtifact {
   updatedAt   DateTime @updatedAt
 
   @@map("ai_artifacts")
+}
+
+// Phase 7: AI Content Generation tracking
+model AIGeneration {
+  id              String            @id @default(cuid())
+  
+  // Generation details
+  type            AIGenerationType
+  model           AIModel           @default(GPT4_TURBO)
+  prompt          String            @db.Text
+  systemPrompt    String?           @db.Text
+  
+  // Input/Output
+  input           Json?             // Input data (URL, text, etc.)
+  output          String?           @db.Text // Generated content
+  
+  // Metadata
+  tokensUsed      Int?
+  costEstimate    Float?            // in USD
+  duration        Int?              // in milliseconds
+  
+  // Status
+  status          String            @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  error           String?           @db.Text
+  
+  // Relations
+  userId          String
+  user            User              @relation("UserGenerations", fields: [userId], references: [id])
+  postId          String?
+  post            Post?             @relation("PostGenerations", fields: [postId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  completedAt     DateTime?
+  
+  @@index([userId])
+  @@index([postId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_generations")
+}
+
+// Phase 7: URL Content Extraction history
+model URLExtraction {
+  id              String      @id @default(cuid())
+  url             String
+  
+  // Extracted content
+  title           String?
+  author          String?
+  publishedDate   DateTime?
+  content         String?     @db.Text
+  excerpt         String?
+  imageUrl        String?
+  
+  // Metadata
+  siteName        String?
+  language        String?
+  wordCount       Int?
+  
+  // Status
+  status          String      @default("PENDING") // PENDING, COMPLETED, FAILED
+  error           String?
+  
+  // Relations
+  userId          String
+  user            User        @relation("UserExtractions", fields: [userId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([userId])
+  @@index([url])
+  @@index([createdAt])
+  @@map("url_extractions")
 }
 
 // Phase 6 Full: Locale for i18n support
@@ -95,8 +223,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  posts     Post[]   @relation("UserPosts")
-  audits    Audit[]  @relation("UserAudits")
+  posts           Post[]          @relation("UserPosts")
+  audits          Audit[]         @relation("UserAudits")
+  uploadedMedia   MediaAsset[]    @relation("UploadedMedia")     // Phase 6.5
+  aiGenerations   AIGeneration[]  @relation("UserGenerations")   // Phase 7
+  urlExtractions  URLExtraction[] @relation("UserExtractions")   // Phase 7
 
   @@map("users")
 }
@@ -124,8 +255,13 @@ model Post {
   authorId    String
   author      User        @relation("UserPosts", fields: [authorId], references: [id])
 
-  translations PostTranslation[] // Phase 6 Full: i18n support
-  PostMedia    PostMedia[]
+  // Phase 6.5: Featured image support
+  featuredImageId String?
+  featuredImage   MediaAsset? @relation("FeaturedImage", fields: [featuredImageId], references: [id])
+
+  translations  PostTranslation[] // Phase 6 Full: i18n support
+  PostMedia     PostMedia[]
+  aiGenerations AIGeneration[]    @relation("PostGenerations") // Phase 7
 
   @@map("posts")
 }

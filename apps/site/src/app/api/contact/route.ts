@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     expiresAt.setMonth(expiresAt.getMonth() + 12);
 
     // Create lead
-    const lead = await prisma.lead.create({
+    await prisma.lead.create({
       data: {
         name,
         email,

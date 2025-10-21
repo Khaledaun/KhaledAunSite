@@ -11,3 +11,6 @@ export * from './sanitize';
 // Phase 7: AI Content Generation
 export * from './ai-content';
 export * from './url-extractor';
+
+// Phase 1 Strategic UX: Encryption
+export * from './encryption';

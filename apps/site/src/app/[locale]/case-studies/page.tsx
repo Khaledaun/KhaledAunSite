@@ -33,7 +33,7 @@ export default async function CaseStudiesPage() {
       featuredImage: {
         select: {
           url: true,
-          altText: true,
+          alt: true,
         },
       },
     },
@@ -65,7 +65,7 @@ export default async function CaseStudiesPage() {
                   <div className="relative overflow-hidden h-48">
                     <img
                       src={caseStudy.featuredImage.url}
-                      alt={caseStudy.featuredImage.altText || caseStudy.title}
+                      alt={caseStudy.featuredImage.alt || caseStudy.title}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   </div>

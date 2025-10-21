@@ -59,7 +59,7 @@ export default async function CaseStudyPage({ params }: Props) {
       featuredImage: {
         select: {
           url: true,
-          altText: true,
+          alt: true,
         },
       },
     },
@@ -135,7 +135,7 @@ export default async function CaseStudyPage({ params }: Props) {
             <div className="mb-12 rounded-lg overflow-hidden shadow-lg">
               <img
                 src={caseStudy.featuredImage.url}
-                alt={caseStudy.featuredImage.altText || caseStudy.title}
+                alt={caseStudy.featuredImage.alt || caseStudy.title}
                 className="w-full h-auto"
               />
             </div>

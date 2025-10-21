@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^0.0.39",
     "@ai-sdk/openai": "^0.0.46",
+    "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@khaledaun/auth": "file:../../packages/auth",
     "@khaledaun/db": "file:../../packages/db",

@@ -36,7 +36,7 @@ export async function validatePost(post: PostContent): Promise<ValidationResult>
 
   // Load content with Cheerio for parsing
   const $ = load(post.content);
-  const textContent = $.text();
+  const textContent = $('body').text() || $.text();
   
   // Calculate word count
   const words = textContent.split(/\s+/).filter((w) => w.length > 0);

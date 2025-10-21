@@ -5,10 +5,19 @@
 
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-load OpenAI client to avoid build-time errors
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openaiInstance) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is required');
+    }
+    openaiInstance = new OpenAI({ apiKey });
+  }
+  return openaiInstance;
+}
 
 export interface GenerateContentOptions {
   topic: string;
@@ -57,6 +66,7 @@ Format the output in clean HTML with proper headings, paragraphs, and lists.`;
     : `Write a ${wordCount}-word blog post about "${topic}". Include an engaging introduction, well-structured body with headings, and a strong conclusion.`;
 
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
@@ -91,6 +101,7 @@ Include:
 Format as a numbered outline.`;
 
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
@@ -128,6 +139,7 @@ Ensure cultural appropriateness and natural phrasing.`;
     : `Translate the following text from ${from} to ${to}:\n\n${text}`;
 
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
@@ -175,6 +187,7 @@ Format your response as JSON:
 }`;
 
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
@@ -216,6 +229,7 @@ export async function improveContent(content: string, instructions?: string): Pr
 Content:\n${content}`;
 
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [
@@ -244,6 +258,7 @@ Make them specific, actionable, and SEO-friendly.
 Format as a JSON array of strings.`;
 
   try {
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       model: 'gpt-4-turbo-preview',
       messages: [

@@ -94,10 +94,11 @@ export async function POST(request: NextRequest) {
         height = imageMetadata.height || null;
 
         // Optimize original image
-        processedBuffer = await image
+        const optimizedBuffer = await image
           .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
           .jpeg({ quality: 85 })
-          .toBuffer() as Buffer;
+          .toBuffer();
+        processedBuffer = optimizedBuffer as Buffer;
 
         // Create thumbnail
         const thumbnailBuffer = await sharp(buffer)

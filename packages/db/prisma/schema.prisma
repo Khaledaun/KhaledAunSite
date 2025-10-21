@@ -60,8 +60,9 @@ model MediaAsset {
   updatedAt       DateTime    @updatedAt
   
   // Relations
-  PostMedia       PostMedia[]
-  featuredInPosts Post[]      @relation("FeaturedImage")
+  PostMedia           PostMedia[]
+  featuredInPosts     Post[]        @relation("FeaturedImage")
+  featuredInCaseStudies CaseStudy[] @relation("CaseStudyFeaturedImage")  // Phase 1
 
   @@index([uploadedBy])
   @@index([folder])
@@ -228,6 +229,7 @@ model User {
   uploadedMedia   MediaAsset[]    @relation("UploadedMedia")     // Phase 6.5
   aiGenerations   AIGeneration[]  @relation("UserGenerations")   // Phase 7
   urlExtractions  URLExtraction[] @relation("UserExtractions")   // Phase 7
+  caseStudies     CaseStudy[]     @relation("UserCaseStudies")   // Phase 1
 
   @@map("users")
 }
@@ -301,16 +303,57 @@ model Audit {
   @@map("audits")
 }
 
-model Lead {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  source    String?
-  status    String   @default("NEW") // NEW, CONTACTED, QUALIFIED, CONVERTED
-  metadata  Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Phase 1: Enhanced Lead model (Mini-CRM Light)
+enum LeadInterest {
+  COLLABORATION
+  SPEAKING
+  REFERRAL
+  PRESS
+  GENERAL
+}
 
+enum LeadSource {
+  CONTACT_FORM
+  LINKEDIN_EMBED
+  NEWSLETTER
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  REPLIED
+  SCHEDULED
+  ARCHIVED
+}
+
+model Lead {
+  id            String       @id @default(cuid())
+  
+  // Contact Info
+  name          String
+  email         String
+  organization  String?
+  country       String?
+  
+  // Intent
+  interest      LeadInterest
+  message       String       @db.Text
+  source        LeadSource
+  
+  // Management
+  status        LeadStatus   @default(NEW)
+  tags          String[]     @default([])
+  nextActionAt  DateTime?
+  
+  // Metadata
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  // Auto-purge after 12 months
+  expiresAt     DateTime?
+  
+  @@index([status, createdAt])
+  @@index([email])
   @@map("leads")
 }
 
@@ -398,4 +441,141 @@ model HeroMedia {
   updatedAt   DateTime @updatedAt
 
   @@map("hero_media")
+}
+
+// Phase 1: Newsletter Subscribers
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("newsletter_signup")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  @@index([email])
+  @@map("subscribers")
+}
+
+// Phase 1: Case Studies (Portfolio)
+enum CaseStudyType {
+  LITIGATION
+  ARBITRATION
+  ADVISORY
+  VENTURE
+}
+
+model CaseStudy {
+  id            String        @id @default(cuid())
+  
+  // Classification
+  type          CaseStudyType
+  confidential  Boolean       @default(false)
+  
+  // Content (Problem → Strategy → Outcome)
+  title         String
+  slug          String        @unique
+  problem       String        @db.Text
+  strategy      String        @db.Text
+  outcome       String        @db.Text
+  
+  // Metadata
+  categories    String[]      @default([])  // ["International Arbitration", "Conflict Prevention"]
+  practiceArea  String?       // "Arbitration", "Litigation", etc.
+  year          Int?
+  jurisdiction  String?
+  
+  // Publishing
+  published     Boolean       @default(false)
+  publishedAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  authorId      String
+  author        User          @relation("UserCaseStudies", fields: [authorId], references: [id])
+  
+  // Media
+  featuredImageId String?
+  featuredImage   MediaAsset?  @relation("CaseStudyFeaturedImage", fields: [featuredImageId], references: [id])
+  
+  @@index([type, published])
+  @@index([slug])
+  @@map("case_studies")
+}
+
+// Phase 1: AI Provider Configuration
+enum AIProvider {
+  OPENAI
+  ANTHROPIC
+  COHERE
+  CUSTOM
+}
+
+enum AIUseCase {
+  CONTENT_GENERATION
+  TRANSLATION
+  EMAIL_MARKETING
+  SEO_OPTIMIZATION
+  CONTENT_IMPROVEMENT
+  URL_EXTRACTION
+}
+
+model AIConfig {
+  id          String       @id @default(cuid())
+  
+  // Provider Info
+  provider    AIProvider
+  name        String           // "OpenAI GPT-4", "Anthropic Claude 3.5"
+  
+  // Credentials
+  apiKey      String           // Encrypted in production
+  
+  // Model Settings
+  model       String           // "gpt-4-turbo", "claude-3-5-sonnet-20241022"
+  
+  // Use Cases (what this config is used for)
+  useCases    AIUseCase[]      @default([])
+  
+  // Prompts
+  systemPrompt String?         @db.Text
+  
+  // Status
+  active      Boolean          @default(true)
+  isDefault   Boolean          @default(false)
+  
+  // Metadata
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@index([provider, active])
+  @@map("ai_configs")
+}
+
+// Phase 1: AI Prompt Templates (Saved Prompts)
+model AIPromptTemplate {
+  id          String     @id @default(cuid())
+  
+  // Template Info
+  name        String           // "Arbitration Watch Digest"
+  description String?          @db.Text
+  category    String           // "arbitration", "conflict_prevention", "linkedin"
+  
+  // Prompt
+  prompt      String           @db.Text
+  
+  // Settings
+  useCase     AIUseCase
+  tone        String?          // "professional", "casual", "technical"
+  language    String?          // "en", "ar"
+  
+  // Usage
+  usageCount  Int              @default(0)
+  
+  // Metadata
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@index([category])
+  @@map("ai_prompt_templates")
 }

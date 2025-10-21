@@ -98,13 +98,15 @@ export async function POST(request: NextRequest) {
           .resize(2000, 2000, { fit: 'inside', withoutEnlargement: true })
           .jpeg({ quality: 85 })
           .toBuffer();
-        processedBuffer = optimizedBuffer as Buffer;
+        // @ts-ignore - Sharp returns Buffer<ArrayBufferLike> but we need Buffer<ArrayBuffer>
+        processedBuffer = optimizedBuffer;
 
         // Create thumbnail
+        // @ts-ignore - Sharp buffer type compatibility
         const thumbnailBuffer = await sharp(buffer)
           .resize(400, 400, { fit: 'cover' })
           .jpeg({ quality: 80 })
-          .toBuffer() as Buffer;
+          .toBuffer();
 
         const thumbnailFilename = filename.replace(/\.[^.]+$/, '-thumb.jpg');
 

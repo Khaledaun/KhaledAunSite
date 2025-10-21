@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: {
     locale: string;

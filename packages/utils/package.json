@@ -9,6 +9,9 @@
     "@types/sanitize-html": "^2.11.0",
     "openai": "^4.73.1",
     "cheerio": "^1.0.0",
-    "@types/cheerio": "^0.22.35"
+    "@types/cheerio": "^0.22.35",
+    "@ai-sdk/openai": "^1.0.8",
+    "@ai-sdk/anthropic": "^1.0.4",
+    "ai": "^4.0.25"
   }
 }

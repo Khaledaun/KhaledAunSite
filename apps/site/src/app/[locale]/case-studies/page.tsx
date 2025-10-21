@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 
+// Force dynamic rendering since we need database access
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Case Studies | Khaled Aun',
   description: 'Explore successful legal outcomes and strategic advisory work',

@@ -1,7 +1,7 @@
 # Phase 1 Strategic UX - Implementation Progress
 
 **Started**: October 21, 2025
-**Status**: 🚧 In Progress (37.5% complete - 3/8 steps done)
+**Status**: 🚧 In Progress (50% complete - 4/8 steps done)
 
 ---
 
@@ -96,14 +96,63 @@
 
 ---
 
+### Step 4: Case Studies Module - DONE ✅
+**Duration**: 2.5 hours
+
+**Changes**:
+- ✅ Built complete Case Study API (GET, POST, PUT, DELETE, publish)
+- ✅ Created CaseStudyForm component with Problem/Strategy/Outcome framework
+- ✅ Auto-slug generation from title
+- ✅ Type selection (Litigation/Arbitration/Advisory/Venture)
+- ✅ Confidential toggle for sensitive cases
+- ✅ Categories management (add/remove tags)
+- ✅ Metadata fields (practice area, year, jurisdiction)
+- ✅ Created admin Case Studies listing page with:
+  - Type and status filters
+  - Publish/unpublish toggle
+  - Edit and delete actions
+  - Empty state with CTA
+- ✅ Created admin New/Edit pages
+- ✅ Built public case studies listing page
+- ✅ Built public case study detail page with:
+  - Problem → Strategy → Outcome structure
+  - Visual icons for each section
+  - Metadata display (practice area, year, jurisdiction)
+  - Categories tags
+  - Featured image support
+  - CTA for contact
+- ✅ Revalidation on publish/unpublish
+
+**Files Created**:
+- `apps/admin/app/api/admin/case-studies/route.ts` (GET, POST)
+- `apps/admin/app/api/admin/case-studies/[id]/route.ts` (GET, PUT, DELETE)
+- `apps/admin/app/api/admin/case-studies/[id]/publish/route.ts`
+- `apps/admin/components/CaseStudyForm.tsx`
+- `apps/admin/app/(dashboard)/case-studies/page.tsx`
+- `apps/admin/app/(dashboard)/case-studies/new/page.tsx`
+- `apps/admin/app/(dashboard)/case-studies/[id]/edit/page.tsx`
+- `apps/site/src/app/[locale]/case-studies/page.tsx`
+- `apps/site/src/app/[locale]/case-studies/[slug]/page.tsx`
+
+**Admin → Public Flow**:
+1. Admin creates case study with Problem/Strategy/Outcome
+2. Admin can save as draft or publish immediately
+3. Publish triggers revalidation of public pages
+4. Public pages show only published case studies
+5. Case study detail page displays full P→S→O narrative
+
+**Commit**: [next commit]
+
+---
+
 ## 🚧 In Progress
 
-### Step 4: Case Studies Module (Next - Estimated 3 hours)
-- [ ] Build Case Study API endpoints (GET, POST, PUT, DELETE, publish)
-- [ ] Create CaseStudyForm with Problem/Strategy/Outcome
-- [ ] Build public case study listing page
-- [ ] Build public case study detail pages
-- [ ] Test publish → revalidate flow
+### Step 5: AI Configuration (Next - Estimated 4 hours)
+- [ ] Build AI Config API with CRUD operations
+- [ ] Add API key encryption (AES-256)
+- [ ] Create AIConfigManager UI
+- [ ] Update AI generation services to use configs
+- [ ] Test with OpenAI and Anthropic providers
 
 ---
 
@@ -150,15 +199,15 @@
 
 ## 📊 Progress Tracking
 
-**Overall**: 3/8 steps complete (37.5%)
+**Overall**: 4/8 steps complete (50%)
 
 | Step | Status | Time Est | Time Actual |
 |------|--------|----------|-------------|
 | 1. Database Schema | ✅ Done | 30 min | 45 min |
 | 2. Sidebar Nav | ✅ Done | 2 hours | 45 min |
 | 3. Leads Module | ✅ Done | 3 hours | 2 hours |
-| 4. Case Studies | 🚧 In Progress | 3 hours | - |
-| 5. AI Config | ⏳ Pending | 4 hours | - |
+| 4. Case Studies | ✅ Done | 3 hours | 2.5 hours |
+| 5. AI Config | 🚧 In Progress | 4 hours | - |
 | 6. AI Templates | ⏳ Pending | 2 hours | - |
 | 7. Profile & Presence | ⏳ Pending | 2 hours | - |
 | 8. Polish & Test | ⏳ Pending | 1 hour | - |

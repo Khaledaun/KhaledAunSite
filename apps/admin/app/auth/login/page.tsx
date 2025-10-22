@@ -35,27 +35,8 @@ function LoginForm() {
       }
 
       if (data.user) {
-        // Verify user has admin access
-        const { data: userData, error: userError } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', data.user.id)
-          .single();
-
-        if (userError || !userData) {
-          setError('Failed to verify user permissions');
-          await supabase.auth.signOut();
-          return;
-        }
-
-        const allowedRoles = ['OWNER', 'ADMIN', 'EDITOR', 'REVIEWER', 'AUTHOR'];
-        if (!allowedRoles.includes(userData.role)) {
-          setError('You do not have permission to access the admin dashboard');
-          await supabase.auth.signOut();
-          return;
-        }
-
         // Redirect to original destination or command center
+        // The middleware will verify user permissions
         router.push(redirectTo);
         router.refresh();
       }

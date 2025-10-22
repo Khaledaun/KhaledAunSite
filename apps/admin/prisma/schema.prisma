@@ -1,0 +1,582 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Source-of-Truth Models as specified in requirements
+model SEOEntry {
+  id          String   @id @default(cuid())
+  url         String   @unique
+  title       String?
+  description String?
+  keywords    String[]
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("seo_entries")
+}
+
+// Phase 6.5: Enhanced Media Asset for rich media library
+model MediaAsset {
+  id              String      @id @default(cuid())
+  filename        String      // Unique filename in storage
+  originalName    String      // Original uploaded filename
+  url             String      // Public URL from Supabase Storage
+  thumbnailUrl    String?     // Optimized thumbnail URL
+  mimeType        String      // MIME type (image/jpeg, video/mp4, etc.)
+  size            Int         // File size in bytes
+  
+  // Image/Video metadata
+  width           Int?        // Width in pixels (for images/videos)
+  height          Int?        // Height in pixels (for images/videos)
+  duration        Int?        // Duration in seconds (for videos)
+  
+  // Content metadata
+  alt             String?     // Alt text for accessibility
+  caption         String?     // Caption/description
+  
+  // Organization
+  folder          String?     // Folder/category (e.g., "blog", "avatars")
+  tags            String[]    // Searchable tags
+  
+  // Ownership & RBAC
+  uploadedBy      String
+  uploader        User        @relation("UploadedMedia", fields: [uploadedBy], references: [id])
+  
+  // Status
+  status          String      @default("ACTIVE") // ACTIVE, ARCHIVED, DELETED
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  // Relations
+  PostMedia           PostMedia[]
+  featuredInPosts     Post[]        @relation("FeaturedImage")
+  featuredInCaseStudies CaseStudy[] @relation("CaseStudyFeaturedImage")  // Phase 1
+
+  @@index([uploadedBy])
+  @@index([folder])
+  @@index([mimeType])
+  @@index([status])
+  @@map("media_assets")
+}
+
+model PostMedia {
+  id           String     @id @default(cuid())
+  postId       String
+  mediaAssetId String
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now())
+  post         Post       @relation(fields: [postId], references: [id], onDelete: Cascade)
+  mediaAsset   MediaAsset @relation(fields: [mediaAssetId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, mediaAssetId])
+  @@map("post_media")
+}
+
+// Phase 7: AI Content Generation Models
+
+enum AIModel {
+  GPT4
+  GPT4_TURBO
+  CLAUDE3_OPUS
+  CLAUDE3_SONNET
+  CLAUDE3_HAIKU
+  GEMINI_PRO
+}
+
+enum AIGenerationType {
+  CONTENT_DRAFT      // Full article generation
+  CONTENT_OUTLINE    // Article outline
+  CONTENT_IDEAS      // Content ideas/topics
+  TRANSLATION        // EN → AR translation
+  SEO_METADATA       // Title, description, keywords
+  CONTENT_IMPROVE    // Enhance existing content
+  URL_EXTRACTION     // Extract content from URL
+}
+
+model AIArtifact {
+  id          String   @id @default(cuid())
+  type        String   // "outline_options", "outline_final", "facts", "content", etc.
+  content     Json
+  metadata    Json?
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  approvedBy  String?
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+  postId      String?  // Link to associated post
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("ai_artifacts")
+}
+
+// Phase 7: AI Content Generation tracking
+model AIGeneration {
+  id              String            @id @default(cuid())
+  
+  // Generation details
+  type            AIGenerationType
+  model           AIModel           @default(GPT4_TURBO)
+  prompt          String            @db.Text
+  systemPrompt    String?           @db.Text
+  
+  // Input/Output
+  input           Json?             // Input data (URL, text, etc.)
+  output          String?           @db.Text // Generated content
+  
+  // Metadata
+  tokensUsed      Int?
+  costEstimate    Float?            // in USD
+  duration        Int?              // in milliseconds
+  
+  // Status
+  status          String            @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  error           String?           @db.Text
+  
+  // Relations
+  userId          String
+  user            User              @relation("UserGenerations", fields: [userId], references: [id])
+  postId          String?
+  post            Post?             @relation("PostGenerations", fields: [postId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  completedAt     DateTime?
+  
+  @@index([userId])
+  @@index([postId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_generations")
+}
+
+// Phase 7: URL Content Extraction history
+model URLExtraction {
+  id              String      @id @default(cuid())
+  url             String
+  
+  // Extracted content
+  title           String?
+  author          String?
+  publishedDate   DateTime?
+  content         String?     @db.Text
+  excerpt         String?
+  imageUrl        String?
+  
+  // Metadata
+  siteName        String?
+  language        String?
+  wordCount       Int?
+  
+  // Status
+  status          String      @default("PENDING") // PENDING, COMPLETED, FAILED
+  error           String?
+  
+  // Relations
+  userId          String
+  user            User        @relation("UserExtractions", fields: [userId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([userId])
+  @@index([url])
+  @@index([createdAt])
+  @@map("url_extractions")
+}
+
+// Phase 6 Full: Locale for i18n support
+enum Locale {
+  en
+  ar
+}
+
+// Phase 6 Full: User & Role (expanded for RBAC)
+enum Role {
+  USER
+  AUTHOR    // Can create and edit own posts, submit for review
+  REVIEWER  // Can approve/reject posts
+  EDITOR    // Can edit any post and publish
+  OWNER     // Full access (site owner)
+  ADMIN     // Full access (admin)
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts           Post[]          @relation("UserPosts")
+  audits          Audit[]         @relation("UserAudits")
+  uploadedMedia   MediaAsset[]    @relation("UploadedMedia")     // Phase 6.5
+  aiGenerations   AIGeneration[]  @relation("UserGenerations")   // Phase 7
+  urlExtractions  URLExtraction[] @relation("UserExtractions")   // Phase 7
+  caseStudies     CaseStudy[]     @relation("UserCaseStudies")   // Phase 1
+
+  @@map("users")
+}
+
+// Phase 6 Full: Post (multilingual with translations)
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Post {
+  id          String      @id @default(cuid())
+  // NOTE: title, slug, excerpt, content moved to PostTranslation
+  // Keeping these fields temporarily for backwards compatibility during migration
+  title       String      // TODO: Remove after backfill
+  slug        String      @unique // TODO: Remove after backfill
+  excerpt     String?     // TODO: Remove after backfill
+  content     String      // TODO: Remove after backfill
+  
+  status      PostStatus  @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  authorId    String
+  author      User        @relation("UserPosts", fields: [authorId], references: [id])
+
+  // Phase 6.5: Featured image support
+  featuredImageId String?
+  featuredImage   MediaAsset? @relation("FeaturedImage", fields: [featuredImageId], references: [id])
+
+  translations  PostTranslation[] // Phase 6 Full: i18n support
+  PostMedia     PostMedia[]
+  aiGenerations AIGeneration[]    @relation("PostGenerations") // Phase 7
+
+  @@map("posts")
+}
+
+// Phase 6 Full: Post translations for multilingual content
+model PostTranslation {
+  id        String   @id @default(cuid())
+  postId    String
+  locale    Locale
+  title     String
+  slug      String
+  excerpt   String?
+  content   String   // markdown or serialized JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  // Ensure each post has only one translation per locale
+  @@unique([postId, locale])
+  // Ensure slugs are unique per locale
+  @@unique([locale, slug])
+  @@map("post_translations")
+}
+
+// Phase 6 Lite: Audit trail
+model Audit {
+  id        String   @id @default(cuid())
+  entity    String   // "Post", "User", etc.
+  entityId  String
+  action    String   // "CREATE", "UPDATE", "PUBLISH", "DELETE"
+  payload   Json?
+  actorId   String?
+  actor     User?    @relation("UserAudits", fields: [actorId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("audits")
+}
+
+// Phase 1: Enhanced Lead model (Mini-CRM Light)
+enum LeadInterest {
+  COLLABORATION
+  SPEAKING
+  REFERRAL
+  PRESS
+  GENERAL
+}
+
+enum LeadSource {
+  CONTACT_FORM
+  LINKEDIN_EMBED
+  NEWSLETTER
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  REPLIED
+  SCHEDULED
+  ARCHIVED
+}
+
+model Lead {
+  id            String       @id @default(cuid())
+  
+  // Contact Info
+  name          String
+  email         String
+  organization  String?
+  country       String?
+  
+  // Intent
+  interest      LeadInterest
+  message       String       @db.Text
+  source        LeadSource
+  
+  // Management
+  status        LeadStatus   @default(NEW)
+  tags          String[]     @default([])
+  nextActionAt  DateTime?
+  
+  // Metadata
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  
+  // Auto-purge after 12 months
+  expiresAt     DateTime?
+  
+  @@index([status, createdAt])
+  @@index([email])
+  @@map("leads")
+}
+
+model JobRun {
+  id          String   @id @default(cuid())
+  type        String   // "content_generation", "seo_analysis", etc.
+  status      String   @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  input       Json?
+  output      Json?
+  error       String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("job_runs")
+}
+
+// Phase 8 Full: Social Media Embeds
+model SocialEmbed {
+  id        String   @id @default(cuid())
+  key       String   @unique            // e.g. "LINKEDIN_WALL"
+  html      String                      // sanitized embed HTML
+  enabled   Boolean  @default(true)
+  updatedBy String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("social_embeds")
+}
+
+// CMS: Hero Rotating Titles
+model HeroTitle {
+  id        String   @id @default(cuid())
+  titleEn   String   // English title
+  titleAr   String   // Arabic title
+  order     Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("hero_titles")
+}
+
+// CMS: Professional Experience
+model Experience {
+  id          String              @id @default(cuid())
+  company     String
+  role        String
+  startDate   String              // e.g., "2019"
+  endDate     String?             // e.g., "2023" or null for "Present"
+  description String              // Rich text/HTML
+  order       Int                 @default(0)
+  enabled     Boolean             @default(true)
+  logoUrl     String?             // Company logo
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  images      ExperienceImage[]
+
+  @@map("experiences")
+}
+
+// CMS: Experience Images (landmarks, offices, etc.)
+model ExperienceImage {
+  id           String     @id @default(cuid())
+  experienceId String
+  url          String     // Image URL
+  caption      String?    // Optional caption
+  order        Int        @default(0)
+  createdAt    DateTime   @default(now())
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@map("experience_images")
+}
+
+// CMS: Hero Media (Video or Image)
+model HeroMedia {
+  id          String   @id @default(cuid())
+  type        String   // "IMAGE" or "VIDEO"
+  imageUrl    String?  // Hero image URL
+  videoUrl    String?  // YouTube/Vimeo URL or self-hosted
+  videoType   String?  // "youtube", "vimeo", "selfhosted"
+  enabled     Boolean  @default(true)
+  autoplay    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hero_media")
+}
+
+// Phase 1: Newsletter Subscribers
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  source    String   @default("newsletter_signup")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  @@index([email])
+  @@map("subscribers")
+}
+
+// Phase 1: Case Studies (Portfolio)
+enum CaseStudyType {
+  LITIGATION
+  ARBITRATION
+  ADVISORY
+  VENTURE
+}
+
+model CaseStudy {
+  id            String        @id @default(cuid())
+  
+  // Classification
+  type          CaseStudyType
+  confidential  Boolean       @default(false)
+  
+  // Content (Problem → Strategy → Outcome)
+  title         String
+  slug          String        @unique
+  problem       String        @db.Text
+  strategy      String        @db.Text
+  outcome       String        @db.Text
+  
+  // Metadata
+  categories    String[]      @default([])  // ["International Arbitration", "Conflict Prevention"]
+  practiceArea  String?       // "Arbitration", "Litigation", etc.
+  year          Int?
+  jurisdiction  String?
+  
+  // Publishing
+  published     Boolean       @default(false)
+  publishedAt   DateTime?
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Relations
+  authorId      String
+  author        User          @relation("UserCaseStudies", fields: [authorId], references: [id])
+  
+  // Media
+  featuredImageId String?
+  featuredImage   MediaAsset?  @relation("CaseStudyFeaturedImage", fields: [featuredImageId], references: [id])
+  
+  @@index([type, published])
+  @@index([slug])
+  @@map("case_studies")
+}
+
+// Phase 1: AI Provider Configuration
+enum AIProvider {
+  OPENAI
+  ANTHROPIC
+  COHERE
+  CUSTOM
+}
+
+enum AIUseCase {
+  CONTENT_GENERATION
+  TRANSLATION
+  EMAIL_MARKETING
+  SEO_OPTIMIZATION
+  CONTENT_IMPROVEMENT
+  URL_EXTRACTION
+}
+
+model AIConfig {
+  id          String       @id @default(cuid())
+  
+  // Provider Info
+  provider    AIProvider
+  name        String           // "OpenAI GPT-4", "Anthropic Claude 3.5"
+  
+  // Credentials
+  apiKey      String           // Encrypted in production
+  
+  // Model Settings
+  model       String           // "gpt-4-turbo", "claude-3-5-sonnet-20241022"
+  
+  // Use Cases (what this config is used for)
+  useCases    AIUseCase[]      @default([])
+  
+  // Prompts
+  systemPrompt String?         @db.Text
+  
+  // Status
+  active      Boolean          @default(true)
+  isDefault   Boolean          @default(false)
+  
+  // Metadata
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@index([provider, active])
+  @@map("ai_configs")
+}
+
+// Phase 1: AI Prompt Templates (Saved Prompts)
+model AIPromptTemplate {
+  id          String     @id @default(cuid())
+  
+  // Template Info
+  name        String           // "Arbitration Watch Digest"
+  description String?          @db.Text
+  category    String           // "arbitration", "conflict_prevention", "linkedin"
+  
+  // Prompt
+  prompt      String           @db.Text
+  
+  // Settings
+  useCase     AIUseCase
+  tone        String?          // "professional", "casual", "technical"
+  language    String?          // "en", "ar"
+  
+  // Usage
+  usageCount  Int              @default(0)
+  
+  // Metadata
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@index([category])
+  @@map("ai_prompt_templates")
+}

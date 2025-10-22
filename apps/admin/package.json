@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate --schema ../../packages/db/prisma/schema.prisma && next build",
-    "postinstall": "prisma generate --schema ../../packages/db/prisma/schema.prisma || true",
+    "dev": "prisma generate && next dev",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate || true",
     "start": "next start",
     "test": "vitest",
     "test:run": "vitest run"

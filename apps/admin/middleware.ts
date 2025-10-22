@@ -141,7 +141,8 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/static/') ||
     pathname === '/api/health' ||
     pathname === '/favicon.ico' ||
-    pathname === '/api/auth' // Allow auth endpoints
+    pathname.startsWith('/auth') || // Allow all auth routes (login, callback, etc.)
+    pathname.startsWith('/api/auth') // Allow auth API endpoints
   ) {
     return NextResponse.next();
   }

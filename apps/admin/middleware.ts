@@ -85,7 +85,7 @@ async function checkAdminAuth(request: NextRequest, response: NextResponse): Pro
     
     // Check if user has admin role
     const { data: user } = await supabase
-      .from('User')
+      .from('users')
       .select('role')
       .eq('id', session.user.id)
       .single();

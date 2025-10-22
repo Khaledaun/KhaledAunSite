@@ -7,10 +7,7 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Output configuration for Vercel
-  output: 'standalone',
-  
-  // Experimental features for better Prisma support
+  // Experimental features for better Prisma support in monorepo
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../../'),
   },

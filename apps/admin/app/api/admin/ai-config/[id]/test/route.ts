@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@khaledaun/db';
+import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@khaledaun/auth';
 import { decrypt } from '@khaledaun/utils';
 import { generateText } from 'ai';

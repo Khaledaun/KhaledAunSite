@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionUser, requirePermission } from '@khaledaun/auth';
-import { prisma } from '@khaledaun/db';
+import { prisma } from '@/lib/prisma';
 import { PostCreateSchema } from '@khaledaun/schemas';
 import { ZodError } from 'zod';
 

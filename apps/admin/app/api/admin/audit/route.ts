@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAdmin } from '@khaledaun/auth';
-import { prisma } from '@khaledaun/db';
+import { prisma } from '@/lib/prisma';
 
 /**
  * GET /api/admin/audit?entity=Post&entityId=xyz

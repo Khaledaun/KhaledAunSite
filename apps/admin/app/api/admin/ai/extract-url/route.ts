@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@khaledaun/db';
+import { prisma } from '@/lib/prisma';
 import { extractFromURL, validateURL } from '@khaledaun/utils';
 import { z } from 'zod';
 

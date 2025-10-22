@@ -7,6 +7,14 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Output configuration for Vercel
+  output: 'standalone',
+  
+  // Experimental features for better Prisma support
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, '../../'),
+  },
+  
   // Transpile workspace packages
   transpilePackages: ['@khaledaun/auth', '@khaledaun/db', '@khaledaun/schemas', '@khaledaun/utils'],
   

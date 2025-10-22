@@ -37,7 +37,7 @@ function LoginForm() {
       if (data.user) {
         // Verify user has admin access
         const { data: userData, error: userError } = await supabase
-          .from('User')
+          .from('users')
           .select('role')
           .eq('id', data.user.id)
           .single();

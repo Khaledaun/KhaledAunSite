@@ -139,8 +139,8 @@ export async function middleware(request: NextRequest) {
   // TODO: Re-enable after fixing Supabase auth-helpers  
   return NextResponse.next();
   
-  // @ts-nocheck - All code below is unreachable, kept for reference when re-enabling auth
-  /* eslint-disable */
+  /* COMMENTED OUT - Unreachable code below, kept for reference when re-enabling auth
+  
   // Skip middleware for static files and API health checks
   if (
     pathname.startsWith('/_next/') ||
@@ -234,6 +234,8 @@ export async function middleware(request: NextRequest) {
   }
   
   return response;
+  
+  END OF COMMENTED OUT CODE */
 }
 
 // Configure which paths the middleware should run on

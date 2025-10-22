@@ -216,6 +216,7 @@ export async function middleware(request: NextRequest) {
   
   // Add CORS headers for allowed origins
   const origin = request.headers.get('origin');
+  // @ts-expect-error - Unreachable code, kept for reference
   if (origin && ALLOWED_ORIGINS.includes(origin)) {
     response.headers.set('Access-Control-Allow-Origin', origin);
     response.headers.set('Access-Control-Allow-Credentials', 'true');

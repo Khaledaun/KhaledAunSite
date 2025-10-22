@@ -10,6 +10,9 @@ const nextConfig = {
   // Experimental features for better Prisma support in monorepo
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../../'),
+    outputFileTracingIncludes: {
+      '/api/**/*': ['../../node_modules/.prisma/**/*'],
+    },
   },
   
   // Transpile workspace packages

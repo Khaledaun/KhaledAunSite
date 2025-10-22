@@ -10,16 +10,17 @@ export default function HomePage() {
         </p>
         <div className="mt-8 space-x-4">
           <a 
-            href="/admin/command-center" 
+            href="/command-center" 
             className="inline-block bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
           >
             Command Center
           </a>
           <a 
-            href="/en/contact" 
+            href="https://khaledaun.com/en/contact" 
+            target="_blank"
             className="inline-block bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700"
           >
-            Contact Page
+            View Public Site
           </a>
         </div>
       </div>

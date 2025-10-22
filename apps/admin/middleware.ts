@@ -139,8 +139,8 @@ export async function middleware(request: NextRequest) {
   // TODO: Re-enable after fixing Supabase auth-helpers  
   return NextResponse.next();
   
-  // @ts-ignore - Unreachable code below, kept for reference when re-enabling auth
-  // eslint-disable-next-line no-unreachable
+  // @ts-nocheck - All code below is unreachable, kept for reference when re-enabling auth
+  /* eslint-disable */
   // Skip middleware for static files and API health checks
   if (
     pathname.startsWith('/_next/') ||
@@ -216,7 +216,6 @@ export async function middleware(request: NextRequest) {
   
   // Add CORS headers for allowed origins
   const origin = request.headers.get('origin');
-  // @ts-expect-error - Unreachable code, kept for reference
   if (origin && ALLOWED_ORIGINS.includes(origin)) {
     response.headers.set('Access-Control-Allow-Origin', origin);
     response.headers.set('Access-Control-Allow-Credentials', 'true');

@@ -74,8 +74,8 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Social Badges */}
-            {/* Instagram - Always show if env is set */}
+            {/* Social Badges - Env vars must be set before build */}
+            {/* Instagram */}
             {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
               <a
                 href={process.env.NEXT_PUBLIC_INSTAGRAM_URL}

@@ -87,7 +87,7 @@ export default function Navbar({ locale }) {
           {/* Language Switcher */}
           <Link 
             href={locale === 'en' ? '/ar' : '/en'} 
-            className="ms-2 px-3 py-2 text-sm font-semibold text-dark dark:text-white hover:text-brand-gold dark:hover:text-brand-gold transition-colors"
+            className={`ms-2 px-3 py-2 text-sm font-semibold text-dark dark:text-white hover:text-brand-gold dark:hover:text-brand-gold transition-colors ${locale === 'en' ? 'font-cairo' : ''}`}
           >
             {locale === 'en' ? 'العربية' : 'English'}
           </Link>

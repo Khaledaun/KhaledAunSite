@@ -61,16 +61,24 @@ export default function Navbar({ locale }) {
 
         <div className="nav-icons flex items-center lg_992:order-2 ms-auto md:ms-8">
           {/* Social Media Links */}
-          <ul className="list-none menu-social mb-0">
+          <ul className="list-none menu-social mb-0 flex items-center">
             <li className="inline-flex">
-              <Link href="https://www.linkedin.com/in/khaledaun" target="_blank" className="ms-1">
-                <span className="btn btn-icon btn-sm rounded-full bg-brand-gold hover:bg-brand-gold/90 text-brand-navy">
-                  <Unicons.UilLinkedin width={16} />
+              <Link href={process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/khaledaun"} target="_blank" className="ms-1">
+                <span className="w-10 h-10 rounded-full bg-brand-gold hover:bg-brand-gold/90 flex items-center justify-center transition-all duration-200 shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D1B2A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                  </svg>
                 </span>
               </Link>
-              <Link href="mailto:contact@khaledaun.com" className="ms-1">
-                <span className="btn btn-icon btn-sm rounded-full bg-brand-gold hover:bg-brand-gold/90 text-brand-navy">
-                  <Unicons.UilEnvelope width={16} />
+              <Link href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://linkedin.com/in/khaledaun"} target="_blank" className="ms-1">
+                <span className="w-10 h-10 rounded-full bg-brand-gold hover:bg-brand-gold/90 flex items-center justify-center transition-all duration-200 shadow-md">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D1B2A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect x="2" y="9" width="4" height="12"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
+                  </svg>
                 </span>
               </Link>
             </li>

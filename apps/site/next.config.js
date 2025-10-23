@@ -23,6 +23,10 @@ const nextConfig = {
       },
     ];
   },
+  // Force dynamic rendering for locale-specific pages
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

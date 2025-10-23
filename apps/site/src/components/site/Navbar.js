@@ -4,17 +4,31 @@ import Link from "next/link";
 import { Link as ScrollLink } from 'react-scroll';
 import * as Unicons from "@iconscout/react-unicons";
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 export default function Navbar({ locale }) {
   const t = useTranslations('Navigation');
   const [stickyNavbar, setStickyNavbar] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logo, setLogo] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.addEventListener("scroll", windowScroll);
       return () => window.removeEventListener("scroll", windowScroll);
     }
+  }, []);
+
+  useEffect(() => {
+    // Fetch logo from API
+    fetch('/api/site-logo')
+      .then(res => res.json())
+      .then(data => {
+        if (data.logo) {
+          setLogo(data.logo);
+        }
+      })
+      .catch(err => console.error('Failed to fetch logo:', err));
   }, []);
 
   function windowScroll() {
@@ -26,12 +40,23 @@ export default function Navbar({ locale }) {
   };
 
   return (
-    <nav className={`${stickyNavbar ? "is-sticky" : ""} navbar`} id="navbar">
-      <div className="container flex flex-wrap items-center justify-between">
-        <Link href={`/${locale}`} className="navbar-brand md:me-8">
-          <span className="text-2xl font-bold text-brand-gold">
-            {locale === 'ar' ? 'خالد عون' : 'Khaled Aun'}
-          </span>
+    <nav className={`${stickyNavbar ? "is-sticky" : ""} navbar`} id="navbar" style={{ padding: '0.5cm 0' }}>
+      <div className="container flex flex-wrap items-center justify-between" style={{ padding: '0 0.5cm' }}>
+        <Link href={`/${locale}`} className="navbar-brand md:me-8 flex items-center">
+          {logo ? (
+            <Image 
+              src={logo.url} 
+              alt={logo.alt || 'Khaled Aun'} 
+              width={logo.width || 200} 
+              height={logo.height || 60}
+              className="h-auto"
+              style={{ maxHeight: '60px', width: 'auto' }}
+            />
+          ) : (
+            <span className="text-4xl font-bold text-brand-gold">
+              {locale === 'ar' ? 'خالد عون' : 'Khaled Aun'}
+            </span>
+          )}
         </Link>
 
         <div className="nav-icons flex items-center lg_992:order-2 ms-auto md:ms-8">
@@ -39,12 +64,12 @@ export default function Navbar({ locale }) {
           <ul className="list-none menu-social mb-0">
             <li className="inline-flex">
               <Link href="https://www.linkedin.com/in/khaledaun" target="_blank" className="ms-1">
-                <span className="btn btn-icon btn-sm rounded-full bg-brand-gold hover:bg-brand-gold/90 text-white">
+                <span className="btn btn-icon btn-sm rounded-full bg-brand-gold hover:bg-brand-gold/90 text-brand-navy">
                   <Unicons.UilLinkedin width={16} />
                 </span>
               </Link>
               <Link href="mailto:contact@khaledaun.com" className="ms-1">
-                <span className="btn btn-icon btn-sm rounded-full bg-brand-gold hover:bg-brand-gold/90 text-white">
+                <span className="btn btn-icon btn-sm rounded-full bg-brand-gold hover:bg-brand-gold/90 text-brand-navy">
                   <Unicons.UilEnvelope width={16} />
                 </span>
               </Link>

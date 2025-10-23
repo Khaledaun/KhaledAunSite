@@ -584,6 +584,20 @@ model AIPromptTemplate {
   @@map("ai_prompt_templates")
 }
 
+// Site Logo Management
+model SiteLogo {
+  id        String   @id @default(cuid())
+  url       String   // URL to logo image
+  alt       String   @default("Khaled Aun")
+  width     Int?
+  height    Int?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("site_logos")
+}
+
 // LinkedIn Posts Management
 model LinkedInPost {
   id          String   @id @default(cuid())

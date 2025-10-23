@@ -18,7 +18,7 @@ export async function GET() {
       urlExtractionsThisMonth,
     ] = await Promise.all([
       prisma.post.count(),
-      prisma.post.count({ where: { published: true } }),
+      prisma.post.count({ where: { status: 'PUBLISHED' } }),
       prisma.caseStudy.count(),
       prisma.lead.count(),
       prisma.aIGeneration.count({

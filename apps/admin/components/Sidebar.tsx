@@ -59,6 +59,7 @@ const navigation: NavItem[] = [
     href: '/profile', 
     icon: UserIcon,
     children: [
+      { name: 'Site Logo', href: '/profile/logo' },
       { name: 'Hero & Bio', href: '/cms/hero-titles' },
       { name: 'Experience', href: '/cms/experiences' },
       { name: 'Credentials', href: '/profile/credentials' },

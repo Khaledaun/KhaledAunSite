@@ -1,4 +1,3 @@
-import { unstable_setRequestLocale } from 'next-intl/server';
 import Navbar from '@/components/site/Navbar';
 import HeroDennis from '@/components/site/HeroDennis';
 import AboutDennis from '@/components/site/AboutDennis';
@@ -13,9 +12,11 @@ import Switcher from '@/components/site/Switcher';
 import ConsultationModal from '@/components/common/ConsultationModal';
 import Script from 'next/script';
 
+// Force dynamic rendering to ensure locale is determined at runtime
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function Home({params: {locale}}) {
-  // Enable static rendering
-  unstable_setRequestLocale(locale);
   
   const organizationJsonLd = {
     '@context': 'https://schema.org',

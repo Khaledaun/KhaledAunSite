@@ -150,6 +150,7 @@ model AIGeneration {
   user            User              @relation("UserGenerations", fields: [userId], references: [id])
   postId          String?
   post            Post?             @relation("PostGenerations", fields: [postId], references: [id])
+  linkedInPosts   LinkedInPost[]    @relation("LinkedInPostGeneration")
   
   // Timestamps
   createdAt       DateTime          @default(now())
@@ -231,6 +232,7 @@ model User {
   aiGenerations   AIGeneration[]  @relation("UserGenerations")   // Phase 7
   urlExtractions  URLExtraction[] @relation("UserExtractions")   // Phase 7
   caseStudies     CaseStudy[]     @relation("UserCaseStudies")   // Phase 1
+  linkedInPosts   LinkedInPost[]  @relation("UserLinkedInPosts") // LinkedIn
 
   @@map("users")
 }
@@ -262,9 +264,10 @@ model Post {
   featuredImageId String?
   featuredImage   MediaAsset? @relation("FeaturedImage", fields: [featuredImageId], references: [id])
 
-  translations  PostTranslation[] // Phase 6 Full: i18n support
-  PostMedia     PostMedia[]
-  aiGenerations AIGeneration[]    @relation("PostGenerations") // Phase 7
+  translations    PostTranslation[] // Phase 6 Full: i18n support
+  PostMedia       PostMedia[]
+  aiGenerations   AIGeneration[]    @relation("PostGenerations")     // Phase 7
+  linkedInPosts   LinkedInPost[]    @relation("LinkedInFromBlogPost") // LinkedIn posts generated from this blog
 
   @@map("posts")
 }
@@ -579,4 +582,40 @@ model AIPromptTemplate {
   
   @@index([category])
   @@map("ai_prompt_templates")
+}
+
+// LinkedIn Posts Management
+model LinkedInPost {
+  id          String   @id @default(cuid())
+  
+  // Content
+  title       String
+  content     String   @db.Text
+  linkedinUrl String?  // URL to actual LinkedIn post
+  
+  // Status
+  published   Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  
+  // Author
+  authorId    String
+  author      User     @relation("UserLinkedInPosts", fields: [authorId], references: [id])
+  
+  // AI Generation
+  aiGenerated Boolean  @default(false)
+  aiGenerationId String?
+  aiGeneration   AIGeneration? @relation("LinkedInPostGeneration", fields: [aiGenerationId], references: [id])
+  
+  // Source (if generated from blog post)
+  sourcePostId String?
+  sourcePost   Post?    @relation("LinkedInFromBlogPost", fields: [sourcePostId], references: [id])
+  
+  // Metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+  
+  @@index([published, isPinned])
+  @@index([authorId])
+  @@map("linkedin_posts")
 }

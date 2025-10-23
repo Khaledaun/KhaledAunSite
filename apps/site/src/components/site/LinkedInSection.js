@@ -7,28 +7,23 @@ import { Linkedin, ExternalLink, Calendar, MessageSquare } from 'lucide-react';
 export default function LinkedInSection() {
   const t = useTranslations('LinkedIn');
   
-  // Phase 8 Full: Fetch LinkedIn wall embed from database
-  const [wallEmbedHtml, setWallEmbedHtml] = useState(null);
-  const [isWallEnabled, setIsWallEnabled] = useState(false);
+  // Fetch LinkedIn posts: 1 pinned + 2 latest
+  const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
   const linkedinProfileUrl = process.env.NEXT_PUBLIC_LINKEDIN_PROFILE_URL || 'https://linkedin.com/in/khaledaun';
   
   useEffect(() => {
-    // Fetch LinkedIn wall embed from API
-    fetch('/api/social-embed/LINKEDIN_WALL')
+    // Fetch LinkedIn posts from admin API
+    fetch('/api/social-embed/LINKEDIN_POSTS')
       .then(res => res.json())
       .then(data => {
-        if (data.embed && data.embed.html) {
-          setWallEmbedHtml(data.embed.html);
-          setIsWallEnabled(true);
-        } else {
-          setIsWallEnabled(false);
+        if (data.posts && data.posts.length > 0) {
+          setPosts(data.posts);
         }
       })
       .catch(err => {
-        console.error('Failed to fetch LinkedIn embed:', err);
-        setIsWallEnabled(false);
+        console.error('Failed to fetch LinkedIn posts:', err);
       })
       .finally(() => {
         setIsLoading(false);
@@ -65,8 +60,8 @@ export default function LinkedInSection() {
     return null;
   }
   
-  // If wall is disabled, don't render anything (Phase 8 Full requirement)
-  if (!isWallEnabled && !wallEmbedHtml) {
+  // Don't render if no posts configured
+  if (posts.length === 0) {
     return null;
   }
 
@@ -83,37 +78,23 @@ export default function LinkedInSection() {
           </p>
         </div>
 
-        {isWallEnabled && wallEmbedHtml ? (
-          // LinkedIn Wall Embed
-          <div className="max-w-4xl mx-auto">
-            <div 
-              className="bg-white rounded-lg p-6"
-              dangerouslySetInnerHTML={{ __html: wallEmbedHtml }}
-            />
-            
-            {/* Follow Button */}
-            <div className="text-center mt-8">
-              <a
-                href={linkedinProfileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary inline-flex items-center space-x-2"
-              >
-                <Linkedin className="w-5 h-5" />
-                <span>{t('followLinkedIn')}</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          </div>
-        ) : (
-          // Curated LinkedIn Posts
-          <div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {samplePosts.map((post) => (
+        {/* Curated LinkedIn Posts: 1 Pinned + 2 Latest */}
+        <div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {posts.map((post, index) => (
                 <div
                   key={post.id}
-                  className="bg-brand-navy/50 backdrop-blur-sm rounded-lg p-6 hover:bg-brand-navy/70 transition-all duration-300 hover:shadow-xl hover:shadow-brand-gold/10 group"
+                  className={`bg-brand-navy/50 backdrop-blur-sm rounded-lg p-6 hover:bg-brand-navy/70 transition-all duration-300 hover:shadow-xl hover:shadow-brand-gold/10 group relative ${
+                    index === 0 ? 'ring-2 ring-brand-gold/40' : ''
+                  }`}
                 >
+                  {/* Pinned Badge */}
+                  {index === 0 && (
+                    <div className="absolute top-4 right-4 bg-brand-gold text-brand-ink text-xs font-bold px-2 py-1 rounded">
+                      PINNED
+                    </div>
+                  )}
+                  
                   {/* Post Header */}
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center">
@@ -123,7 +104,7 @@ export default function LinkedInSection() {
                       <div className="font-semibold text-white">Khaled Aun</div>
                       <div className="text-sm text-gray-400 flex items-center space-x-1">
                         <Calendar className="w-3 h-3" />
-                        <span>{new Date(post.date).toLocaleDateString()}</span>
+                        <span>{new Date(post.createdAt || post.date).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -134,12 +115,12 @@ export default function LinkedInSection() {
                   </h3>
                   
                   <p className="text-gray-300 text-sm mb-4 line-clamp-3">
-                    {post.excerpt}
+                    {post.content || post.excerpt}
                   </p>
 
                   {/* Read More Link */}
                   <a
-                    href={post.url}
+                    href={post.linkedinUrl || post.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center space-x-2 text-brand-gold hover:text-white transition-colors duration-200 text-sm font-medium"
@@ -191,7 +172,7 @@ export default function LinkedInSection() {
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

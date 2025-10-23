@@ -4,6 +4,8 @@ import HeroDennis from '@/components/site/HeroDennis';
 import AboutDennis from '@/components/site/AboutDennis';
 import ServicesDennis from '@/components/site/ServicesDennis';
 import ExperienceTimelineDennis from '@/components/site/ExperienceTimelineDennis';
+import LinkedInSection from '@/components/site/LinkedInSection';
+import BlogPreview from '@/components/site/BlogPreview';
 import ContactDennis from '@/components/site/ContactDennis';
 import VenturesStrip from '@/components/site/VenturesStrip';
 import FooterDennis from '@/components/site/FooterDennis';
@@ -54,6 +56,8 @@ export default function Home({params: {locale}}) {
         <AboutDennis />
         <ServicesDennis />
         <ExperienceTimelineDennis />
+        <BlogPreview locale={locale} />
+        <LinkedInSection />
         <VenturesStrip />
         <ContactDennis />
       </main>

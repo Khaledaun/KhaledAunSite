@@ -13,6 +13,9 @@ import Switcher from '@/components/site/Switcher';
 import ConsultationModal from '@/components/common/ConsultationModal';
 import Script from 'next/script';
 
+// Force dynamic rendering to ensure correct locale is used
+export const dynamic = 'force-dynamic';
+
 export default function Home({params: {locale}}) {
   unstable_setRequestLocale(locale);
   

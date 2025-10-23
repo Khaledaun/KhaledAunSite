@@ -13,7 +13,15 @@ const nextConfig = {
       'via.placeholder.com'
     ]
   },
-  // Removed redirect - let next-intl middleware handle locale routing
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/en',
+        permanent: false,
+      },
+    ];
+  },
 };
 
 module.exports = withNextIntl(nextConfig);

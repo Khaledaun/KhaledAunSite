@@ -122,7 +122,7 @@ export default function CredentialsTimeline({ locale }) {
 
                   {/* Desktop Layout - Alternating sides */}
                   <div className="hidden md:block">
-                    <div className={`flex items-center ${shouldAlignRight ? 'justify-end' : 'justify-start'}`}>
+                    <div className="flex items-center justify-center">
                       {/* Left side content (for left-aligned items) */}
                       {!shouldAlignRight && (
                         <div className="w-5/12 pr-8">

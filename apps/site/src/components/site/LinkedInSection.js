@@ -82,7 +82,7 @@ export default function LinkedInSection() {
         <div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {posts.map((post, index) => (
-                <div
+              <div
                   key={post.id}
                   className={`bg-brand-navy/50 backdrop-blur-sm rounded-lg p-6 hover:bg-brand-navy/70 transition-all duration-300 hover:shadow-xl hover:shadow-brand-gold/10 group relative ${
                     index === 0 ? 'ring-2 ring-brand-gold/40' : ''
@@ -128,50 +128,50 @@ export default function LinkedInSection() {
                     <span>{t('readMore')}</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
-                </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
-            {/* Follow LinkedIn CTA */}
-            <div className="text-center">
-              <div className="bg-brand-navy/30 backdrop-blur-sm rounded-lg p-8 max-w-2xl mx-auto">
-                <div className="flex items-center justify-center space-x-3 mb-4">
-                  <Linkedin className="w-8 h-8 text-brand-gold" />
-                  <h3 className="text-2xl font-heading font-semibold text-white">
-                    {t('followTitle')}
-                  </h3>
-                </div>
+          {/* Follow LinkedIn CTA */}
+          <div className="text-center">
+            <div className="bg-brand-navy/30 backdrop-blur-sm rounded-lg p-8 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center space-x-3 mb-4">
+                <Linkedin className="w-8 h-8 text-brand-gold" />
+                <h3 className="text-2xl font-heading font-semibold text-white">
+                  {t('followTitle')}
+                </h3>
+              </div>
+              
+              <p className="text-gray-300 mb-6">
+                {t('followDescription')}
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href={linkedinProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary inline-flex items-center space-x-2"
+                >
+                  <Linkedin className="w-5 h-5" />
+                  <span>{t('followLinkedIn')}</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
                 
-                <p className="text-gray-300 mb-6">
-                  {t('followDescription')}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href={linkedinProfileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary inline-flex items-center space-x-2"
-                  >
-                    <Linkedin className="w-5 h-5" />
-                    <span>{t('followLinkedIn')}</span>
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                  
-                  <button
-                    onClick={() => {
-                      const event = new CustomEvent('openConsultationModal');
-                      window.dispatchEvent(event);
-                    }}
-                    className="btn-secondary inline-flex items-center space-x-2"
-                  >
-                    <MessageSquare className="w-5 h-5" />
-                    <span>{t('connectDirectly')}</span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    const event = new CustomEvent('openConsultationModal');
+                    window.dispatchEvent(event);
+                  }}
+                  className="btn-secondary inline-flex items-center space-x-2"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  <span>{t('connectDirectly')}</span>
+                </button>
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </section>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@repo/db/supabase-client';
-import { requirePermission } from '@repo/auth';
+import { getSupabaseClient } from '@/lib/supabase';
+import { requirePermission } from '@khaledaun/auth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;

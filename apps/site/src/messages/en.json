@@ -195,5 +195,34 @@
     "noPostsYet": "No articles published yet. Check back soon!",
     "readMore": "Read More",
     "viewAll": "View All Posts"
+  },
+  "Credentials": {
+    "title": "Work Experience & Career Landmarks",
+    "subtitle": "A journey of continuous professional development and specialized expertise in law, business, and strategic leadership.",
+    "llb": {
+      "title": "LL.B. in Law",
+      "institution": "The Hebrew University of Jerusalem",
+      "description": "Completed a Bachelor of Laws at one of Israel's most prestigious academic institutions. The program provided a rigorous foundation in commercial, civil, and administrative law, shaping a strong analytical and ethical approach to legal practice."
+    },
+    "bar": {
+      "title": "Admission to the Israeli Bar Association",
+      "institution": "Israel Bar Association",
+      "description": "Officially admitted as a licensed attorney in Israel, authorized to appear before all courts and legal forums. This milestone marks the transition from academic study to full professional legal practice."
+    },
+    "directors": {
+      "title": "Directors Course",
+      "institution": "The Hebrew University of Jerusalem – School of Business Administration",
+      "description": "Completed an intensive executive education program focusing on corporate governance, strategic decision-making, and board leadership. The course strengthened my ability to advise and serve organizations at the management and board levels."
+    },
+    "angel": {
+      "title": "Angel Investment Training Program",
+      "institution": "Tel Aviv University Entrepreneurship Center (in collaboration with Hasoub & Arab Angels Club)",
+      "description": "A specialized program in venture capital and startup investment strategy. Developed a deep understanding of early-stage financing, innovation ecosystems, and investor relations within the MENA entrepreneurial landscape."
+    },
+    "mediation": {
+      "title": "Mediation & Arbitration Certification (40 Hours)",
+      "institution": "Israel Bar Association – National Mediation Institute",
+      "description": "Certified in professional mediation and arbitration practices. The program enhanced my ability to resolve complex commercial disputes efficiently, emphasizing negotiation, neutrality, and strategic conflict management."
+    }
   }
 }

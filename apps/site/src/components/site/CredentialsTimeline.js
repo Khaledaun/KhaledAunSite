@@ -81,42 +81,42 @@ export default function CredentialsTimeline({ locale }) {
 
               return (
                 <div key={credential.id} className="relative mb-12 last:mb-0">
-                  {/* Mobile Layout - All left aligned */}
+                  {/* Mobile Layout - Centered */}
                   <div className="md:hidden">
-                    <div className="flex items-start gap-4">
-                      {/* Icon */}
-                      <div className={`flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br ${credential.color} flex items-center justify-center shadow-lg`}>
-                        <Icon className="w-6 h-6 text-white" />
+                    {/* Icon centered at top */}
+                    <div className="flex justify-center mb-4">
+                      <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${credential.color} flex items-center justify-center shadow-xl border-4 border-brand-sand`}>
+                        <Icon className="w-8 h-8 text-white" />
                       </div>
+                    </div>
 
-                      {/* Content */}
-                      <div className="flex-1 bg-white rounded-lg shadow-lg p-6 border-l-4 border-brand-gold">
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="text-2xl font-bold text-brand-gold">{credential.year}</span>
-                          {credential.logo && (
-                            <div className="w-16 h-16 relative">
-                              <Image
-                                src={credential.logo}
-                                alt={credential.logoAlt}
-                                fill
-                                className="object-contain"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
-                        <h3 className="text-xl font-heading font-bold text-brand-navy mb-2">
-                          {t(`${credential.id}.title`)}
-                        </h3>
-                        <p className="text-sm font-semibold text-brand-gold mb-3">
-                          {t(`${credential.id}.institution`)}
-                        </p>
-                        <p className="text-brand-ink/80 leading-relaxed">
-                          {t(`${credential.id}.description`)}
-                        </p>
+                    {/* Content Card */}
+                    <div className="bg-white rounded-lg shadow-lg p-6 border-t-4 border-brand-gold">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-2xl font-bold text-brand-gold">{credential.year}</span>
+                        {credential.logo && (
+                          <div className="w-16 h-16 relative">
+                            <Image
+                              src={credential.logo}
+                              alt={credential.logoAlt}
+                              fill
+                              className="object-contain"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
+                      <h3 className="text-xl font-heading font-bold text-brand-navy mb-2">
+                        {t(`${credential.id}.title`)}
+                      </h3>
+                      <p className="text-sm font-semibold text-brand-gold mb-3">
+                        {t(`${credential.id}.institution`)}
+                      </p>
+                      <p className="text-brand-ink/80 leading-relaxed">
+                        {t(`${credential.id}.description`)}
+                      </p>
                     </div>
                   </div>
 

@@ -1,6 +1,8 @@
+import { unstable_setRequestLocale } from 'next-intl/server';
 import ContactForm from '@/components/site/ContactForm';
 
 export default async function ContactPage({params: {locale}}) {
+  unstable_setRequestLocale(locale);
   return (
     <main id="main-content">
       <section className="min-h-screen bg-brand-sand py-20">

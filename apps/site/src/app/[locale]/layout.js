@@ -20,9 +20,12 @@ const poppins = Poppins({
   display: 'swap',
 });
 
-// Force dynamic rendering - no static generation
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export function generateStaticParams() {
+  return locales.map((locale) => ({locale}));
+}
+
+// Dynamic segments not included in generateStaticParams are generated on demand
+export const dynamicParams = true;
 
 export const metadata = {
   title: 'Khaled Aun - Legal Strategy & Business Growth',

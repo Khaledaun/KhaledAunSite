@@ -3,7 +3,6 @@ import Navbar from '@/components/site/Navbar';
 import HeroDennis from '@/components/site/HeroDennis';
 import AboutDennis from '@/components/site/AboutDennis';
 import ServicesDennis from '@/components/site/ServicesDennis';
-import ExperienceTimelineDennis from '@/components/site/ExperienceTimelineDennis';
 import CredentialsTimeline from '@/components/site/CredentialsTimeline';
 import LinkedInSection from '@/components/site/LinkedInSection';
 import BlogPreview from '@/components/site/BlogPreview';
@@ -55,7 +54,6 @@ export default function Home({params: {locale}}) {
         <HeroDennis locale={locale} />
         <AboutDennis locale={locale} />
         <ServicesDennis locale={locale} />
-        <ExperienceTimelineDennis locale={locale} />
         <CredentialsTimeline locale={locale} />
         <LinkedInSection locale={locale} />
         <BlogPreview locale={locale} />

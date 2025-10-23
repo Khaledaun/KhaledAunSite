@@ -1,3 +1,4 @@
+import { unstable_setRequestLocale } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import { notFound } from 'next/navigation';
 import { draftMode } from 'next/headers';
@@ -59,6 +60,7 @@ async function getPost(slug, showDrafts = false) {
 }
 
 export default async function BlogPostPage({ params: { slug, locale }, searchParams }) {
+  unstable_setRequestLocale(locale);
   const { isEnabled: isDraftMode } = draftMode();
   const isPreview = searchParams?.preview === '1';
   

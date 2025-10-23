@@ -1,3 +1,4 @@
+import { unstable_setRequestLocale } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -51,6 +52,7 @@ async function getPostById(id) {
 }
 
 export default async function PreviewPostPage({ params: { id, locale } }) {
+  unstable_setRequestLocale(locale);
   const post = await getPostById(id);
 
   if (!post) {

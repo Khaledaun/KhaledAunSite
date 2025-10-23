@@ -1,10 +1,6 @@
 import { getTranslations } from 'next-intl/server';
-import { unstable_setRequestLocale } from 'next-intl/server';
 
 export default async function AboutPage({params: {locale}}) {
-  // Enable static rendering
-  unstable_setRequestLocale(locale);
-  
   const t = await getTranslations('About');
 
   return (

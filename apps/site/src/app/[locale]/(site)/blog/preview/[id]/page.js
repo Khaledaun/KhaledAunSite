@@ -1,9 +1,10 @@
-import { unstable_setRequestLocale } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic'; // Always fetch fresh data for preview
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params: { id } }) {
   try {
@@ -50,8 +51,6 @@ async function getPostById(id) {
 }
 
 export default async function PreviewPostPage({ params: { id, locale } }) {
-  unstable_setRequestLocale(locale);
-  
   const post = await getPostById(id);
 
   if (!post) {

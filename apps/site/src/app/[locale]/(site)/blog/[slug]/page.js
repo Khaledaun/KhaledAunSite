@@ -1,8 +1,11 @@
-import { unstable_setRequestLocale } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import { notFound } from 'next/navigation';
 import { draftMode } from 'next/headers';
 import Link from 'next/link';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params: { slug } }) {
   try {
@@ -56,7 +59,6 @@ async function getPost(slug, showDrafts = false) {
 }
 
 export default async function BlogPostPage({ params: { slug, locale }, searchParams }) {
-  unstable_setRequestLocale(locale);
   const { isEnabled: isDraftMode } = draftMode();
   const isPreview = searchParams?.preview === '1';
   
@@ -143,26 +145,4 @@ export default async function BlogPostPage({ params: { slug, locale }, searchPar
     </main>
   );
 }
-
-// Generate static params for published posts (ISR)
-export async function generateStaticParams() {
-  try {
-    // If database is not available (e.g., during build without DATABASE_URL), return empty array
-    const posts = await prisma.post.findMany({
-      where: { status: 'PUBLISHED' },
-      select: { slug: true }
-    });
-
-    return posts.map((post) => ({
-      slug: post.slug,
-    }));
-  } catch (error) {
-    console.warn('Unable to generate static params for blog posts (database not available):', error.message);
-    // Return empty array - pages will be generated on-demand (SSR)
-    return [];
-  }
-}
-
-// Enable ISR with revalidation
-export const revalidate = 60; // Revalidate every 60 seconds
 

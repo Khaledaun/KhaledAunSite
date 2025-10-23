@@ -1,5 +1,4 @@
 import { getTranslations } from 'next-intl/server';
-import { unstable_setRequestLocale } from 'next-intl/server';
 import Header from '@/components/site/Header';
 import Footer from '@/components/site/Footer';
 import ConsultationModal from '@/components/common/ConsultationModal';
@@ -9,9 +8,6 @@ import Link from 'next/link';
 import ConsultationButton from '@/components/common/ConsultationButton';
 
 export default async function Ventures({params: {locale}}) {
-  // Enable static rendering
-  unstable_setRequestLocale(locale);
-  
   const t = await getTranslations('Ventures');
   const nav = await getTranslations('Navigation');
 

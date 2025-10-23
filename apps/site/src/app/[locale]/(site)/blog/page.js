@@ -1,7 +1,10 @@
-import { unstable_setRequestLocale } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 import { draftMode } from 'next/headers';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata = {
   title: 'Blog',
@@ -29,7 +32,6 @@ async function getPosts(showDrafts = false) {
 }
 
 export default async function BlogPage({ params: { locale } }) {
-  unstable_setRequestLocale(locale);
   const { isEnabled: isDraftMode } = draftMode();
   
   const posts = await getPosts(isDraftMode);

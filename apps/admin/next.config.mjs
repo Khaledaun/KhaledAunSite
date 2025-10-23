@@ -5,13 +5,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Force cache invalidation for Prisma client regeneration
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Experimental features for better Prisma support in monorepo
   experimental: {
     outputFileTracingRoot: path.join(__dirname, '../../'),
     outputFileTracingIncludes: {
-      '/api/**/*': ['../../node_modules/.prisma/**/*'],
+      '/api/**/*': ['./node_modules/.prisma/**/*', './node_modules/@prisma/**/*'],
     },
   },
   

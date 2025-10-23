@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+// Force rebuild - Arabic translations should work
 const withNextIntl = require('next-intl/plugin')(
   './src/i18n/request.js'
 );

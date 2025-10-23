@@ -17,6 +17,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   ChevronRightIcon,
+  RectangleStackIcon,
+  QueueListIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -66,19 +68,25 @@ const navigation: NavItem[] = [
     ]
   },
   { 
-    name: 'Library', 
-    href: '/media', 
-    icon: PhotoIcon 
-  },
-  { 
     name: 'AI Assistant', 
     href: '/ai', 
     icon: SparklesIcon,
     children: [
+      { name: 'Topic Queue', href: '/topics' },
       { name: 'Content Generation', href: '/ai' },
       { name: 'Templates', href: '/ai/templates' },
       { name: 'Configuration', href: '/ai/config' },
     ]
+  },
+  { 
+    name: 'Content Library', 
+    href: '/content/library', 
+    icon: RectangleStackIcon 
+  },
+  { 
+    name: 'Media Library', 
+    href: '/media', 
+    icon: PhotoIcon 
   },
   { 
     name: 'Leads & Collaborations', 

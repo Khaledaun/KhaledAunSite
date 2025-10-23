@@ -54,8 +54,15 @@ export const metadata = {
 export default async function LocaleLayout({children, params: {locale}}) {
   if (!locales.includes(locale)) notFound();
 
-  // Pass locale to getMessages for static generation
-  const messages = await getMessages({locale});
+  // Import messages directly to ensure they're loaded
+  let messages;
+  try {
+    messages = (await import(`../../messages/${locale}.json`)).default;
+  } catch (error) {
+    console.error(`Failed to load messages for locale ${locale}:`, error);
+    // Fallback to English if Arabic fails
+    messages = (await import(`../../messages/en.json`)).default;
+  }
 
   return (
     <html 

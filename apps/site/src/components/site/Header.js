@@ -86,7 +86,7 @@ export default function Header() {
                 title={t('followInstagram')}
                 data-testid="instagram-badge"
               >
-                <Instagram className="w-5 h-5 text-brand-navy stroke-current" strokeWidth={2} />
+                <Instagram className="w-5 h-5" style={{ stroke: '#0D1B2A', strokeWidth: 2.5, fill: 'none' }} />
               </a>
             )}
 
@@ -101,7 +101,7 @@ export default function Header() {
                 title={t('followLinkedIn')}
                 data-testid="linkedin-badge"
               >
-                <Linkedin className="w-5 h-5 text-brand-navy stroke-current" strokeWidth={2} />
+                <Linkedin className="w-5 h-5" style={{ stroke: '#0D1B2A', strokeWidth: 2.5, fill: 'none' }} />
               </a>
             )}
 

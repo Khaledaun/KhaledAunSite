@@ -70,7 +70,7 @@ export default async function LocaleLayout({children, params: {locale}}) {
         >
           Skip to main content
         </a>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={messages} locale={locale}>
           <ModalProvider>
             {children}
           </ModalProvider>

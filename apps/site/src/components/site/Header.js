@@ -81,12 +81,12 @@ export default function Header() {
                 href={process.env.NEXT_PUBLIC_INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-navy hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
+                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
                 aria-label={t('followInstagram')}
                 title={t('followInstagram')}
                 data-testid="instagram-badge"
               >
-                <Instagram className="w-5 h-5 fill-current" />
+                <Instagram className="w-5 h-5 text-brand-navy stroke-current" strokeWidth={2} />
               </a>
             )}
 
@@ -96,12 +96,12 @@ export default function Header() {
                 href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-navy hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
+                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
                 aria-label={t('followLinkedIn')}
                 title={t('followLinkedIn')}
                 data-testid="linkedin-badge"
               >
-                <Linkedin className="w-5 h-5 fill-current" />
+                <Linkedin className="w-5 h-5 text-brand-navy stroke-current" strokeWidth={2} />
               </a>
             )}
 

@@ -19,6 +19,7 @@ module.exports = {
     fontFamily: {
       poppins: ['var(--font-heading)', 'sans-serif'],
       body: ['var(--font-body)', 'sans-serif'],
+      cairo: ['var(--font-cairo)', 'sans-serif'],
     },
     container: {
       center: true,

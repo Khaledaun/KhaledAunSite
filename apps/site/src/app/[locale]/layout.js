@@ -1,7 +1,7 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Inter, Poppins } from 'next/font/google';
+import { Inter, Poppins, Cairo } from 'next/font/google';
 import { ModalProvider } from '../../context/ModalContext';
 import { locales } from '../../i18n/config';
 import '../globals.css';
@@ -17,6 +17,13 @@ const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-heading',
+  display: 'swap',
+});
+
+// Cairo font for Arabic
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  variable: '--font-cairo',
   display: 'swap',
 });
 
@@ -54,9 +61,9 @@ export default async function LocaleLayout({children, params: {locale}}) {
     <html 
       dir={locale === 'ar' ? 'rtl' : 'ltr'} 
       lang={locale}
-      className={`${inter.variable} ${poppins.variable}`}
+      className={`${inter.variable} ${poppins.variable} ${cairo.variable}`}
     >
-      <body className="font-poppins text-base text-black dark:text-white dark:bg-slate-900">
+      <body className={`${locale === 'ar' ? 'font-cairo' : 'font-poppins'} text-base text-black dark:text-white dark:bg-slate-900`}>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-brand-gold text-brand-navy px-4 py-2 rounded z-50"

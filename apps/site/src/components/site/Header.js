@@ -75,31 +75,33 @@ export default function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Social Badges */}
+            {/* Instagram - Always show if env is set */}
             {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
               <a
                 href={process.env.NEXT_PUBLIC_INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center text-white hover:text-brand-gold hover:bg-brand-navy/80 transition-all duration-200"
+                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-navy hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
                 aria-label={t('followInstagram')}
                 title={t('followInstagram')}
                 data-testid="instagram-badge"
               >
-                <Instagram className="w-5 h-5" />
+                <Instagram className="w-5 h-5 fill-current" />
               </a>
             )}
 
+            {/* LinkedIn - Always show if env is set */}
             {process.env.NEXT_PUBLIC_LINKEDIN_URL && (
               <a
                 href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center text-white hover:text-brand-gold hover:bg-brand-navy/80 transition-all duration-200"
+                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center text-brand-navy hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
                 aria-label={t('followLinkedIn')}
                 title={t('followLinkedIn')}
                 data-testid="linkedin-badge"
               >
-                <Linkedin className="w-5 h-5" />
+                <Linkedin className="w-5 h-5 fill-current" />
               </a>
             )}
 

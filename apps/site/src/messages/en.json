@@ -187,5 +187,11 @@
     "businessAdvisory": "Business Advisory",
     "mentorship": "Legal Mentorship",
     "allRightsReserved": "All rights reserved."
+  },
+  "blog": {
+    "title": "Latest Insights",
+    "readMore": "Read More",
+    "viewAll": "View All Posts",
+    "noPostsYet": "No posts available yet"
   }
 }

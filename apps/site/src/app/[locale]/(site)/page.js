@@ -52,13 +52,13 @@ export default function Home({params: {locale}}) {
       <Navbar locale={locale} />
       <main id="main-content">
         <HeroDennis locale={locale} />
-        <AboutDennis />
-        <ServicesDennis />
-        <ExperienceTimelineDennis />
-        <LinkedInSection />
+        <AboutDennis locale={locale} />
+        <ServicesDennis locale={locale} />
+        <ExperienceTimelineDennis locale={locale} />
+        <LinkedInSection locale={locale} />
         <BlogPreview locale={locale} />
-        <VenturesStrip />
-        <ContactDennis />
+        <VenturesStrip locale={locale} />
+        <ContactDennis locale={locale} />
       </main>
       <FooterDennis locale={locale} />
       <Switcher />

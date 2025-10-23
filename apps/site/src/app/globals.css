@@ -11,6 +11,20 @@
     font-family: var(--font-body);
   }
   
+  /* Arabic font override */
+  html[lang="ar"] {
+    font-family: var(--font-cairo);
+  }
+  
+  html[lang="ar"] h1, 
+  html[lang="ar"] h2, 
+  html[lang="ar"] h3, 
+  html[lang="ar"] h4, 
+  html[lang="ar"] h5, 
+  html[lang="ar"] h6 {
+    font-family: var(--font-cairo);
+  }
+  
   body {
     @apply bg-white dark:bg-slate-900 text-black dark:text-white;
   }

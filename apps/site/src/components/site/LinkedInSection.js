@@ -55,16 +55,6 @@ export default function LinkedInSection() {
     }
   ];
 
-  // Hide entire section while loading or if no content
-  if (isLoading) {
-    return null;
-  }
-  
-  // Don't render if no posts configured
-  if (posts.length === 0) {
-    return null;
-  }
-
   return (
     <section id="linkedin" data-testid="linkedin" className="section-padding bg-brand-ink">
       <div className="container">
@@ -80,6 +70,15 @@ export default function LinkedInSection() {
 
         {/* Curated LinkedIn Posts: 1 Pinned + 2 Latest */}
         <div>
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-brand-sand/60">Loading LinkedIn posts...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-brand-sand/60">No LinkedIn posts configured yet.</p>
+            </div>
+          ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {posts.map((post, index) => (
               <div
@@ -131,6 +130,7 @@ export default function LinkedInSection() {
               </div>
             ))}
           </div>
+          )}
 
           {/* Follow LinkedIn CTA */}
           <div className="text-center">

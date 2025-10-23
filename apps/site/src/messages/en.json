@@ -192,8 +192,8 @@
     "title": "Latest Insights",
     "latestInsights": "Latest Insights",
     "latestInsightsDesc": "Stay informed with my latest articles on international law, business strategy, and legal innovation.",
+    "noPostsYet": "No articles published yet. Check back soon!",
     "readMore": "Read More",
-    "viewAll": "View All Posts",
-    "noPostsYet": "No posts available yet"
+    "viewAll": "View All Posts"
   }
 }

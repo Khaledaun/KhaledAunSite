@@ -23,11 +23,6 @@ export default function BlogPreview({ locale }) {
       .finally(() => setLoading(false));
   }, [locale]);
 
-  // Don't render if no posts
-  if (!loading && posts.length === 0) {
-    return null;
-  }
-
   return (
     <section className="section-padding bg-brand-sand">
       <div className="container">
@@ -44,6 +39,10 @@ export default function BlogPreview({ locale }) {
         {loading ? (
           <div className="text-center py-12">
             <p className="text-brand-ink/60">Loading articles...</p>
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-brand-ink/60">{t('noPostsYet')}</p>
           </div>
         ) : (
           <>

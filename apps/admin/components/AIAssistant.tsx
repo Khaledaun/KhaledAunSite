@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 interface AIAssistantProps {
-  onInsertContent: (content: string) => void;
+  onInsertContent?: (content: string) => void;
   currentContent?: string;
 }
 
@@ -53,7 +53,7 @@ export function AIAssistant({ onInsertContent, currentContent }: AIAssistantProp
       const data = await response.json();
 
       if (response.ok) {
-        onInsertContent(data.output);
+        onInsertContent?.(data.output);
         setTopic('');
       } else {
         setError(data.error || 'Generation failed');
@@ -88,7 +88,7 @@ export function AIAssistant({ onInsertContent, currentContent }: AIAssistantProp
       const data = await response.json();
 
       if (response.ok) {
-        onInsertContent(data.translated);
+        onInsertContent?.(data.translated);
       } else {
         setError(data.error || 'Translation failed');
       }
@@ -118,7 +118,7 @@ export function AIAssistant({ onInsertContent, currentContent }: AIAssistantProp
       const data = await response.json();
 
       if (response.ok) {
-        onInsertContent(data.extracted.content);
+        onInsertContent?.(data.extracted.content);
         setUrl('');
       } else {
         setError(data.error || 'Extraction failed');
@@ -153,7 +153,7 @@ export function AIAssistant({ onInsertContent, currentContent }: AIAssistantProp
       const data = await response.json();
 
       if (response.ok) {
-        onInsertContent(data.output);
+        onInsertContent?.(data.output);
         setInstructions('');
       } else {
         setError(data.error || 'Improvement failed');

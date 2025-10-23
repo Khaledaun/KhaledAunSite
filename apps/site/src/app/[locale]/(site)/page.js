@@ -56,8 +56,8 @@ export default function Home({params: {locale}}) {
         <AboutDennis />
         <ServicesDennis />
         <ExperienceTimelineDennis />
-        <BlogPreview locale={locale} />
         <LinkedInSection />
+        <BlogPreview locale={locale} />
         <VenturesStrip />
         <ContactDennis />
       </main>

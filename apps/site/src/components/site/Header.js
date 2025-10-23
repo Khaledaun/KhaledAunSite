@@ -74,36 +74,32 @@ export default function Header() {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Social Badges - Env vars must be set before build */}
+            {/* Social Badges - Always render, hardcoded URLs for now */}
             {/* Instagram */}
-            {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
-              <a
-                href={process.env.NEXT_PUBLIC_INSTAGRAM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
-                aria-label={t('followInstagram')}
-                title={t('followInstagram')}
-                data-testid="instagram-badge"
-              >
-                <Instagram className="w-5 h-5" style={{ stroke: '#0D1B2A', strokeWidth: 2.5, fill: 'none' }} />
-              </a>
-            )}
+            <a
+              href={process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/khaledaun"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
+              aria-label={t('followInstagram')}
+              title={t('followInstagram')}
+              data-testid="instagram-badge"
+            >
+              <Instagram className="w-5 h-5" style={{ stroke: '#0D1B2A', strokeWidth: 2.5, fill: 'none' }} />
+            </a>
 
-            {/* LinkedIn - Always show if env is set */}
-            {process.env.NEXT_PUBLIC_LINKEDIN_URL && (
-              <a
-                href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
-                aria-label={t('followLinkedIn')}
-                title={t('followLinkedIn')}
-                data-testid="linkedin-badge"
-              >
-                <Linkedin className="w-5 h-5" style={{ stroke: '#0D1B2A', strokeWidth: 2.5, fill: 'none' }} />
-              </a>
-            )}
+            {/* LinkedIn */}
+            <a
+              href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://linkedin.com/in/khaledaun"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 bg-brand-gold rounded-full flex items-center justify-center hover:bg-brand-gold/90 transition-all duration-200 shadow-md"
+              aria-label={t('followLinkedIn')}
+              title={t('followLinkedIn')}
+              data-testid="linkedin-badge"
+            >
+              <Linkedin className="w-5 h-5" style={{ stroke: '#0D1B2A', strokeWidth: 2.5, fill: 'none' }} />
+            </a>
 
             {/* Language Switch */}
             <button
@@ -158,31 +154,27 @@ export default function Header() {
               
               {/* Mobile Social Badges */}
               <div className="flex items-center space-x-4 px-3 py-2">
-                {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
-                  <a
-                    href={process.env.NEXT_PUBLIC_INSTAGRAM_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center text-white hover:text-brand-gold hover:bg-brand-navy/80 transition-all duration-200"
-                    aria-label={t('followInstagram')}
-                    title={t('followInstagram')}
-                  >
-                    <Instagram className="w-5 h-5" />
-                  </a>
-                )}
+                <a
+                  href={process.env.NEXT_PUBLIC_INSTAGRAM_URL || "https://instagram.com/khaledaun"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center text-white hover:text-brand-gold hover:bg-brand-navy/80 transition-all duration-200"
+                  aria-label={t('followInstagram')}
+                  title={t('followInstagram')}
+                >
+                  <Instagram className="w-5 h-5" style={{ stroke: 'currentColor', strokeWidth: 2, fill: 'none' }} />
+                </a>
 
-                {process.env.NEXT_PUBLIC_LINKEDIN_URL && (
-                  <a
-                    href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center text-white hover:text-brand-gold hover:bg-brand-navy/80 transition-all duration-200"
-                    aria-label={t('followLinkedIn')}
-                    title={t('followLinkedIn')}
-                  >
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                )}
+                <a
+                  href={process.env.NEXT_PUBLIC_LINKEDIN_URL || "https://linkedin.com/in/khaledaun"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-brand-navy rounded-full flex items-center justify-center text-white hover:text-brand-gold hover:bg-brand-navy/80 transition-all duration-200"
+                  aria-label={t('followLinkedIn')}
+                  title={t('followLinkedIn')}
+                >
+                  <Linkedin className="w-5 h-5" style={{ stroke: 'currentColor', strokeWidth: 2, fill: 'none' }} />
+                </a>
               </div>
 
               {/* Mobile Language Switch */}

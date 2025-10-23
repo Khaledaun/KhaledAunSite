@@ -37,7 +37,7 @@ const nextConfig = {
       '@khaledaun/schemas': path.resolve(__dirname, '../../packages/schemas'),
       '@khaledaun/utils$': path.resolve(__dirname, '../../packages/utils/index.ts'),
       '@khaledaun/utils': path.resolve(__dirname, '../../packages/utils'),
-      '@prisma/client': path.resolve(__dirname, '../../node_modules/@prisma/client'),
+      '@prisma/client': path.resolve(__dirname, './node_modules/@prisma/client'),
     };
     
     // Ensure symlinks are resolved

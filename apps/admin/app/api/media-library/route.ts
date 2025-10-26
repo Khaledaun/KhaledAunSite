@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
-import { requirePermission } from '@khaledaun/auth';
+import { getSupabaseClient, checkAuth } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -8,9 +7,9 @@ export const revalidate = 0;
 // GET /api/media-library - List all media with filters
 export async function GET(request: NextRequest) {
   try {
-    const permission = await requirePermission(request, 'manage_content');
-    if (!permission.authorized) {
-      return NextResponse.json({ error: permission.message }, { status: 403 });
+    const auth = await checkAuth('manage_content');
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     const { searchParams } = new URL(request.url);
@@ -69,9 +68,9 @@ export async function GET(request: NextRequest) {
 // POST /api/media-library - Create media record (after upload to Supabase Storage)
 export async function POST(request: NextRequest) {
   try {
-    const permission = await requirePermission(request, 'manage_content');
-    if (!permission.authorized) {
-      return NextResponse.json({ error: permission.message }, { status: 403 });
+    const auth = await checkAuth('manage_content');
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     const body = await request.json();

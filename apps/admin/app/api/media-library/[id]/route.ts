@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient } from '@/lib/supabase';
-import { requirePermission } from '@khaledaun/auth';
+import { getSupabaseClient, checkAuth } from '@/lib/supabase';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -11,9 +10,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const permission = await requirePermission(request, 'manage_content');
-    if (!permission.authorized) {
-      return NextResponse.json({ error: permission.message }, { status: 403 });
+    const auth = await checkAuth('manage_content');
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     const supabase = getSupabaseClient();
@@ -46,9 +45,9 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const permission = await requirePermission(request, 'manage_content');
-    if (!permission.authorized) {
-      return NextResponse.json({ error: permission.message }, { status: 403 });
+    const auth = await checkAuth('manage_content');
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     const body = await request.json();
@@ -85,9 +84,9 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const permission = await requirePermission(request, 'manage_content');
-    if (!permission.authorized) {
-      return NextResponse.json({ error: permission.message }, { status: 403 });
+    const auth = await checkAuth('manage_content');
+    if (!auth.authorized) {
+      return auth.response;
     }
 
     const supabase = getSupabaseClient();

@@ -16,23 +16,45 @@ let failed = 0;
 function checkUrl(url, description) {
   return new Promise((resolve) => {
     https.get(url, (res) => {
-      const success = res.statusCode === 200 || res.statusCode === 302 || res.statusCode === 307;
-      tests.push({
-        description,
-        url,
-        status: res.statusCode,
-        success
+      let data = '';
+      
+      // Collect response data
+      res.on('data', (chunk) => {
+        data += chunk;
       });
       
-      if (success) {
-        passed++;
-        console.log(`✅ PASS: ${description} (${res.statusCode})`);
-      } else {
-        failed++;
-        console.log(`❌ FAIL: ${description} (${res.statusCode})`);
-      }
-      
-      resolve();
+      res.on('end', () => {
+        const success = res.statusCode === 200 || res.statusCode === 302 || res.statusCode === 307;
+        const testResult = {
+          description,
+          url,
+          status: res.statusCode,
+          success
+        };
+        
+        // For 500 errors, try to parse the error message
+        if (res.statusCode === 500 && data) {
+          try {
+            const jsonData = JSON.parse(data);
+            testResult.errorMessage = jsonData.error || jsonData.message || 'Unknown error';
+          } catch (e) {
+            testResult.errorMessage = data.substring(0, 100);
+          }
+        }
+        
+        tests.push(testResult);
+        
+        if (success) {
+          passed++;
+          console.log(`✅ PASS: ${description} (${res.statusCode})`);
+        } else {
+          failed++;
+          const errorMsg = testResult.errorMessage ? ` - ${testResult.errorMessage}` : '';
+          console.log(`❌ FAIL: ${description} (${res.statusCode})${errorMsg}`);
+        }
+        
+        resolve();
+      });
     }).on('error', (err) => {
       tests.push({
         description,

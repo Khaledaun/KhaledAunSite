@@ -2,12 +2,29 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 import { getSessionUser, requirePermission, Permission } from '@khaledaun/auth';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// Server-side Supabase client for API routes
+// Server-side Supabase client for API routes (uses service role key for admin operations)
 export function getSupabaseClient() {
-  return createClient(supabaseUrl, supabaseAnonKey);
+  if (!supabaseUrl) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
+  }
+  
+  // Use service role key for server-side operations to bypass RLS
+  const key = supabaseServiceKey || supabaseAnonKey;
+  
+  if (!key) {
+    throw new Error('Missing Supabase key (SUPABASE_SERVICE_ROLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY)');
+  }
+  
+  return createClient(supabaseUrl, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  });
 }
 
 /**

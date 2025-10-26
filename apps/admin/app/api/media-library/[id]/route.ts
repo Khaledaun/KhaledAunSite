@@ -89,11 +89,15 @@ export async function DELETE(
     }
 
     // Delete from storage if it's a Supabase storage URL
-    if (media.publicUrl.includes('supabase')) {
+    if (media.url.includes('supabase')) {
       const supabase = getSupabaseClient();
+      // Extract the file path from the URL
+      const urlParts = new URL(media.url);
+      const path = urlParts.pathname.split('/').slice(3).join('/'); // Extract path after bucket name
+      
       const { error: storageError } = await supabase.storage
         .from('media')
-        .remove([media.storagePath]);
+        .remove([path]);
 
       if (storageError) {
         console.error('Error deleting from storage:', storageError);

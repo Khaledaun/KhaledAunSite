@@ -74,16 +74,26 @@ export async function POST(request: NextRequest) {
       .from('media')
       .getPublicUrl(filePath);
 
+    // Determine media type
+    let mediaType = 'document';
+    if (file.type.startsWith('image/')) {
+      mediaType = 'image';
+    } else if (file.type.startsWith('video/')) {
+      mediaType = 'video';
+    } else if (file.type.startsWith('audio/')) {
+      mediaType = 'audio';
+    }
+
     // Create media record in database using Prisma
     try {
       const media = await prisma.mediaLibrary.create({
         data: {
           filename: fileName,
           originalFilename: file.name,
-          storagePath: filePath,
-          publicUrl: urlData.publicUrl,
+          url: urlData.publicUrl,
+          type: mediaType,
+          sizeBytes: file.size,
           mimeType: file.type,
-          fileSize: file.size,
           altText,
           caption,
           tags: tags ? tags.split(',').map(t => t.trim()) : [],

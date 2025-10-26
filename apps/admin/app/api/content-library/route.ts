@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const where: any = {};
     
     if (contentType) {
-      where.contentType = contentType;
+      where.type = contentType;
     }
 
     if (status) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
-        { seoKeywords: { has: search } },
+        { keywords: { has: search } },
       ];
     }
 
@@ -80,20 +80,20 @@ export async function POST(request: NextRequest) {
       topicId,
       title,
       content,
-      contentType = 'blog_post',
-      seoTitle,
-      seoDescription,
-      seoKeywords = [],
+      type = 'blog',
+      format,
+      summary,
+      excerpt,
+      keywords = [],
+      tags = [],
+      category,
       featuredImageId,
       scheduledFor,
-      aiGenerated = false,
-      aiModel,
-      aiPrompt,
     } = body;
 
-    if (!title || !content) {
+    if (!title || !content || !type) {
       return NextResponse.json(
-        { error: 'Title and content are required' },
+        { error: 'Title, content, and type are required' },
         { status: 400 }
       );
     }
@@ -107,19 +107,19 @@ export async function POST(request: NextRequest) {
         topicId,
         title,
         content,
-        contentType,
+        type,
+        format,
+        summary,
+        excerpt,
+        keywords,
+        tags,
+        category,
         status: 'draft',
         authorId: auth.user?.id,
         wordCount,
         readingTimeMinutes,
-        seoTitle,
-        seoDescription,
-        seoKeywords,
         featuredImageId,
         scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
-        aiGenerated,
-        aiModel,
-        aiPrompt,
       },
     });
 

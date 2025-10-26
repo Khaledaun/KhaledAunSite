@@ -72,10 +72,11 @@ export async function POST(request: NextRequest) {
     const {
       filename,
       originalFilename,
-      storagePath,
-      publicUrl,
+      url,
+      thumbnailUrl,
+      type,
+      sizeBytes,
       mimeType,
-      fileSize,
       width,
       height,
       durationSeconds,
@@ -85,9 +86,9 @@ export async function POST(request: NextRequest) {
       folder = 'uncategorized',
     } = body;
 
-    if (!filename || !storagePath || !publicUrl || !mimeType) {
+    if (!filename || !url || !type) {
       return NextResponse.json(
-        { error: 'Filename, storagePath, publicUrl, and mimeType are required' },
+        { error: 'Filename, url, and type are required' },
         { status: 400 }
       );
     }
@@ -96,10 +97,11 @@ export async function POST(request: NextRequest) {
       data: {
         filename,
         originalFilename: originalFilename || filename,
-        storagePath,
-        publicUrl,
+        url,
+        thumbnailUrl,
+        type,
+        sizeBytes,
         mimeType,
-        fileSize: fileSize || 0,
         width,
         height,
         durationSeconds,

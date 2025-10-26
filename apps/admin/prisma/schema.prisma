@@ -640,7 +640,7 @@ model Topic {
   title           String
   description     String?   @db.Text
   sourceUrl       String?   @map("source_url")
-  sourceType      String    @default("manual") @map("source_type")
+  sourceType      String?   @map("source_type")
   keywords        String[]  @default([])
   priority        Int       @default(0)
   status          String    @default("pending")
@@ -648,11 +648,11 @@ model Topic {
   lockedAt        DateTime? @map("locked_at")
   lockedBy        String?   @map("locked_by")
   userNotes       String?   @db.Text @map("user_notes")
-  aiSuggestions   Json?     @map("ai_suggestions")
-  metadata        Json?
+  relevanceScore  Float?    @map("relevance_score")
+  scheduledFor    DateTime? @map("scheduled_for")
+  metadata        Json?     @db.Json
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
-  processedAt     DateTime? @map("processed_at")
   
   // Relations
   content         ContentLibrary[]
@@ -666,67 +666,69 @@ model Topic {
 model ContentLibrary {
   id                    String    @id @default(uuid())
   topicId               String?   @map("topic_id")
+  type                  String
+  format                String?
   title                 String
   content               String    @db.Text
-  contentType           String    @default("blog_post") @map("content_type")
-  status                String    @default("draft")
-  authorId              String?   @map("author_id")
-  lastEditedBy          String?   @map("last_edited_by")
-  lastEditedAt          DateTime? @map("last_edited_at")
+  summary               String?   @db.Text
+  excerpt               String?   @db.Text
+  keywords              String[]  @default([])
+  seoScore              Int?      @map("seo_score")
   wordCount             Int?      @map("word_count")
   readingTimeMinutes    Int?      @map("reading_time_minutes")
-  seoTitle              String?   @map("seo_title")
-  seoDescription        String?   @map("seo_description")
-  seoKeywords           String[]  @default([]) @map("seo_keywords")
+  status                String    @default("draft")
+  publishedAt           DateTime? @map("published_at")
+  publishedTo           String[]  @default([]) @map("published_to")
+  linkedinPostId        String?   @map("linkedin_post_id")
+  linkedinUrl           String?   @map("linkedin_url")
+  blogPostId            String?   @map("blog_post_id")
+  blogSlug              String?   @map("blog_slug")
+  mediaIds              String[]  @default([]) @map("media_ids")
   featuredImageId       String?   @map("featured_image_id")
-  scheduledFor          DateTime? @map("scheduled_for")
-  metadata              Json?
-  aiGenerated           Boolean   @default(false) @map("ai_generated")
-  aiModel               String?   @map("ai_model")
-  aiPrompt              String?   @db.Text @map("ai_prompt")
-  humanEdited           Boolean   @default(false) @map("human_edited")
-  qualityScore          Float?    @map("quality_score")
+  tags                  String[]  @default([])
+  category              String?
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
-  publishedAt           DateTime? @map("published_at")
+  lastEditedBy          String?   @map("last_edited_by")
+  lastEditedAt          DateTime? @map("last_edited_at")
+  scheduledFor          DateTime? @map("scheduled_for")
+  authorId              String?   @map("author_id")
+  metadata              Json?     @db.Json
   
   // Relations
   topic                 Topic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
-  media                 MediaLibrary[]
   
   @@index([status])
+  @@index([type])
   @@index([topicId])
-  @@index([authorId])
-  @@index([createdAt])
+  @@index([publishedAt])
   @@map("content_library")
 }
 
 model MediaLibrary {
   id                String    @id @default(uuid())
-  contentId         String?   @map("content_id")
   filename          String
-  originalFilename  String    @map("original_filename")
-  storagePath       String    @map("storage_path")
-  publicUrl         String    @map("public_url")
-  mimeType          String    @map("mime_type")
-  fileSize          Int       @map("file_size")
+  originalFilename  String?   @map("original_filename")
+  url               String
+  thumbnailUrl      String?   @map("thumbnail_url")
+  type              String
+  sizeBytes         Int?      @map("size_bytes")
+  mimeType          String?   @map("mime_type")
   width             Int?
   height            Int?
   durationSeconds   Int?      @map("duration_seconds")
   altText           String?   @map("alt_text")
   caption           String?
   tags              String[]  @default([])
-  folder            String?
-  uploadedBy        String?   @map("uploaded_by")
-  metadata          Json?
+  folder            String?   @default("uncategorized")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
+  uploadedBy        String?   @map("uploaded_by")
+  usedInContent     String[]  @default([]) @map("used_in_content")
+  metadata          Json?     @db.Json
   
-  // Relations
-  content           ContentLibrary? @relation(fields: [contentId], references: [id], onDelete: SetNull)
-  
-  @@index([contentId])
-  @@index([uploadedBy])
+  @@index([type])
+  @@index([folder])
   @@index([createdAt])
   @@map("media_library")
 }

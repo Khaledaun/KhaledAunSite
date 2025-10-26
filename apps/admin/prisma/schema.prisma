@@ -10,7 +10,6 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  relationMode = "prisma"
 }
 
 // Source-of-Truth Models as specified in requirements
@@ -640,20 +639,20 @@ model Topic {
   id              String    @id @default(uuid())
   title           String
   description     String?   @db.Text
-  sourceUrl       String?
-  sourceType      String    @default("manual") // manual, rss, api, scrape
+  sourceUrl       String?   @map("source_url")
+  sourceType      String    @default("manual") @map("source_type")
   keywords        String[]  @default([])
   priority        Int       @default(0)
-  status          String    @default("pending") // pending, processing, completed, failed
+  status          String    @default("pending")
   locked          Boolean   @default(false)
-  lockedAt        DateTime?
-  lockedBy        String?
-  userNotes       String?   @db.Text
-  aiSuggestions   Json?
+  lockedAt        DateTime? @map("locked_at")
+  lockedBy        String?   @map("locked_by")
+  userNotes       String?   @db.Text @map("user_notes")
+  aiSuggestions   Json?     @map("ai_suggestions")
   metadata        Json?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  processedAt     DateTime?
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  processedAt     DateTime? @map("processed_at")
   
   // Relations
   content         ContentLibrary[]
@@ -666,30 +665,30 @@ model Topic {
 
 model ContentLibrary {
   id                    String    @id @default(uuid())
-  topicId               String?
+  topicId               String?   @map("topic_id")
   title                 String
   content               String    @db.Text
-  contentType           String    @default("blog_post") // blog_post, article, social_post, etc.
-  status                String    @default("draft") // draft, review, published, archived
-  authorId              String?
-  lastEditedBy          String?
-  lastEditedAt          DateTime?
-  wordCount             Int?
-  readingTimeMinutes    Int?
-  seoTitle              String?
-  seoDescription        String?
-  seoKeywords           String[]  @default([])
-  featuredImageId       String?
-  scheduledFor          DateTime?
+  contentType           String    @default("blog_post") @map("content_type")
+  status                String    @default("draft")
+  authorId              String?   @map("author_id")
+  lastEditedBy          String?   @map("last_edited_by")
+  lastEditedAt          DateTime? @map("last_edited_at")
+  wordCount             Int?      @map("word_count")
+  readingTimeMinutes    Int?      @map("reading_time_minutes")
+  seoTitle              String?   @map("seo_title")
+  seoDescription        String?   @map("seo_description")
+  seoKeywords           String[]  @default([]) @map("seo_keywords")
+  featuredImageId       String?   @map("featured_image_id")
+  scheduledFor          DateTime? @map("scheduled_for")
   metadata              Json?
-  aiGenerated           Boolean   @default(false)
-  aiModel               String?
-  aiPrompt              String?   @db.Text
-  humanEdited           Boolean   @default(false)
-  qualityScore          Float?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-  publishedAt           DateTime?
+  aiGenerated           Boolean   @default(false) @map("ai_generated")
+  aiModel               String?   @map("ai_model")
+  aiPrompt              String?   @db.Text @map("ai_prompt")
+  humanEdited           Boolean   @default(false) @map("human_edited")
+  qualityScore          Float?    @map("quality_score")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+  publishedAt           DateTime? @map("published_at")
   
   // Relations
   topic                 Topic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
@@ -704,24 +703,24 @@ model ContentLibrary {
 
 model MediaLibrary {
   id                String    @id @default(uuid())
-  contentId         String?
+  contentId         String?   @map("content_id")
   filename          String
-  originalFilename  String
-  storagePath       String
-  publicUrl         String
-  mimeType          String
-  fileSize          Int
+  originalFilename  String    @map("original_filename")
+  storagePath       String    @map("storage_path")
+  publicUrl         String    @map("public_url")
+  mimeType          String    @map("mime_type")
+  fileSize          Int       @map("file_size")
   width             Int?
   height            Int?
-  durationSeconds   Int?
-  altText           String?
+  durationSeconds   Int?      @map("duration_seconds")
+  altText           String?   @map("alt_text")
   caption           String?
   tags              String[]  @default([])
   folder            String?
-  uploadedBy        String?
+  uploadedBy        String?   @map("uploaded_by")
   metadata          Json?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
   
   // Relations
   content           ContentLibrary? @relation(fields: [contentId], references: [id], onDelete: SetNull)

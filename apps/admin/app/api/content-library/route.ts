@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         reading_time_minutes: readingTimeMinutes,
         scheduled_for: scheduledFor,
         status: 'draft',
-        author_id: permission.user?.id,
+        author_id: auth.user?.id,
       })
       .select()
       .single();

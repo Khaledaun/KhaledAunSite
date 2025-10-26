@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
         caption,
         tags,
         folder,
-        uploaded_by: permission.user?.id,
+        uploaded_by: auth.user?.id,
       })
       .select()
       .single();

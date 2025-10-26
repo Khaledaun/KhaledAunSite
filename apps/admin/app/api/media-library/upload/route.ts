@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         caption,
         tags: tags ? tags.split(',').map(t => t.trim()) : [],
         folder,
-        uploaded_by: permission.user?.id,
+        uploaded_by: auth.user?.id,
       })
       .select()
       .single();

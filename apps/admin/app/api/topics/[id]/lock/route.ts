@@ -21,7 +21,7 @@ export async function POST(
       .update({
         locked: true,
         locked_at: new Date().toISOString(),
-        locked_by: permission.user?.id || 'unknown',
+        locked_by: auth.user?.id || 'unknown',
       })
       .eq('id', params.id)
       .select()

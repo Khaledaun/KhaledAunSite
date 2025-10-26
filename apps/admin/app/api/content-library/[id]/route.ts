@@ -59,7 +59,7 @@ export async function PATCH(
       body.reading_time_minutes = Math.ceil(wordCount / 200);
     }
 
-    body.last_edited_by = permission.user?.id;
+    body.last_edited_by = auth.user?.id;
     body.last_edited_at = new Date().toISOString();
 
     const supabase = getSupabaseClient();

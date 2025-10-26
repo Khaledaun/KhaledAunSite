@@ -1,174 +1,118 @@
-# Sprint 1 - Prisma Integration Fix
+# Sprint 1: Prisma Integration Fix
 
-## 🔴 Current Problem
+## Problem
+The Sprint 1 API endpoints were returning 500 errors with "Failed to fetch topics/content/media" messages. The root cause was that the new Sprint 1 API routes were using a direct Supabase client, while the existing working API routes use Prisma ORM.
 
-The Sprint 1 API endpoints are returning `500` errors with the message:
-```
-permission denied for schema public
-```
+## Solution
+Integrated the Sprint 1 database tables (`topics`, `content_library`, `media_library`) into the Prisma schema and updated all API routes to use Prisma for database operations.
 
-**Root Cause**: The Sprint 1 tables were created directly in Supabase, but the admin app uses **Prisma** for all database access, not direct Supabase queries. The Supabase client connection is failing with `401 Unauthorized`.
+## Changes Made
 
-## ✅ Solution: Use Prisma Instead of Supabase Client
+### 1. Prisma Schema Updates (`apps/admin/prisma/schema.prisma`)
+Added three new models:
 
-All existing API routes in the admin app use Prisma (see `/api/admin/posts/route.ts` as an example). We need to do the same for Sprint 1.
+- **Topic**: Content topic queue management
+  - Fields: title, description, sourceUrl, sourceType, keywords, priority, status, locked, lockedAt, lockedBy, userNotes, aiSuggestions, metadata
+  - Relations: One-to-many with ContentLibrary
 
-### Step 1: Add Models to Prisma Schema ✅
+- **ContentLibrary**: Content storage and management
+  - Fields: title, content, contentType, status, authorId, lastEditedBy, wordCount, readingTimeMinutes, seoTitle, seoDescription, seoKeywords, featuredImageId, scheduledFor, aiGenerated, aiModel, aiPrompt, humanEdited, qualityScore
+  - Relations: Many-to-one with Topic, One-to-many with MediaLibrary
 
-I've already added the Sprint 1 models to `apps/admin/prisma/schema.prisma`:
-- `Topic` (maps to `topics` table)
-- `ContentLibrary` (maps to `content_library` table)
-- `MediaLibrary` (maps to `media_library` table)
+- **MediaLibrary**: Media asset management
+  - Fields: filename, originalFilename, storagePath, publicUrl, mimeType, fileSize, width, height, durationSeconds, altText, caption, tags, folder, uploadedBy, metadata
+  - Relations: Many-to-one with ContentLibrary
 
-### Step 2: Generate Prisma Client
+### 2. API Route Updates
+Updated all Sprint 1 API routes to use Prisma:
 
-Run this command to generate the Prisma client with the new models:
+#### Topics API
+- `apps/admin/app/api/topics/route.ts` - List and create topics
+- `apps/admin/app/api/topics/[id]/route.ts` - Get, update, delete single topic
+- `apps/admin/app/api/topics/[id]/lock/route.ts` - Lock/unlock topic
 
-```bash
-cd apps/admin
-npx prisma generate
-```
+#### Content Library API
+- `apps/admin/app/api/content-library/route.ts` - List and create content
+- `apps/admin/app/api/content-library/[id]/route.ts` - Get, update, delete content
 
-### Step 3: Update API Routes to Use Prisma
+#### Media Library API
+- `apps/admin/app/api/media-library/route.ts` - List and create media records
+- `apps/admin/app/api/media-library/[id]/route.ts` - Get, update, delete media
+- `apps/admin/app/api/media-library/upload/route.ts` - Upload files to Supabase Storage and create records
 
-I've started updating the routes. You need to:
+### 3. Key Changes in API Routes
 
-1. Replace all Supabase queries with Prisma queries
-2. Use `prisma.topic.findMany()` instead of `supabase.from('topics').select()`
-3. Follow the pattern used in `/api/admin/posts/route.ts`
-
-### Example: Topics GET Route
-
-**Before (Supabase - NOT WORKING):**
+**Before:**
 ```typescript
+import { getSupabaseClient } from '@/lib/supabase';
+
 const supabase = getSupabaseClient();
-const { data: topics, error } = await supabase
+const { data, error } = await supabase
   .from('topics')
-  .select('*')
-  .order('created_at', { ascending: false });
+  .select('*');
 ```
 
-**After (Prisma - WORKING):**
+**After:**
 ```typescript
-const topics = await prisma.topic.findMany({
-  orderBy: { createdAt: 'desc' }
-});
+import { prisma } from '@khaledaun/db';
+
+const topics = await prisma.topic.findMany();
 ```
 
-## 📋 Files That Need Updating
+### 4. Benefits of Prisma Integration
 
-All Sprint 1 API routes need to be converted from Supabase to Prisma:
+1. **Consistency**: All API routes now use the same data access pattern
+2. **Type Safety**: Prisma provides full TypeScript types for all models
+3. **Better Error Handling**: Prisma errors are more descriptive and easier to debug
+4. **Query Building**: Prisma's query builder is more intuitive than raw SQL
+5. **Migrations**: Prisma migrations can track schema changes over time
+6. **Relations**: Prisma handles relations automatically with `include` and `select`
 
-1. ✅ `apps/admin/app/api/topics/route.ts` - Started
-2. ⏳ `apps/admin/app/api/topics/[id]/route.ts` - TODO
-3. ⏳ `apps/admin/app/api/topics/[id]/lock/route.ts` - TODO
-4. ⏳ `apps/admin/app/api/content-library/route.ts` - TODO
-5. ⏳ `apps/admin/app/api/content-library/[id]/route.ts` - TODO
-6. ⏳ `apps/admin/app/api/media-library/route.ts` - TODO
-7. ⏳ `apps/admin/app/api/media-library/[id]/route.ts` - TODO
-8. ⏳ `apps/admin/app/api/media-library/upload/route.ts` - TODO
+### 5. Media Upload Flow
+The media upload endpoint maintains Supabase Storage integration:
+1. Validate file (type, size)
+2. Upload to Supabase Storage bucket
+3. Get public URL
+4. Create database record using Prisma
+5. On error, clean up uploaded file
 
-## 🚀 Quick Fix Commands
+## Testing
+After deployment, test the following:
 
-```bash
-# 1. Navigate to admin app
-cd apps/admin
+1. **Topics API**
+   - GET `/api/topics` - List all topics
+   - POST `/api/topics` - Create a new topic
+   - GET `/api/topics/[id]` - Get single topic
+   - PATCH `/api/topics/[id]` - Update topic
+   - DELETE `/api/topics/[id]` - Delete topic
+   - POST `/api/topics/[id]/lock` - Lock topic
+   - DELETE `/api/topics/[id]/lock` - Unlock topic
 
-# 2. Generate Prisma client
-npx prisma generate
+2. **Content Library API**
+   - GET `/api/content-library` - List all content
+   - POST `/api/content-library` - Create new content
+   - GET `/api/content-library/[id]` - Get single content
+   - PATCH `/api/content-library/[id]` - Update content
+   - DELETE `/api/content-library/[id]` - Delete content
 
-# 3. Test locally
-npm run dev
+3. **Media Library API**
+   - GET `/api/media-library` - List all media
+   - POST `/api/media-library` - Create media record
+   - GET `/api/media-library/[id]` - Get single media
+   - PATCH `/api/media-library/[id]` - Update media metadata
+   - DELETE `/api/media-library/[id]` - Delete media (and from storage)
+   - POST `/api/media-library/upload` - Upload file
 
-# 4. Test the API
-curl http://localhost:3000/api/topics
+## Next Steps
+1. Wait for Vercel deployment to complete
+2. Run smoke tests: `node test-sprint-1.js`
+3. Manually test each endpoint in the admin UI
+4. Verify data is being stored correctly in Supabase
 
-# 5. If it works, commit and push
-git add -A
-git commit -m "fix: Convert Sprint 1 API routes to use Prisma"
-git push origin main
-```
+## Database Schema
+The Prisma models map to the following Supabase tables:
+- `Topic` → `topics`
+- `ContentLibrary` → `content_library`
+- `MediaLibrary` → `media_library`
 
-## 📝 Prisma Query Cheat Sheet
-
-### Find Many
-```typescript
-const topics = await prisma.topic.findMany({
-  where: { status: 'pending' },
-  orderBy: { createdAt: 'desc' },
-  skip: 0,
-  take: 30,
-});
-```
-
-### Find One
-```typescript
-const topic = await prisma.topic.findUnique({
-  where: { id: topicId },
-});
-```
-
-### Create
-```typescript
-const topic = await prisma.topic.create({
-  data: {
-    title: 'New Topic',
-    description: 'Description',
-    status: 'pending',
-  },
-});
-```
-
-### Update
-```typescript
-const topic = await prisma.topic.update({
-  where: { id: topicId },
-  data: {
-    status: 'completed',
-  },
-});
-```
-
-### Delete
-```typescript
-await prisma.topic.delete({
-  where: { id: topicId },
-});
-```
-
-### Count
-```typescript
-const count = await prisma.topic.count({
-  where: { status: 'pending' },
-});
-```
-
-## ⚠️ Important Notes
-
-1. **Column Names**: Prisma uses camelCase (`createdAt`), but the database uses snake_case (`created_at`). Prisma handles the conversion automatically via the `@@map()` directive.
-
-2. **Relations**: The models have relations defined:
-   - `Topic` has many `ContentLibrary` items
-   - `ContentLibrary` has many `MediaLibrary` items
-   
-3. **No More Supabase Client**: Remove all `getSupabaseClient()` calls from Sprint 1 routes. Only use `prisma`.
-
-4. **Keep checkAuth**: The `checkAuth()` helper for permissions is still needed and works fine.
-
-## 🎯 Why This Fixes the Issue
-
-- Prisma uses the `DATABASE_URL` environment variable which is already configured
-- Prisma doesn't need the service role key
-- Prisma is what all other routes use successfully
-- No more "permission denied" errors
-
-## 📚 Reference
-
-See these working examples in the codebase:
-- `apps/admin/app/api/admin/posts/route.ts` - Full CRUD with Prisma
-- `apps/admin/app/api/admin/case-studies/route.ts` - Another example
-
----
-
-**Status**: Prisma schema updated ✅, API routes need conversion ⏳
-
+All tables were created using the `RUN-THIS-IN-SUPABASE.sql` script.

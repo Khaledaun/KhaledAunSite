@@ -7,7 +7,7 @@ export const revalidate = 0;
 // POST /api/media-library/upload - Upload file to Supabase Storage
 export async function POST(request: NextRequest) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }

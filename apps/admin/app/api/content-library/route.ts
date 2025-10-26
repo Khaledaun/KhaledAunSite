@@ -7,7 +7,7 @@ export const revalidate = 0;
 // GET /api/content-library - List all content with filters
 export async function GET(request: NextRequest) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 // POST /api/content-library - Create new content
 export async function POST(request: NextRequest) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }

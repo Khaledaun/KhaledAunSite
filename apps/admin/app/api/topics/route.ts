@@ -7,7 +7,7 @@ export const revalidate = 0;
 // GET /api/topics - List all topics with filters
 export async function GET(request: NextRequest) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 // POST /api/topics - Create a new topic
 export async function POST(request: NextRequest) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }

@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }
@@ -45,7 +45,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }
@@ -84,7 +84,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const auth = await checkAuth('manage_content');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }

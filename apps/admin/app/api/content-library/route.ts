@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,45 +14,47 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
+    const contentType = searchParams.get('type');
     const status = searchParams.get('status');
     const search = searchParams.get('search');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const supabase = getSupabaseClient();
+    const where: any = {};
     
-    let query = supabase
-      .from('content_library')
-      .select('*, topics(title)', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (type) {
-      query = query.eq('type', type);
+    if (contentType) {
+      where.contentType = contentType;
     }
 
     if (status) {
-      query = query.eq('status', status);
+      where.status = status;
     }
 
     if (search) {
-      query = query.or(`title.ilike.%${search}%,keywords.cs.{${search}}`);
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { seoKeywords: { has: search } },
+      ];
     }
 
-    const { data: content, error, count } = await query;
-
-    if (error) {
-      console.error('Error fetching content library:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch content' },
-        { status: 500 }
-      );
-    }
+    const [content, total] = await Promise.all([
+      prisma.contentLibrary.findMany({
+        where,
+        include: {
+          topic: {
+            select: { title: true },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.contentLibrary.count({ where }),
+    ]);
 
     return NextResponse.json({
-      content: content || [],
-      total: count || 0,
+      content,
+      total,
       limit,
       offset,
     });
@@ -75,23 +78,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       topicId,
-      type,
-      format,
       title,
       content,
-      summary,
-      excerpt,
-      keywords = [],
-      tags = [],
-      category,
-      mediaIds = [],
+      contentType = 'blog_post',
+      seoTitle,
+      seoDescription,
+      seoKeywords = [],
       featuredImageId,
       scheduledFor,
+      aiGenerated = false,
+      aiModel,
+      aiPrompt,
     } = body;
 
-    if (!title || !content || !type) {
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'Title, content, and type are required' },
+        { error: 'Title and content are required' },
         { status: 400 }
       );
     }
@@ -100,39 +102,26 @@ export async function POST(request: NextRequest) {
     const wordCount = content.split(/\s+/).length;
     const readingTimeMinutes = Math.ceil(wordCount / 200); // Average reading speed
 
-    const supabase = getSupabaseClient();
-
-    const { data: contentItem, error } = await supabase
-      .from('content_library')
-      .insert({
-        topic_id: topicId,
-        type,
-        format,
+    const contentItem = await prisma.contentLibrary.create({
+      data: {
+        topicId,
         title,
         content,
-        summary,
-        excerpt,
-        keywords,
-        tags,
-        category,
-        media_ids: mediaIds,
-        featured_image_id: featuredImageId,
-        word_count: wordCount,
-        reading_time_minutes: readingTimeMinutes,
-        scheduled_for: scheduledFor,
+        contentType,
         status: 'draft',
-        author_id: auth.user?.id,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating content:', error);
-      return NextResponse.json(
-        { error: 'Failed to create content' },
-        { status: 500 }
-      );
-    }
+        authorId: auth.user?.id,
+        wordCount,
+        readingTimeMinutes,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
+        featuredImageId,
+        scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
+        aiGenerated,
+        aiModel,
+        aiPrompt,
+      },
+    });
 
     return NextResponse.json({ content: contentItem }, { status: 201 });
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -73,36 +74,26 @@ export async function POST(request: NextRequest) {
       .from('media')
       .getPublicUrl(filePath);
 
-    // Determine media type
-    let mediaType = 'document';
-    if (file.type.startsWith('image/')) {
-      mediaType = 'image';
-    } else if (file.type.startsWith('video/')) {
-      mediaType = 'video';
-    } else if (file.type.startsWith('audio/')) {
-      mediaType = 'audio';
-    }
+    // Create media record in database using Prisma
+    try {
+      const media = await prisma.mediaLibrary.create({
+        data: {
+          filename: fileName,
+          originalFilename: file.name,
+          storagePath: filePath,
+          publicUrl: urlData.publicUrl,
+          mimeType: file.type,
+          fileSize: file.size,
+          altText,
+          caption,
+          tags: tags ? tags.split(',').map(t => t.trim()) : [],
+          folder,
+          uploadedBy: auth.user?.id,
+        },
+      });
 
-    // Create media record in database
-    const { data: media, error: dbError } = await supabase
-      .from('media_library')
-      .insert({
-        filename: fileName,
-        original_filename: file.name,
-        url: urlData.publicUrl,
-        type: mediaType,
-        size_bytes: file.size,
-        mime_type: file.type,
-        alt_text: altText,
-        caption,
-        tags: tags ? tags.split(',').map(t => t.trim()) : [],
-        folder,
-        uploaded_by: auth.user?.id,
-      })
-      .select()
-      .single();
-
-    if (dbError) {
+      return NextResponse.json({ media }, { status: 201 });
+    } catch (dbError) {
       console.error('Error creating media record:', dbError);
       // Try to clean up the uploaded file
       await supabase.storage.from('media').remove([filePath]);
@@ -111,8 +102,6 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
-
-    return NextResponse.json({ media }, { status: 201 });
   } catch (error) {
     console.error('Error in POST /api/media-library/upload:', error);
     return NextResponse.json(

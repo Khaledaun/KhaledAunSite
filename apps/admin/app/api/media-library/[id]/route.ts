@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth, getSupabaseClient } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,14 +16,11 @@ export async function GET(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { data: media, error } = await supabase
-      .from('media_library')
-      .select('*')
-      .eq('id', params.id)
-      .single();
+    const media = await prisma.mediaLibrary.findUnique({
+      where: { id: params.id },
+    });
 
-    if (error || !media) {
+    if (!media) {
       return NextResponse.json(
         { error: 'Media not found' },
         { status: 404 }
@@ -51,22 +49,11 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const supabase = getSupabaseClient();
 
-    const { data: media, error } = await supabase
-      .from('media_library')
-      .update(body)
-      .eq('id', params.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating media:', error);
-      return NextResponse.json(
-        { error: 'Failed to update media' },
-        { status: 500 }
-      );
-    }
+    const media = await prisma.mediaLibrary.update({
+      where: { id: params.id },
+      data: body,
+    });
 
     return NextResponse.json({ media });
   } catch (error) {
@@ -89,16 +76,12 @@ export async function DELETE(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    
-    // First, get the media to find the file URL
-    const { data: media, error: fetchError } = await supabase
-      .from('media_library')
-      .select('*')
-      .eq('id', params.id)
-      .single();
+    // First, get the media to find the storage path
+    const media = await prisma.mediaLibrary.findUnique({
+      where: { id: params.id },
+    });
 
-    if (fetchError || !media) {
+    if (!media) {
       return NextResponse.json(
         { error: 'Media not found' },
         { status: 404 }
@@ -106,13 +89,11 @@ export async function DELETE(
     }
 
     // Delete from storage if it's a Supabase storage URL
-    if (media.url.includes('supabase')) {
-      const urlParts = new URL(media.url);
-      const path = urlParts.pathname.split('/').slice(3).join('/'); // Extract path after bucket name
-      
+    if (media.publicUrl.includes('supabase')) {
+      const supabase = getSupabaseClient();
       const { error: storageError } = await supabase.storage
         .from('media')
-        .remove([path]);
+        .remove([media.storagePath]);
 
       if (storageError) {
         console.error('Error deleting from storage:', storageError);
@@ -121,18 +102,9 @@ export async function DELETE(
     }
 
     // Delete from database
-    const { error } = await supabase
-      .from('media_library')
-      .delete()
-      .eq('id', params.id);
-
-    if (error) {
-      console.error('Error deleting media:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete media' },
-        { status: 500 }
-      );
-    }
+    await prisma.mediaLibrary.delete({
+      where: { id: params.id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

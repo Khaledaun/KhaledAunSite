@@ -32,13 +32,14 @@ function checkUrl(url, description) {
           success
         };
         
-        // For 500 errors, try to parse the error message
-        if (res.statusCode === 500 && data) {
+        // For error responses, try to parse the error message
+        if ((res.statusCode >= 400) && data) {
           try {
             const jsonData = JSON.parse(data);
             testResult.errorMessage = jsonData.error || jsonData.message || 'Unknown error';
+            testResult.errorDetails = jsonData;
           } catch (e) {
-            testResult.errorMessage = data.substring(0, 100);
+            testResult.errorMessage = data.substring(0, 200);
           }
         }
         
@@ -114,7 +115,14 @@ async function runTests() {
     tests.filter(t => !t.success).forEach(t => {
       console.log(`   - ${t.description}`);
       console.log(`     URL: ${t.url}`);
-      console.log(`     ${t.error || `Status: ${t.status}`}\n`);
+      console.log(`     ${t.error || `Status: ${t.status}`}`);
+      if (t.errorMessage) {
+        console.log(`     Error: ${t.errorMessage}`);
+      }
+      if (t.errorDetails) {
+        console.log(`     Details: ${JSON.stringify(t.errorDetails, null, 2)}`);
+      }
+      console.log('');
     });
   }
   

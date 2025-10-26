@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -13,46 +14,40 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type');
+    const mimeType = searchParams.get('type');
     const folder = searchParams.get('folder');
-    const tags = searchParams.get('tags');
+    const tagsParam = searchParams.get('tags');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const supabase = getSupabaseClient();
+    const where: any = {};
     
-    let query = supabase
-      .from('media_library')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (type) {
-      query = query.eq('type', type);
+    if (mimeType) {
+      where.mimeType = { startsWith: mimeType };
     }
 
     if (folder) {
-      query = query.eq('folder', folder);
+      where.folder = folder;
     }
 
-    if (tags) {
-      const tagArray = tags.split(',');
-      query = query.contains('tags', tagArray);
+    if (tagsParam) {
+      const tagArray = tagsParam.split(',');
+      where.tags = { hasSome: tagArray };
     }
 
-    const { data: media, error, count } = await query;
-
-    if (error) {
-      console.error('Error fetching media library:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch media' },
-        { status: 500 }
-      );
-    }
+    const [media, total] = await Promise.all([
+      prisma.mediaLibrary.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.mediaLibrary.count({ where }),
+    ]);
 
     return NextResponse.json({
-      media: media || [],
-      total: count || 0,
+      media,
+      total,
       limit,
       offset,
     });
@@ -77,11 +72,10 @@ export async function POST(request: NextRequest) {
     const {
       filename,
       originalFilename,
-      url,
-      thumbnailUrl,
-      type,
-      sizeBytes,
+      storagePath,
+      publicUrl,
       mimeType,
+      fileSize,
       width,
       height,
       durationSeconds,
@@ -91,44 +85,31 @@ export async function POST(request: NextRequest) {
       folder = 'uncategorized',
     } = body;
 
-    if (!filename || !url || !type) {
+    if (!filename || !storagePath || !publicUrl || !mimeType) {
       return NextResponse.json(
-        { error: 'Filename, url, and type are required' },
+        { error: 'Filename, storagePath, publicUrl, and mimeType are required' },
         { status: 400 }
       );
     }
 
-    const supabase = getSupabaseClient();
-
-    const { data: media, error } = await supabase
-      .from('media_library')
-      .insert({
+    const media = await prisma.mediaLibrary.create({
+      data: {
         filename,
-        original_filename: originalFilename,
-        url,
-        thumbnail_url: thumbnailUrl,
-        type,
-        size_bytes: sizeBytes,
-        mime_type: mimeType,
+        originalFilename: originalFilename || filename,
+        storagePath,
+        publicUrl,
+        mimeType,
+        fileSize: fileSize || 0,
         width,
         height,
-        duration_seconds: durationSeconds,
-        alt_text: altText,
+        durationSeconds,
+        altText,
         caption,
         tags,
         folder,
-        uploaded_by: auth.user?.id,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating media record:', error);
-      return NextResponse.json(
-        { error: 'Failed to create media record' },
-        { status: 500 }
-      );
-    }
+        uploadedBy: auth.user?.id,
+      },
+    });
 
     return NextResponse.json({ media }, { status: 201 });
   } catch (error) {

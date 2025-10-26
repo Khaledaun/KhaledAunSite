@@ -633,3 +633,100 @@ model LinkedInPost {
   @@index([authorId])
   @@map("linkedin_posts")
 }
+
+// Sprint 1: AI Content Management System
+model Topic {
+  id              String    @id @default(uuid())
+  title           String
+  description     String?   @db.Text
+  sourceUrl       String?
+  sourceType      String    @default("manual") // manual, rss, api, scrape
+  keywords        String[]  @default([])
+  priority        Int       @default(0)
+  status          String    @default("pending") // pending, processing, completed, failed
+  locked          Boolean   @default(false)
+  lockedAt        DateTime?
+  lockedBy        String?
+  userNotes       String?   @db.Text
+  aiSuggestions   Json?
+  metadata        Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  processedAt     DateTime?
+  
+  // Relations
+  content         ContentLibrary[]
+  
+  @@index([status, priority])
+  @@index([locked])
+  @@index([createdAt])
+  @@map("topics")
+}
+
+model ContentLibrary {
+  id                    String    @id @default(uuid())
+  topicId               String?
+  title                 String
+  content               String    @db.Text
+  contentType           String    @default("blog_post") // blog_post, article, social_post, etc.
+  status                String    @default("draft") // draft, review, published, archived
+  authorId              String?
+  lastEditedBy          String?
+  lastEditedAt          DateTime?
+  wordCount             Int?
+  readingTimeMinutes    Int?
+  seoTitle              String?
+  seoDescription        String?
+  seoKeywords           String[]  @default([])
+  featuredImageId       String?
+  scheduledFor          DateTime?
+  metadata              Json?
+  aiGenerated           Boolean   @default(false)
+  aiModel               String?
+  aiPrompt              String?   @db.Text
+  humanEdited           Boolean   @default(false)
+  qualityScore          Float?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  publishedAt           DateTime?
+  
+  // Relations
+  topic                 Topic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  media                 MediaLibrary[]
+  
+  @@index([status])
+  @@index([topicId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("content_library")
+}
+
+model MediaLibrary {
+  id                String    @id @default(uuid())
+  contentId         String?
+  filename          String
+  originalFilename  String
+  storagePath       String
+  publicUrl         String
+  mimeType          String
+  fileSize          Int
+  width             Int?
+  height            Int?
+  durationSeconds   Int?
+  altText           String?
+  caption           String?
+  tags              String[]  @default([])
+  folder            String?
+  uploadedBy        String?
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  content           ContentLibrary? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+  
+  @@index([contentId])
+  @@index([uploadedBy])
+  @@index([createdAt])
+  @@map("media_library")
+}

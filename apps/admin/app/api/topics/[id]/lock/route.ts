@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,25 +16,14 @@ export async function POST(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { data: topic, error } = await supabase
-      .from('topics')
-      .update({
+    const topic = await prisma.topic.update({
+      where: { id: params.id },
+      data: {
         locked: true,
-        locked_at: new Date().toISOString(),
-        locked_by: auth.user?.id || 'unknown',
-      })
-      .eq('id', params.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error locking topic:', error);
-      return NextResponse.json(
-        { error: 'Failed to lock topic' },
-        { status: 500 }
-      );
-    }
+        lockedAt: new Date(),
+        lockedBy: auth.user?.id || 'unknown',
+      },
+    });
 
     return NextResponse.json({ topic });
   } catch (error) {
@@ -56,25 +46,14 @@ export async function DELETE(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { data: topic, error } = await supabase
-      .from('topics')
-      .update({
+    const topic = await prisma.topic.update({
+      where: { id: params.id },
+      data: {
         locked: false,
-        locked_at: null,
-        locked_by: null,
-      })
-      .eq('id', params.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error unlocking topic:', error);
-      return NextResponse.json(
-        { error: 'Failed to unlock topic' },
-        { status: 500 }
-      );
-    }
+        lockedAt: null,
+        lockedBy: null,
+      },
+    });
 
     return NextResponse.json({ topic });
   } catch (error) {

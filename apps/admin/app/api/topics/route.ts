@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth } from '@/lib/supabase';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,36 +19,32 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '30');
     const offset = parseInt(searchParams.get('offset') || '0');
 
-    const supabase = getSupabaseClient();
-    
-    let query = supabase
-      .from('topics')
-      .select('*', { count: 'exact' })
-      .order('priority', { ascending: false })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
+    // Build where clause
+    const where: any = {};
     if (status) {
-      query = query.eq('status', status);
+      where.status = status;
     }
-
     if (locked !== null) {
-      query = query.eq('locked', locked === 'true');
+      where.locked = locked === 'true';
     }
 
-    const { data: topics, error, count } = await query;
-
-    if (error) {
-      console.error('Error fetching topics:', error);
-      return NextResponse.json(
-        { error: 'Failed to fetch topics' },
-        { status: 500 }
-      );
-    }
+    // Fetch topics with count
+    const [topics, total] = await Promise.all([
+      prisma.topic.findMany({
+        where,
+        orderBy: [
+          { priority: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        skip: offset,
+        take: limit,
+      }),
+      prisma.topic.count({ where }),
+    ]);
 
     return NextResponse.json({
-      topics: topics || [],
-      total: count || 0,
+      topics,
+      total,
       limit,
       offset,
     });
@@ -87,31 +84,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = getSupabaseClient();
-
-    const { data: topic, error } = await supabase
-      .from('topics')
-      .insert({
+    const topic = await prisma.topic.create({
+      data: {
         title,
         description,
-        source_url: sourceUrl,
-        source_type: sourceType,
+        sourceUrl,
+        sourceType,
         keywords,
         priority,
-        user_notes: userNotes,
-        scheduled_for: scheduledFor,
+        userNotes,
         status: 'pending',
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating topic:', error);
-      return NextResponse.json(
-        { error: 'Failed to create topic' },
-        { status: 500 }
-      );
-    }
+      },
+    });
 
     return NextResponse.json({ topic }, { status: 201 });
   } catch (error) {

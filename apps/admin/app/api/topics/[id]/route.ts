@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,14 +16,11 @@ export async function GET(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { data: topic, error } = await supabase
-      .from('topics')
-      .select('*')
-      .eq('id', params.id)
-      .single();
+    const topic = await prisma.topic.findUnique({
+      where: { id: params.id },
+    });
 
-    if (error || !topic) {
+    if (!topic) {
       return NextResponse.json(
         { error: 'Topic not found' },
         { status: 404 }
@@ -51,22 +49,11 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const supabase = getSupabaseClient();
 
-    const { data: topic, error } = await supabase
-      .from('topics')
-      .update(body)
-      .eq('id', params.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating topic:', error);
-      return NextResponse.json(
-        { error: 'Failed to update topic' },
-        { status: 500 }
-      );
-    }
+    const topic = await prisma.topic.update({
+      where: { id: params.id },
+      data: body,
+    });
 
     return NextResponse.json({ topic });
   } catch (error) {
@@ -89,19 +76,9 @@ export async function DELETE(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { error } = await supabase
-      .from('topics')
-      .delete()
-      .eq('id', params.id);
-
-    if (error) {
-      console.error('Error deleting topic:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete topic' },
-        { status: 500 }
-      );
-    }
+    await prisma.topic.delete({
+      where: { id: params.id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

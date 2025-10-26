@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSupabaseClient, checkAuth } from '@/lib/supabase';
+import { checkAuth } from '@/lib/supabase';
+import { prisma } from '@khaledaun/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -15,14 +16,16 @@ export async function GET(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { data: content, error } = await supabase
-      .from('content_library')
-      .select('*, topics(title)')
-      .eq('id', params.id)
-      .single();
+    const content = await prisma.contentLibrary.findUnique({
+      where: { id: params.id },
+      include: {
+        topic: {
+          select: { title: true },
+        },
+      },
+    });
 
-    if (error || !content) {
+    if (!content) {
       return NextResponse.json(
         { error: 'Content not found' },
         { status: 404 }
@@ -51,33 +54,23 @@ export async function PATCH(
     }
 
     const body = await request.json();
+    const updateData: any = { ...body };
     
     // Recalculate word count and reading time if content changed
     if (body.content) {
       const wordCount = body.content.split(/\s+/).length;
-      body.word_count = wordCount;
-      body.reading_time_minutes = Math.ceil(wordCount / 200);
+      updateData.wordCount = wordCount;
+      updateData.readingTimeMinutes = Math.ceil(wordCount / 200);
     }
 
-    body.last_edited_by = auth.user?.id;
-    body.last_edited_at = new Date().toISOString();
+    updateData.lastEditedBy = auth.user?.id;
+    updateData.lastEditedAt = new Date();
+    updateData.humanEdited = true;
 
-    const supabase = getSupabaseClient();
-
-    const { data: content, error } = await supabase
-      .from('content_library')
-      .update(body)
-      .eq('id', params.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating content:', error);
-      return NextResponse.json(
-        { error: 'Failed to update content' },
-        { status: 500 }
-      );
-    }
+    const content = await prisma.contentLibrary.update({
+      where: { id: params.id },
+      data: updateData,
+    });
 
     return NextResponse.json({ content });
   } catch (error) {
@@ -100,19 +93,9 @@ export async function DELETE(
       return auth.response;
     }
 
-    const supabase = getSupabaseClient();
-    const { error } = await supabase
-      .from('content_library')
-      .delete()
-      .eq('id', params.id);
-
-    if (error) {
-      console.error('Error deleting content:', error);
-      return NextResponse.json(
-        { error: 'Failed to delete content' },
-        { status: 500 }
-      );
-    }
+    await prisma.contentLibrary.delete({
+      where: { id: params.id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

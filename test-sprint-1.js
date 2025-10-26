@@ -56,20 +56,20 @@ async function runTests() {
   await checkUrl(`${ADMIN_URL}`, 'Admin homepage accessible');
   
   // Test 2: Topic Queue page
-  await checkUrl(`${ADMIN_URL}/admin/topics`, 'Topic Queue page accessible');
+  await checkUrl(`${ADMIN_URL}/topics`, 'Topic Queue page accessible');
   
   // Test 3: Content Library page
-  await checkUrl(`${ADMIN_URL}/admin/content/library`, 'Content Library page accessible');
+  await checkUrl(`${ADMIN_URL}/content/library`, 'Content Library page accessible');
   
   // Test 4: Media Library page
-  await checkUrl(`${ADMIN_URL}/admin/media`, 'Media Library page accessible');
+  await checkUrl(`${ADMIN_URL}/media`, 'Media Library page accessible');
   
   // Test 5: API endpoints (these might require auth, so 401/403 is acceptable)
   console.log('\n📡 Testing API Endpoints (401/403 expected if not authenticated)...\n');
   
   await checkUrl(`${ADMIN_URL}/api/topics`, 'Topics API endpoint exists');
-  await checkUrl(`${ADMIN_URL}/api/content`, 'Content API endpoint exists');
-  await checkUrl(`${ADMIN_URL}/api/media`, 'Media API endpoint exists');
+  await checkUrl(`${ADMIN_URL}/api/content-library`, 'Content API endpoint exists');
+  await checkUrl(`${ADMIN_URL}/api/media-library`, 'Media API endpoint exists');
   
   // Print summary
   console.log('\n' + '='.repeat(60));

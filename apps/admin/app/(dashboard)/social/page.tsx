@@ -1,320 +1,398 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Linkedin, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
-interface SocialEmbed {
+interface LinkedInAccount {
   id: string;
-  key: string;
-  html: string;
-  enabled: boolean;
-  updatedBy: string;
+  provider: string;
+  providerAccountId: string;
+  expiresAt: string;
+  isExpired: boolean;
+  connectionValid: boolean;
+  scope: string[];
+  metadata: {
+    firstName: string;
+    lastName: string;
+    profilePicture?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
 
-export default function SocialEmbedsPage() {
-  const [embeds, setEmbeds] = useState<SocialEmbed[]>([]);
+interface ConnectionStatus {
+  connected: boolean;
+  account: LinkedInAccount | null;
+}
+
+export default function SocialPage() {
+  const searchParams = useSearchParams();
+  const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
 
-  // Form state
-  const [selectedKey, setSelectedKey] = useState<string>('');
-  const [formKey, setFormKey] = useState('');
-  const [formHtml, setFormHtml] = useState('');
-  const [formEnabled, setFormEnabled] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-
+  // Check for OAuth callback messages
   useEffect(() => {
-    fetchEmbeds();
+    const success = searchParams?.get('success');
+    const error = searchParams?.get('error');
+    const details = searchParams?.get('details');
+
+    if (success === 'linkedin_connected') {
+      setMessage({
+        type: 'success',
+        text: 'LinkedIn account connected successfully! 🎉',
+      });
+      // Clear URL params
+      window.history.replaceState({}, '', '/social');
+    } else if (error) {
+      setMessage({
+        type: 'error',
+        text: `Connection failed: ${details || error}`,
+      });
+      // Clear URL params
+      window.history.replaceState({}, '', '/social');
+    }
+  }, [searchParams]);
+
+  // Fetch connection status
+  useEffect(() => {
+    fetchStatus();
   }, []);
 
-  const fetchEmbeds = async () => {
+  const fetchStatus = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const response = await fetch('/api/admin/social');
-      
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to fetch embeds');
+      const response = await fetch('/api/auth/linkedin/status');
+      if (response.ok) {
+        const data = await response.json();
+        setStatus(data);
+      } else {
+        console.error('Failed to fetch status');
       }
-      
-      const data = await response.json();
-      setEmbeds(data.embeds || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+    } catch (error) {
+      console.error('Error fetching status:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleNew = () => {
-    setSelectedKey('');
-    setFormKey('');
-    setFormHtml('');
-    setFormEnabled(true);
-    setIsEditing(false);
+  const handleConnect = () => {
+    // Redirect to OAuth flow
+    window.location.href = '/api/auth/linkedin/connect';
   };
 
-  const handleEdit = (embed: SocialEmbed) => {
-    setSelectedKey(embed.key);
-    setFormKey(embed.key);
-    setFormHtml(embed.html);
-    setFormEnabled(embed.enabled);
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-
-      if (!formKey.trim()) {
-        alert('Key is required');
-        return;
-      }
-
-      if (!formHtml.trim()) {
-        alert('HTML is required');
-        return;
-      }
-
-      // Validate key format (uppercase, numbers, underscores)
-      if (!/^[A-Z0-9_]+$/.test(formKey)) {
-        alert('Key must contain only uppercase letters, numbers, and underscores');
-        return;
-      }
-
-      const response = await fetch('/api/admin/social', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          key: formKey,
-          html: formHtml,
-          enabled: formEnabled,
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to save embed');
-      }
-
-      await fetchEmbeds();
-      handleNew(); // Reset form
-      alert('Social embed saved successfully!');
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to save embed');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (key: string) => {
-    if (!confirm(`Are you sure you want to delete the embed "${key}"?`)) {
+  const handleDisconnect = async () => {
+    if (!confirm('Are you sure you want to disconnect your LinkedIn account?')) {
       return;
     }
 
+    setDisconnecting(true);
     try {
-      const response = await fetch(`/api/admin/social/${key}`, {
-        method: 'DELETE',
+      const response = await fetch('/api/auth/linkedin/disconnect', {
+        method: 'POST',
       });
 
-      if (!response.ok) {
+      if (response.ok) {
+        setMessage({
+          type: 'success',
+          text: 'LinkedIn account disconnected successfully',
+        });
+        setStatus({ connected: false, account: null });
+      } else {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to delete embed');
+        setMessage({
+          type: 'error',
+          text: error.details || 'Failed to disconnect account',
+        });
       }
-
-      await fetchEmbeds();
-      if (selectedKey === key) {
-        handleNew();
-      }
-      alert('Social embed deleted successfully!');
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete embed');
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: 'An error occurred while disconnecting',
+      });
+    } finally {
+      setDisconnecting(false);
     }
   };
 
+  const handleRefresh = () => {
+    setMessage(null);
+    fetchStatus();
+  };
+
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Social Media Embeds</h1>
-        <p className="text-gray-600 mt-2">
-          Manage social media embeds for your site. HTML is automatically sanitized for security.
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Social Accounts
+        </h1>
+        <p className="text-gray-600">
+          Connect and manage your social media accounts for publishing content.
         </p>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800">Error: {error}</p>
+      {/* Message Banner */}
+      {message && (
+        <div
+          className={`mb-6 p-4 rounded-lg border ${
+            message.type === 'success'
+              ? 'bg-green-50 border-green-200 text-green-800'
+              : message.type === 'error'
+              ? 'bg-red-50 border-red-200 text-red-800'
+              : 'bg-blue-50 border-blue-200 text-blue-800'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {message.type === 'success' && <CheckCircle className="h-5 w-5" />}
+              {message.type === 'error' && <XCircle className="h-5 w-5" />}
+              {message.type === 'info' && <AlertCircle className="h-5 w-5" />}
+              <span>{message.text}</span>
+            </div>
+            <button
+              onClick={() => setMessage(null)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              ×
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Embeds List */}
-        <div>
-          <div className="mb-4 flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Existing Embeds</h2>
+      {/* LinkedIn Card */}
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-600 p-2 rounded-lg">
+                <Linkedin className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">LinkedIn</h2>
+                <p className="text-sm text-gray-500">Share professional content</p>
+              </div>
+            </div>
+
             <button
-              onClick={handleNew}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              data-testid="social-new"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="p-2 text-gray-500 hover:text-gray-700 disabled:opacity-50"
+              title="Refresh status"
             >
-              New Embed
+              <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
           {loading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600">Loading embeds...</p>
+            <div className="py-8 text-center text-gray-500">
+              Loading connection status...
             </div>
-          ) : embeds.length === 0 ? (
-            <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <p className="text-gray-600">No social embeds yet. Create your first one!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {embeds.map((embed) => (
-                <div
-                  key={embed.id}
-                  className={`p-4 border rounded-lg cursor-pointer transition ${
-                    selectedKey === embed.key
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  onClick={() => handleEdit(embed)}
-                  data-testid={`social-embed-${embed.key}`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">{embed.key}</h3>
-                    <span
-                      className={`px-2 py-1 text-xs rounded ${
-                        embed.enabled
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {embed.enabled ? 'Enabled' : 'Disabled'}
+          ) : status?.connected && status.account ? (
+            <div>
+              {/* Connected Status */}
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  <span className="font-medium text-green-900">Connected</span>
+                </div>
+                <div className="text-sm text-green-700">
+                  Signed in as {status.account.metadata.firstName}{' '}
+                  {status.account.metadata.lastName}
+                </div>
+              </div>
+
+              {/* Account Details */}
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Account ID:</span>
+                  <span className="font-mono text-gray-900">
+                    {status.account.providerAccountId}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Connected:</span>
+                  <span className="text-gray-900">
+                    {new Date(status.account.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Token Expires:</span>
+                  <span
+                    className={
+                      status.account.isExpired
+                        ? 'text-red-600 font-medium'
+                        : 'text-gray-900'
+                    }
+                  >
+                    {new Date(status.account.expiresAt).toLocaleString()}
+                    {status.account.isExpired && ' (Expired)'}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Permissions:</span>
+                  <span className="text-gray-900">
+                    {status.account.scope.join(', ')}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Status:</span>
+                  <span
+                    className={
+                      status.account.connectionValid
+                        ? 'text-green-600 font-medium'
+                        : 'text-orange-600 font-medium'
+                    }
+                  >
+                    {status.account.connectionValid ? 'Active' : 'Needs Refresh'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Warning for Expired */}
+              {status.account.isExpired && (
+                <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle className="h-5 w-5 text-orange-600" />
+                    <span className="font-medium text-orange-900">
+                      Token Expired
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500">
-                    Updated: {new Date(embed.updatedAt).toLocaleDateString()}
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1 font-mono truncate">
-                    {embed.html.substring(0, 60)}...
+                  <p className="text-sm text-orange-700">
+                    Your LinkedIn access token has expired. Reconnect to continue
+                    posting.
                   </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Editor Panel */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">
-            {isEditing ? `Edit: ${formKey}` : 'Create New Embed'}
-          </h2>
-
-          <div className="bg-white shadow-md rounded-lg p-6" data-testid="social-form">
-            <div className="space-y-4">
-              {/* Key */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Key * {!isEditing && '(uppercase, numbers, underscores only)'}
-                </label>
-                <input
-                  type="text"
-                  value={formKey}
-                  onChange={(e) => setFormKey(e.target.value.toUpperCase())}
-                  disabled={isEditing}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  placeholder="LINKEDIN_WALL"
-                  pattern="[A-Z0-9_]+"
-                  data-testid="social-key-input"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {isEditing ? 'Key cannot be changed after creation' : 'Example: LINKEDIN_WALL, TWITTER_FEED'}
-                </p>
-              </div>
-
-              {/* HTML */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  HTML Code *
-                </label>
-                <textarea
-                  value={formHtml}
-                  onChange={(e) => setFormHtml(e.target.value)}
-                  rows={12}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-                  placeholder="<iframe src='...' />"
-                  data-testid="social-html-input"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Paste embed code from LinkedIn, Twitter, etc. Automatically sanitized for security.
-                </p>
-              </div>
-
-              {/* Enabled Toggle */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="enabled"
-                  checked={formEnabled}
-                  onChange={(e) => setFormEnabled(e.target.checked)}
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                  data-testid="social-enabled-checkbox"
-                />
-                <label htmlFor="enabled" className="ml-2 text-sm font-medium text-gray-700">
-                  Enabled (show on site)
-                </label>
-              </div>
+              )}
 
               {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t">
-                <div className="space-x-2">
+              <div className="flex gap-3">
+                {status.account.isExpired ? (
                   <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                    data-testid="social-save"
+                    onClick={handleConnect}
+                    className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
-                    {saving ? 'Saving...' : 'Save'}
+                    Reconnect LinkedIn
                   </button>
-                  {selectedKey && (
-                    <button
-                      onClick={handleNew}
-                      className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-                {selectedKey && (
+                ) : (
                   <button
-                    onClick={() => handleDelete(selectedKey)}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                    data-testid="social-delete"
+                    onClick={handleDisconnect}
+                    disabled={disconnecting}
+                    className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                   >
-                    Delete
+                    {disconnecting ? 'Disconnecting...' : 'Disconnect'}
                   </button>
                 )}
               </div>
             </div>
-          </div>
+          ) : (
+            <div>
+              {/* Not Connected */}
+              <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <XCircle className="h-5 w-5 text-gray-400" />
+                  <span className="font-medium text-gray-900">Not Connected</span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  Connect your LinkedIn account to start publishing content directly
+                  from the CMS.
+                </p>
+              </div>
 
-          {/* Security Notice */}
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h3 className="font-semibold text-yellow-900 mb-2">🔒 Security Notice</h3>
-            <p className="text-sm text-yellow-800">
-              All HTML is automatically sanitized before saving. Scripts and dangerous tags are removed.
-              Only safe tags like <code className="bg-yellow-100 px-1">iframe</code>, <code className="bg-yellow-100 px-1">div</code>, and <code className="bg-yellow-100 px-1">a</code> are allowed.
-            </p>
+              {/* Features List */}
+              <div className="mb-6 space-y-2">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  What you can do:
+                </p>
+                <div className="space-y-2">
+                  {[
+                    'Post articles and updates instantly',
+                    'Schedule posts for optimal timing',
+                    'Share content with images and links',
+                    'Track publishing status and errors',
+                  ].map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-gray-700">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Connect Button */}
+              <button
+                onClick={handleConnect}
+                className="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                Connect LinkedIn Account
+              </button>
+
+              {/* Setup Instructions */}
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div className="text-sm text-blue-900">
+                    <p className="font-medium mb-1">First time setup?</p>
+                    <p className="text-blue-700">
+                      Make sure your LinkedIn app credentials are configured in
+                      environment variables. See{' '}
+                      <code className="bg-blue-100 px-1 rounded">
+                        docs/Sprint4-Auth-LinkedIn.md
+                      </code>{' '}
+                      for setup instructions.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Coming Soon: Other Platforms */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 opacity-50">
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-2 rounded-lg">
+              <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Instagram</h3>
+              <p className="text-sm text-gray-500">Coming soon</p>
+            </div>
           </div>
+          <p className="text-sm text-gray-600">
+            Share visual content and stories with your audience.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="bg-blue-400 p-2 rounded-lg">
+              <svg className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Twitter / X</h3>
+              <p className="text-sm text-gray-500">Coming soon</p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-600">
+            Share quick updates and engage in real-time conversations.
+          </p>
         </div>
       </div>
     </div>
   );
 }
-

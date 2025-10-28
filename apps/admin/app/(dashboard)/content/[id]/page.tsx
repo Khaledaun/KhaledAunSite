@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ContentSEOPanel } from '@/components/content/ContentSEOPanel';
 import { ContentAIOPanel } from '@/components/content/ContentAIOPanel';
 import { generateSlug } from '@/lib/utils/slug-generator';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 function ContentEditForm({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -239,16 +240,13 @@ function ContentEditForm({ params }: { params: { id: string } }) {
 
             {/* Content Editor */}
             <div className="mt-4">
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
                 Content <span className="text-red-500">*</span>
               </label>
-              <textarea
-                id="content"
-                required
-                rows={20}
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content) => setFormData({ ...formData, content })}
+                placeholder="Start writing your content... Use the toolbar to format text."
               />
             </div>
           </div>

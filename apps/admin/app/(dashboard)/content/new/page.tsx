@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ContentSEOPanel } from '@/components/content/ContentSEOPanel';
 import { ContentAIOPanel } from '@/components/content/ContentAIOPanel';
+import { RichTextEditor } from '@/components/RichTextEditor';
 
 function NewContentForm() {
   const router = useRouter();
@@ -156,23 +157,16 @@ function NewContentForm() {
               />
             </div>
 
-            {/* Content Editor (Simplified) */}
+            {/* Content Editor */}
             <div className="mt-4">
-              <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
                 Content <span className="text-red-500">*</span>
               </label>
-              <textarea
-                id="content"
-                required
-                rows={20}
-                value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 font-mono text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                placeholder="Write your content here... (HTML supported)"
+              <RichTextEditor
+                content={formData.content}
+                onChange={(content) => setFormData({ ...formData, content })}
+                placeholder="Start writing your content... Use the toolbar to format text."
               />
-              <p className="mt-1 text-xs text-gray-500">
-                Tip: Use HTML tags for formatting (e.g., &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;li&gt;)
-              </p>
             </div>
           </div>
 

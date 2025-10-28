@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* TipTap Editor Styles */
+.prose-editor .ProseMirror {
+  @apply min-h-[400px] p-4 focus:outline-none;
+}
+
+.prose-editor .ProseMirror p {
+  @apply my-3;
+}
+
+.prose-editor .ProseMirror h1 {
+  @apply text-3xl font-bold mt-6 mb-4 text-gray-900;
+}
+
+.prose-editor .ProseMirror h2 {
+  @apply text-2xl font-bold mt-5 mb-3 text-gray-900;
+}
+
+.prose-editor .ProseMirror h3 {
+  @apply text-xl font-bold mt-4 mb-2 text-gray-900;
+}
+
+.prose-editor .ProseMirror ul {
+  @apply list-disc list-inside my-3 space-y-1;
+}
+
+.prose-editor .ProseMirror ol {
+  @apply list-decimal list-inside my-3 space-y-1;
+}
+
+.prose-editor .ProseMirror li {
+  @apply text-gray-700;
+}
+
+.prose-editor .ProseMirror blockquote {
+  @apply border-l-4 border-gray-300 pl-4 my-3 italic text-gray-700;
+}
+
+.prose-editor .ProseMirror code {
+  @apply bg-gray-100 text-sm px-1.5 py-0.5 rounded font-mono text-red-600;
+}
+
+.prose-editor .ProseMirror pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg my-3 overflow-x-auto;
+}
+
+.prose-editor .ProseMirror pre code {
+  @apply bg-transparent text-gray-100 p-0;
+}
+
+.prose-editor .ProseMirror strong {
+  @apply font-bold;
+}
+
+.prose-editor .ProseMirror em {
+  @apply italic;
+}
+
+.prose-editor .ProseMirror s {
+  @apply line-through;
+}
+
+.prose-editor .ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-gray-400;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

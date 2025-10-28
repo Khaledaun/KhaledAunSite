@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ContentSEOPanel } from '@/components/content/ContentSEOPanel';
 import { ContentAIOPanel } from '@/components/content/ContentAIOPanel';
 
-export default function NewContentPage() {
+function NewContentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const topicId = searchParams?.get('topicId');
@@ -361,6 +361,18 @@ export default function NewContentPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewContentPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center p-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      </div>
+    }>
+      <NewContentForm />
+    </Suspense>
   );
 }
 

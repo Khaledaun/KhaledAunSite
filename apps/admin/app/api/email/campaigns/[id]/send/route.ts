@@ -22,7 +22,7 @@ export async function POST(
 ) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

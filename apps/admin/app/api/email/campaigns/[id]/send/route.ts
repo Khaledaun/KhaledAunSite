@@ -62,9 +62,9 @@ export async function POST(
           to: body.testEmail,
           subject: `[TEST] ${campaign.subject}`,
           html: campaign.contentHtml,
-          text: campaign.contentText,
+          text: campaign.contentText || undefined,
           from: `${campaign.fromName} <${campaign.fromEmail}>`,
-          replyTo: campaign.replyTo,
+          replyTo: campaign.replyTo || undefined,
         },
       ]);
 
@@ -155,9 +155,9 @@ export async function POST(
         to: subscriber.email,
         subject,
         html,
-        text,
+        text: text || undefined,
         from: `${campaign.fromName} <${campaign.fromEmail}>`,
-        replyTo: campaign.replyTo,
+        replyTo: campaign.replyTo || undefined,
         headers: {
           'X-Campaign-ID': campaignId,
         },

@@ -15,3 +15,7 @@ export * from './url-extractor';
 // Phase 1 Strategic UX: Encryption & AI Config
 export * from './encryption';
 export * from './ai-config-service';
+
+// Sprint 2: SEO & AIO Optimization
+export * from './seo-analyzer';
+export * from './aio-optimizer';

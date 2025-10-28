@@ -22,7 +22,7 @@
     "paths": {
       "@/*": ["./app/*"],
       "@/components/*": ["./components/*"],
-      "@/lib/*": ["./app/lib/*"],
+      "@/lib/*": ["./lib/*", "./app/lib/*"],
       "@prisma/client": ["./node_modules/@prisma/client"]
     }
   },

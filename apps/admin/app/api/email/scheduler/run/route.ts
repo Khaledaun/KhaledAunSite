@@ -142,9 +142,9 @@ export async function GET(request: NextRequest) {
             to: subscriber.email,
             subject,
             html,
-            text,
+            text: text || undefined,
             from: `${campaign.fromName} <${campaign.fromEmail}>`,
-            replyTo: campaign.replyTo,
+            replyTo: campaign.replyTo || undefined,
           };
         });
 

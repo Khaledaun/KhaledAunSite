@@ -122,10 +122,10 @@ export default function CredentialsTimeline({ locale }) {
 
                   {/* Desktop Layout - Alternating sides */}
                   <div className="hidden md:block">
-                    <div className="flex items-center justify-center">
+                    <div className="grid grid-cols-[1fr_auto_1fr] gap-8 items-center">
                       {/* Left side content (for left-aligned items) */}
-                      {!shouldAlignRight && (
-                        <div className="w-5/12 pr-8">
+                      <div className={`${!shouldAlignRight ? 'text-right' : ''}`}>
+                        {!shouldAlignRight && (
                           <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-brand-gold">
                             <div className="flex items-center justify-between mb-3">
                               <span className="text-2xl font-bold text-brand-gold">{credential.year}</span>
@@ -153,19 +153,19 @@ export default function CredentialsTimeline({ locale }) {
                               {t(`${credential.id}.description`)}
                             </p>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
 
                       {/* Center Icon */}
-                      <div className="relative z-10">
+                      <div className="relative z-10 flex-shrink-0">
                         <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${credential.color} flex items-center justify-center shadow-xl border-4 border-brand-sand`}>
                           <Icon className="w-8 h-8 text-white" />
                         </div>
                       </div>
 
                       {/* Right side content (for right-aligned items) */}
-                      {shouldAlignRight && (
-                        <div className="w-5/12 pl-8">
+                      <div>
+                        {shouldAlignRight && (
                           <div className="bg-white rounded-lg shadow-lg p-6 border-l-4 border-brand-gold">
                             <div className="flex items-center justify-between mb-3">
                               <span className="text-2xl font-bold text-brand-gold">{credential.year}</span>
@@ -193,12 +193,8 @@ export default function CredentialsTimeline({ locale }) {
                               {t(`${credential.id}.description`)}
                             </p>
                           </div>
-                        </div>
-                      )}
-
-                      {/* Spacer for the opposite side */}
-                      {!shouldAlignRight && <div className="w-5/12" />}
-                      {shouldAlignRight && <div className="w-5/12" />}
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

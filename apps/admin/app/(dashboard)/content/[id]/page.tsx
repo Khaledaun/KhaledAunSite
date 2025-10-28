@@ -7,11 +7,14 @@ import { ContentSEOPanel } from '@/components/content/ContentSEOPanel';
 import { ContentAIOPanel } from '@/components/content/ContentAIOPanel';
 import { generateSlug } from '@/lib/utils/slug-generator';
 import { RichTextEditor } from '@/components/RichTextEditor';
+import { PrePublishChecklist } from '@/components/content/PrePublishChecklist';
 
 function ContentEditForm({ params }: { params: { id: string } }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activePanel, setActivePanel] = useState<'seo' | 'aio'>('seo');
 
@@ -127,6 +130,33 @@ function ContentEditForm({ params }: { params: { id: string } }) {
       router.push('/content/library');
     } catch (err) {
       setError((err as Error).message);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    setError(null);
+
+    try {
+      // First save the content
+      const saveResponse = await fetch(`/api/content-library/${params.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, status: 'published', publishedAt: new Date().toISOString() }),
+      });
+
+      if (!saveResponse.ok) {
+        const data = await saveResponse.json();
+        throw new Error(data.error || 'Failed to publish content');
+      }
+
+      alert('Content published successfully!');
+      setShowPublishModal(false);
+      router.push('/content/library');
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -357,7 +387,15 @@ function ContentEditForm({ params }: { params: { id: string } }) {
               disabled={saving}
               className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? 'Saving...' : 'Save Draft'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowPublishModal(true)}
+              disabled={saving || !formData.title || !formData.content}
+              className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Publish
             </button>
             <button
               type="button"
@@ -426,6 +464,31 @@ function ContentEditForm({ params }: { params: { id: string } }) {
           </div>
         </div>
       </form>
+
+      {/* Publish Modal */}
+      {showPublishModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-gray-900 bg-opacity-50 p-4">
+          <div className="max-w-2xl w-full">
+            <PrePublishChecklist
+              content={{
+                title: formData.title,
+                content: formData.content,
+                excerpt: formData.excerpt,
+                seoTitle: formData.seoTitle,
+                seoDescription: formData.seoDescription,
+                slug: formData.slug,
+                keywords: formData.keywords,
+              }}
+              seoScore={85} // TODO: Get actual SEO score from analysis
+              aioScore={88} // TODO: Get actual AIO score from analysis
+              onPublish={handlePublish}
+              onCancel={() => setShowPublishModal(false)}
+              onFixIssues={() => setShowPublishModal(false)}
+              publishing={publishing}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

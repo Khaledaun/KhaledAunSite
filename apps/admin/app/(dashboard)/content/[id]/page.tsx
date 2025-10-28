@@ -66,7 +66,7 @@ function ContentEditForm({ params }: { params: { id: string } }) {
       ...formData,
       title,
       // Update slug only if it hasn't been manually edited
-      slug: formData.slug ? formData.slug : generateSlug(title),
+      slug: formData.slug ? formData.slug : generateSlug(title, 60),
       seoTitle: title,
     });
   };

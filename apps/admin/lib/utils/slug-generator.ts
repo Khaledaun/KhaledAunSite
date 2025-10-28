@@ -9,7 +9,7 @@
  * @param maxLength - Maximum slug length (default: 60)
  * @returns SEO-friendly slug
  */
-export function generateSlug(title: string, maxLength: 60): string {
+export function generateSlug(title: string, maxLength = 60): string {
   if (!title) return '';
 
   let slug = title

@@ -137,11 +137,12 @@ export async function POST(
 
       Object.entries(variables).forEach(([key, value]) => {
         const placeholder = `{{${key}}}`;
-        html = html.replaceAll(placeholder, value);
+        const regex = new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+        html = html.replace(regex, value);
         if (text) {
-          text = text.replaceAll(placeholder, value);
+          text = text.replace(regex, value);
         }
-        subject = subject.replaceAll(placeholder, value);
+        subject = subject.replace(regex, value);
       });
 
       // Add unsubscribe link if not present

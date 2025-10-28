@@ -1,4 +1,25 @@
+# Admin Panel - No indexing allowed
 User-agent: *
-Allow: /
+Disallow: /
 
-Sitemap: https://khaledaun.com/sitemap.xml
+# Explicitly disallow all paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /auth/
+Disallow: /topics/
+Disallow: /content/
+Disallow: /media/
+Disallow: /posts/
+Disallow: /case-studies/
+Disallow: /cms/
+Disallow: /profile/
+Disallow: /social/
+Disallow: /analytics/
+Disallow: /leads/
+Disallow: /ai/
+Disallow: /hitl/
+Disallow: /seo-checks/
+Disallow: /command-center/
+Disallow: /settings/
+
+# No sitemap for admin panel

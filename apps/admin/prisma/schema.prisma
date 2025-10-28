@@ -703,6 +703,12 @@ model ContentLibrary {
   publishAttempts       Int       @default(0) @map("publish_attempts")
   lastPublishAttempt    DateTime? @map("last_publish_attempt")
   
+  // Sprint 5: Email notification fields
+  emailNotificationSent       Boolean       @default(false) @map("email_notification_sent")
+  emailNotificationSentAt     DateTime?     @map("email_notification_sent_at")
+  emailNotificationCampaignId String?       @map("email_notification_campaign_id")
+  emailCampaign               EmailCampaign? @relation("CampaignNotifications", fields: [emailNotificationCampaignId], references: [id], onDelete: SetNull)
+  
   // Relations
   topic                 Topic?         @relation(fields: [topicId], references: [id], onDelete: SetNull)
   publishJobs           PublishJob[]
@@ -809,23 +815,259 @@ model UserRole {
   @@map("user_roles")
 }
 
-// Newsletter subscribers
+// =====================================================
+// Sprint 5: Email Marketing + CRM Models
+// =====================================================
+
+// Newsletter subscribers with full tracking
 model NewsletterSubscriber {
-  id                String    @id @default(uuid())
-  email             String    @unique
-  name              String?
-  status            String    @default("pending") // pending, confirmed, unsubscribed
-  confirmationToken String?   @map("confirmation_token")
-  confirmedAt       DateTime? @map("confirmed_at")
-  unsubscribedAt    DateTime? @map("unsubscribed_at")
-  source            String?   // 'website', 'manual', etc.
-  tags              String[]  @default([])
-  metadata          Json?     @default("{}") @db.JsonB
-  createdAt         DateTime  @default(now()) @map("created_at")
-  updatedAt         DateTime  @updatedAt @map("updated_at")
+  id        String  @id @default(uuid())
+  email     String  @unique
+  status    String  @default("pending") // pending, confirmed, unsubscribed, bounced, complained
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+
+  // Subscription management
+  subscribedAt     DateTime? @map("subscribed_at") @default(now())
+  confirmedAt      DateTime? @map("confirmed_at")
+  unsubscribedAt   DateTime? @map("unsubscribed_at")
+
+  // Double opt-in
+  confirmationToken          String?   @unique @map("confirmation_token")
+  confirmationTokenExpiresAt DateTime? @map("confirmation_token_expires_at")
+
+  // Preferences
+  preferences Json? @default("{\"blog\": true, \"newsletter\": true, \"product_updates\": false}") @db.JsonB
+
+  // Source tracking
+  source      String? // 'website', 'linkedin', 'manual', 'import'
+  sourceUrl   String? @map("source_url")
+  utmSource   String? @map("utm_source")
+  utmMedium   String? @map("utm_medium")
+  utmCampaign String? @map("utm_campaign")
+
+  // Engagement metrics
+  totalOpens     Int       @default(0) @map("total_opens")
+  totalClicks    Int       @default(0) @map("total_clicks")
+  lastOpenedAt   DateTime? @map("last_opened_at")
+  lastClickedAt  DateTime? @map("last_clicked_at")
+
+  // CRM sync
+  hubspotContactId String?   @map("hubspot_contact_id")
+  hubspotSyncedAt  DateTime? @map("hubspot_synced_at")
+
+  // Metadata
+  ipAddress    String?   @map("ip_address")
+  userAgent    String?   @map("user_agent")
+  tags         String[]  @default([])
+  customFields Json?     @default("{}") @db.JsonB @map("custom_fields")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  emailEvents EmailEvent[]
 
   @@index([email])
   @@index([status])
-  @@index([createdAt])
+  @@index([confirmationToken])
+  @@index([hubspotContactId])
+  @@index([createdAt(sort: Desc)])
   @@map("newsletter_subscribers")
+}
+
+// Email campaigns
+model EmailCampaign {
+  id String @id @default(uuid())
+
+  // Campaign details
+  name        String
+  subject     String
+  previewText String? @map("preview_text")
+  fromName    String  @default("Khaled Aun") @map("from_name")
+  fromEmail   String  @default("hello@khaledaun.com") @map("from_email")
+  replyTo     String  @default("hello@khaledaun.com") @map("reply_to")
+
+  // Content
+  contentHtml String @map("content_html")
+  contentText String? @map("content_text")
+
+  // Scheduling
+  status       String    @default("draft") // draft, scheduled, sending, sent, failed
+  scheduledFor DateTime? @map("scheduled_for")
+  sentAt       DateTime? @map("sent_at")
+
+  // Targeting
+  targetStatus  String[] @default(["confirmed"]) @map("target_status")
+  targetTags    String[] @default([]) @map("target_tags")
+  excludeTags   String[] @default([]) @map("exclude_tags")
+
+  // Email provider
+  provider           String  @default("resend") // resend, manual
+  providerCampaignId String? @map("provider_campaign_id")
+  providerResponse   Json?   @db.JsonB @map("provider_response")
+
+  // Analytics
+  totalRecipients   Int @default(0) @map("total_recipients")
+  totalSent         Int @default(0) @map("total_sent")
+  totalDelivered    Int @default(0) @map("total_delivered")
+  totalOpens        Int @default(0) @map("total_opens")
+  totalClicks       Int @default(0) @map("total_clicks")
+  totalBounces      Int @default(0) @map("total_bounces")
+  totalComplaints   Int @default(0) @map("total_complaints")
+  totalUnsubscribes Int @default(0) @map("total_unsubscribes")
+
+  // Metadata
+  createdBy String?   @map("created_by")
+  tags      String[]  @default([])
+  notes     String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  emailEvents EmailEvent[]
+  contentNotifications ContentLibrary[] @relation("CampaignNotifications")
+
+  @@index([status])
+  @@index([scheduledFor])
+  @@index([sentAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
+  @@map("email_campaigns")
+}
+
+// Email events (analytics)
+model EmailEvent {
+  id String @id @default(uuid())
+
+  // Relationships
+  campaignId   String?              @map("campaign_id")
+  campaign     EmailCampaign?       @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  subscriberId String?              @map("subscriber_id")
+  subscriber   NewsletterSubscriber? @relation(fields: [subscriberId], references: [id], onDelete: SetNull)
+  email        String
+
+  // Event details
+  eventType String @map("event_type") // sent, delivered, opened, clicked, bounced, complained, unsubscribed
+
+  // Click tracking
+  linkUrl  String? @map("link_url")
+  linkText String? @map("link_text")
+
+  // Bounce/complaint details
+  bounceType             String? @map("bounce_type") // hard, soft
+  bounceReason           String? @map("bounce_reason")
+  complaintFeedbackType  String? @map("complaint_feedback_type")
+
+  // Provider details
+  provider          String  @default("resend")
+  providerMessageId String? @map("provider_message_id")
+  providerEventId   String? @map("provider_event_id")
+
+  // Context
+  ipAddress String? @map("ip_address")
+  userAgent String? @map("user_agent")
+  location  Json?   @db.JsonB // {country, city, region}
+
+  // Timestamps
+  eventTimestamp DateTime @default(now()) @map("event_timestamp")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([campaignId])
+  @@index([subscriberId])
+  @@index([email])
+  @@index([eventType])
+  @@index([eventTimestamp(sort: Desc)])
+  @@index([providerMessageId])
+  @@map("email_events")
+}
+
+// CRM leads (HubSpot)
+model CrmLead {
+  id String @id @default(uuid())
+
+  // Contact info
+  email     String
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+  company   String?
+  jobTitle  String? @map("job_title")
+  phone     String?
+  website   String?
+
+  // Lead details
+  source      String  // contact_form, newsletter, linkedin, manual
+  sourceUrl   String? @map("source_url")
+  message     String?
+  leadStatus  String  @default("new") @map("lead_status") // new, contacted, qualified, unqualified, converted
+
+  // UTM tracking
+  utmSource   String? @map("utm_source")
+  utmMedium   String? @map("utm_medium")
+  utmCampaign String? @map("utm_campaign")
+  utmTerm     String? @map("utm_term")
+  utmContent  String? @map("utm_content")
+
+  // HubSpot sync
+  hubspotContactId String?   @unique @map("hubspot_contact_id")
+  hubspotDealId    String?   @map("hubspot_deal_id")
+  hubspotSyncedAt  DateTime? @map("hubspot_synced_at")
+  hubspotSyncStatus String   @default("pending") @map("hubspot_sync_status") // pending, synced, failed
+  hubspotSyncError String?   @map("hubspot_sync_error")
+
+  // Metadata
+  ipAddress    String?   @map("ip_address")
+  userAgent    String?   @map("user_agent")
+  referrer     String?
+  customFields Json?     @default("{}") @db.JsonB @map("custom_fields")
+  tags         String[]  @default([])
+
+  // Follow-up
+  assignedTo        String?   @map("assigned_to")
+  notes             String?
+  lastContactedAt   DateTime? @map("last_contacted_at")
+  nextFollowUpAt    DateTime? @map("next_follow_up_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([leadStatus])
+  @@index([source])
+  @@index([hubspotContactId])
+  @@index([hubspotSyncStatus])
+  @@index([createdAt(sort: Desc)])
+  @@map("crm_leads")
+}
+
+// Email templates
+model EmailTemplate {
+  id String @id @default(uuid())
+
+  // Template details
+  name        String
+  description String?
+  category    String? // newsletter, transactional, marketing, automated
+
+  // Content
+  subject     String
+  previewText String? @map("preview_text")
+  contentHtml String  @map("content_html")
+  contentText String? @map("content_text")
+
+  // Variables
+  variables Json? @default("[]") @db.JsonB // [{name, required, default}]
+
+  // Metadata
+  isActive   Boolean   @default(true) @map("is_active")
+  usageCount Int       @default(0) @map("usage_count")
+  lastUsedAt DateTime? @map("last_used_at")
+
+  createdBy String?   @map("created_by")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([isActive])
+  @@map("email_templates")
 }

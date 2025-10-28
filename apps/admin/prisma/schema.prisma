@@ -695,13 +695,24 @@ model ContentLibrary {
   authorId              String?   @map("author_id")
   metadata              Json?     @db.Json
   
+  // Sprint 4: Publishing fields
+  publishTargets        String[]  @default([]) @map("publish_targets") // ['linkedin', 'instagram']
+  publishStatus         String    @default("draft") @map("publish_status") // draft, queued, posting, posted, failed
+  publishedLinks        Json?     @default("{}") @map("published_links") @db.JsonB // {"linkedin": "https://..."}
+  lastPublishError      String?   @map("last_publish_error") @db.Text
+  publishAttempts       Int       @default(0) @map("publish_attempts")
+  lastPublishAttempt    DateTime? @map("last_publish_attempt")
+  
   // Relations
-  topic                 Topic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  topic                 Topic?         @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  publishJobs           PublishJob[]
   
   @@index([status])
   @@index([type])
   @@index([topicId])
   @@index([publishedAt])
+  @@index([scheduledFor])
+  @@index([publishStatus])
   @@map("content_library")
 }
 
@@ -731,4 +742,90 @@ model MediaLibrary {
   @@index([folder])
   @@index([createdAt])
   @@map("media_library")
+}
+
+// ============================================
+// Sprint 4: Auth + LinkedIn Integration
+// ============================================
+
+// Social accounts for OAuth (LinkedIn, Instagram, etc.)
+model SocialAccount {
+  id              String    @id @default(uuid())
+  userId          String    @map("user_id")
+  provider        String    // 'linkedin', 'instagram', etc.
+  accountId       String    @map("account_id") // Provider's user ID
+  accountName     String?   @map("account_name")
+  accessToken     String    @map("access_token") @db.Text // Encrypted
+  refreshToken    String?   @map("refresh_token") @db.Text // Encrypted
+  tokenExpiresAt  DateTime? @map("token_expires_at")
+  scopes          String[]  @default([])
+  metadata        Json?     @default("{}") @db.JsonB
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, provider, accountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([isActive])
+  @@map("social_accounts")
+}
+
+// Publish jobs for scheduler
+model PublishJob {
+  id           String    @id @default(uuid())
+  contentId    String    @map("content_id")
+  platform     String    // 'linkedin', 'instagram', etc.
+  scheduledFor DateTime  @map("scheduled_for")
+  status       String    @default("pending") // pending, processing, completed, failed
+  attempts     Int       @default(0)
+  maxAttempts  Int       @default(3) @map("max_attempts")
+  lastAttempt  DateTime? @map("last_attempt")
+  lastError    String?   @map("last_error") @db.Text
+  result       Json?     @db.JsonB // Success response
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  content      ContentLibrary @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@index([contentId])
+  @@index([status])
+  @@index([scheduledFor, status])
+  @@map("publish_jobs")
+}
+
+// User roles for RBAC
+model UserRole {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  role      String   // 'admin', 'editor', 'viewer'
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String?  @map("created_by")
+
+  @@unique([userId, role])
+  @@index([userId])
+  @@index([role])
+  @@map("user_roles")
+}
+
+// Newsletter subscribers
+model NewsletterSubscriber {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  name              String?
+  status            String    @default("pending") // pending, confirmed, unsubscribed
+  confirmationToken String?   @map("confirmation_token")
+  confirmedAt       DateTime? @map("confirmed_at")
+  unsubscribedAt    DateTime? @map("unsubscribed_at")
+  source            String?   // 'website', 'manual', etc.
+  tags              String[]  @default([])
+  metadata          Json?     @default("{}") @db.JsonB
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("newsletter_subscribers")
 }

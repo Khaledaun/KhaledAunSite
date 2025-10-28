@@ -68,235 +68,127 @@ export function ContentSEOPanel(props: ContentSEOPanelProps) {
         </div>
       </div>
 
-      {/* Meta Title */}
+      {/* Meta Information */}
       <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Meta Title</h4>
-          {analysis.metaTitle.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
-        </div>
-        <p className="mt-2 text-sm text-gray-700">{props.title}</p>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className={analysis.metaTitle.optimal ? 'text-green-600' : 'text-yellow-600'}>
-            {analysis.metaTitle.length} characters
-          </span>
-          <span className="text-gray-500">Optimal: 30-60</span>
-        </div>
-        {!analysis.metaTitle.optimal && (
-          <p className="mt-2 text-xs text-gray-500">{analysis.metaTitle.suggestion}</p>
-        )}
-      </div>
-
-      {/* Meta Description */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Meta Description</h4>
-          {analysis.metaDescription.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
-        </div>
-        <p className="mt-2 text-sm text-gray-700">{props.description || 'No description set'}</p>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className={analysis.metaDescription.optimal ? 'text-green-600' : 'text-yellow-600'}>
-            {analysis.metaDescription.length} characters
-          </span>
-          <span className="text-gray-500">Optimal: 120-160</span>
-        </div>
-        {!analysis.metaDescription.optimal && (
-          <p className="mt-2 text-xs text-gray-500">{analysis.metaDescription.suggestion}</p>
-        )}
-      </div>
-
-      {/* Content Length */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Content Length</h4>
-          {analysis.contentLength.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
-        </div>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className={analysis.contentLength.optimal ? 'text-green-600' : 'text-yellow-600'}>
-            {analysis.wordCount} words
-          </span>
-          <span className="text-gray-500">Optimal: 800+</span>
-        </div>
-        <p className="mt-1 text-xs text-gray-500">
-          Estimated reading time: {analysis.readingTime} min
-        </p>
-        {!analysis.contentLength.optimal && (
-          <p className="mt-2 text-xs text-gray-500">{analysis.contentLength.suggestion}</p>
-        )}
-      </div>
-
-      {/* Heading Structure */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Heading Structure</h4>
-          {analysis.headingStructure.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
-        </div>
-        <div className="mt-2 grid grid-cols-3 gap-2 text-sm">
+        <h4 className="font-medium text-gray-900">Meta Tags</h4>
+        <div className="mt-4 space-y-3">
+          {/* Title */}
           <div>
-            <span className="text-gray-500">H1:</span> {analysis.headingStructure.h1Count}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-700">Title Length</span>
+              <span className={analysis.meta.titleOptimal ? 'text-green-600' : 'text-yellow-600'}>
+                {analysis.meta.titleLength} characters {analysis.meta.titleOptimal ? '✓' : '⚠'}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Optimal: 30-60 characters</p>
           </div>
+          
+          {/* Description */}
           <div>
-            <span className="text-gray-500">H2:</span> {analysis.headingStructure.h2Count}
-          </div>
-          <div>
-            <span className="text-gray-500">H3:</span> {analysis.headingStructure.h3Count}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-700">Description Length</span>
+              <span className={analysis.meta.descriptionOptimal ? 'text-green-600' : 'text-yellow-600'}>
+                {analysis.meta.descriptionLength} characters {analysis.meta.descriptionOptimal ? '✓' : '⚠'}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-gray-500">Optimal: 120-160 characters</p>
           </div>
         </div>
-        {!analysis.headingStructure.optimal && (
-          <p className="mt-2 text-xs text-gray-500">{analysis.headingStructure.suggestion}</p>
-        )}
-      </div>
-
-      {/* Keyword Density */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <h4 className="font-medium text-gray-900">Keyword Density</h4>
-        {props.keywords.length > 0 ? (
-          <div className="mt-2 space-y-2">
-            {props.keywords.map((keyword) => {
-              const density = analysis.keywordDensity[keyword] || 0;
-              const optimal = density >= 0.5 && density <= 2.5;
-              return (
-                <div key={keyword} className="flex items-center justify-between text-sm">
-                  <span className="text-gray-700">{keyword}</span>
-                  <div className="flex items-center gap-2">
-                    <span className={optimal ? 'text-green-600' : 'text-yellow-600'}>
-                      {density.toFixed(2)}%
-                    </span>
-                    {optimal ? (
-                      <span className="text-green-600">✓</span>
-                    ) : (
-                      <span className="text-yellow-600">⚠</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-gray-500">Add keywords to analyze density</p>
-        )}
-        <p className="mt-2 text-xs text-gray-500">Optimal range: 0.5% - 2.5%</p>
       </div>
 
       {/* Readability */}
       <div className="rounded-lg border border-gray-200 bg-white p-6">
         <h4 className="font-medium text-gray-900">Readability</h4>
-        <div className="mt-2 text-sm">
+        <div className="mt-4 space-y-2 text-sm">
           <div className="flex items-center justify-between">
             <span className="text-gray-700">Flesch-Kincaid Grade</span>
-            <span className={analysis.readabilityScore <= 10 ? 'text-green-600' : 'text-yellow-600'}>
-              {analysis.readabilityScore.toFixed(1)}
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-gray-500">
-            {analysis.readabilityScore <= 6 && 'Easy to read (6th grade)'}
-            {analysis.readabilityScore > 6 && analysis.readabilityScore <= 10 && 'Fairly easy (7th-10th grade)'}
-            {analysis.readabilityScore > 10 && analysis.readabilityScore <= 14 && 'Moderate (11th-14th grade)'}
-            {analysis.readabilityScore > 14 && 'Difficult (College level)'}
-          </p>
-        </div>
-      </div>
-
-      {/* Image Alt Text */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Image Alt Text</h4>
-          {analysis.imageAltText.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
-        </div>
-        <div className="mt-2 text-sm">
-          <p className="text-gray-700">
-            {analysis.imageAltText.totalImages} image(s), {analysis.imageAltText.imagesMissingAlt} missing alt text
-          </p>
-          {!analysis.imageAltText.optimal && (
-            <p className="mt-2 text-xs text-gray-500">{analysis.imageAltText.suggestion}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Internal Links */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">Internal Links</h4>
-          {analysis.internalLinks.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
-        </div>
-        <div className="mt-2 space-y-1 text-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-gray-700">Internal links</span>
-            <span>{analysis.internalLinks.internalLinkCount}</span>
+            <span className="font-medium">{analysis.readability.fleschKincaid.toFixed(1)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-gray-700">External links</span>
-            <span>{analysis.internalLinks.externalLinkCount}</span>
+            <span className="text-gray-700">Grade Level</span>
+            <span className="font-medium">{analysis.readability.grade}</span>
           </div>
-          {!analysis.internalLinks.optimal && (
-            <p className="mt-2 text-xs text-gray-500">{analysis.internalLinks.suggestion}</p>
-          )}
+          <div className="flex items-center justify-between">
+            <span className="text-gray-700">Word Count</span>
+            <span className="font-medium">{analysis.readability.wordCount}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-gray-700">Reading Time</span>
+            <span className="font-medium">{analysis.readability.readingTime} min</span>
+          </div>
         </div>
       </div>
 
-      {/* URL Slug */}
+      {/* Headings */}
       <div className="rounded-lg border border-gray-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-medium text-gray-900">URL Slug</h4>
-          {analysis.urlSlug.optimal ? (
-            <span className="text-green-600">✓</span>
-          ) : (
-            <span className="text-yellow-600">⚠</span>
-          )}
+        <h4 className="font-medium text-gray-900">Heading Structure</h4>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
+          <div>
+            <span className="text-gray-500">H1:</span> <span className="font-medium">{analysis.headings.h1Count}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">H2:</span> <span className="font-medium">{analysis.headings.h2Count}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">H3:</span> <span className="font-medium">{analysis.headings.h3Count}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">H4:</span> <span className="font-medium">{analysis.headings.h4Count}</span>
+          </div>
         </div>
-        <p className="mt-2 text-sm text-gray-700">{props.slug || 'No slug set'}</p>
-        <div className="mt-2 flex items-center justify-between text-sm">
-          <span className={analysis.urlSlug.optimal ? 'text-green-600' : 'text-yellow-600'}>
-            {analysis.urlSlug.length} characters
+        <div className="mt-2">
+          <span className={`text-sm font-medium ${
+            analysis.headings.structure === 'excellent' ? 'text-green-600' :
+            analysis.headings.structure === 'good' ? 'text-yellow-600' : 'text-red-600'
+          }`}>
+            Structure: {analysis.headings.structure}
           </span>
-          <span className="text-gray-500">Optimal: 3-5 words</span>
         </div>
-        {!analysis.urlSlug.optimal && (
-          <p className="mt-2 text-xs text-gray-500">{analysis.urlSlug.suggestion}</p>
-        )}
       </div>
+
+      {/* Keywords */}
+      {analysis.keywords.length > 0 && (
+        <div className="rounded-lg border border-gray-200 bg-white p-6">
+          <h4 className="font-medium text-gray-900">Keyword Analysis</h4>
+          <div className="mt-4 space-y-2">
+            {analysis.keywords.map((kw, i) => (
+              <div key={i} className="flex items-center justify-between text-sm">
+                <span className="text-gray-700">{kw.keyword}</span>
+                <div className="flex items-center gap-2">
+                  <span className={kw.optimal ? 'text-green-600' : 'text-yellow-600'}>
+                    {kw.density.toFixed(2)}% ({kw.count}x)
+                  </span>
+                  {kw.optimal ? (
+                    <span className="text-green-600">✓</span>
+                  ) : (
+                    <span className="text-yellow-600">⚠</span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-gray-500">Optimal density: 0.5% - 2.5%</p>
+        </div>
+      )}
 
       {/* Issues */}
       {analysis.issues.length > 0 && (
         <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6">
           <h4 className="font-medium text-gray-900">Issues to Fix</h4>
-          <ul className="mt-2 space-y-2">
+          <ul className="mt-4 space-y-3">
             {analysis.issues.map((issue, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 <span className={
-                  issue.severity === 'high' ? 'text-red-600' :
-                  issue.severity === 'medium' ? 'text-yellow-600' :
+                  issue.severity === 'error' ? 'text-red-600' :
+                  issue.severity === 'warning' ? 'text-yellow-600' :
                   'text-blue-600'
                 }>
-                  {issue.severity === 'high' ? '🔴' : issue.severity === 'medium' ? '🟡' : '🔵'}
+                  {issue.severity === 'error' ? '🔴' : issue.severity === 'warning' ? '🟡' : '🔵'}
                 </span>
-                <div>
+                <div className="flex-1">
                   <p className="font-medium text-gray-900">{issue.type}</p>
                   <p className="text-gray-700">{issue.message}</p>
-                  <p className="mt-1 text-gray-600">{issue.suggestion}</p>
+                  {issue.fix && <p className="mt-1 text-gray-600">{issue.fix}</p>}
                 </div>
               </li>
             ))}
@@ -308,7 +200,7 @@ export function ContentSEOPanel(props: ContentSEOPanelProps) {
       {analysis.strengths.length > 0 && (
         <div className="rounded-lg border border-green-200 bg-green-50 p-6">
           <h4 className="font-medium text-gray-900">Strengths</h4>
-          <ul className="mt-2 space-y-1">
+          <ul className="mt-4 space-y-2">
             {analysis.strengths.map((strength, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
                 <span className="text-green-600">✓</span>
@@ -318,7 +210,21 @@ export function ContentSEOPanel(props: ContentSEOPanelProps) {
           </ul>
         </div>
       )}
+
+      {/* Recommendations */}
+      {analysis.recommendations.length > 0 && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 p-6">
+          <h4 className="font-medium text-gray-900">Recommendations</h4>
+          <ul className="mt-4 space-y-2">
+            {analysis.recommendations.map((rec, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                <span className="text-blue-600">💡</span>
+                <span>{rec}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
-

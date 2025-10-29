@@ -166,11 +166,12 @@ export async function sendTemplateEmail(
 
   Object.entries(variables).forEach(([key, value]) => {
     const placeholder = `{{${key}}}`;
-    html = html.replaceAll(placeholder, value);
+    const regex = new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    html = html.replace(regex, value);
     if (text) {
-      text = text.replaceAll(placeholder, value);
+      text = text.replace(regex, value);
     }
-    processedSubject = processedSubject.replaceAll(placeholder, value);
+    processedSubject = processedSubject.replace(regex, value);
   });
 
   return sendEmail({

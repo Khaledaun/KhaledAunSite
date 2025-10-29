@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       // Find by token (more secure)
       subscriber = await prisma.newsletterSubscriber.findFirst({
         where: {
-          email,
+          ...(email && { email: email.toLowerCase().trim() }),
           // Generate a simple hash for unsubscribe tokens if needed
           // For now, just use email
         },

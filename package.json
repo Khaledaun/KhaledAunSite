@@ -26,6 +26,7 @@
     "audit:fix": "pnpm audit --fix"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@playwright/test": "^1.45.1",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
@@ -51,4 +52,3 @@
     "schema": "packages/db/prisma/schema.prisma"
   }
 }
-

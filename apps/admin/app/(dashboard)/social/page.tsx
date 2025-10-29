@@ -7,11 +7,12 @@ import { Linkedin, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-r
 interface LinkedInAccount {
   id: string;
   provider: string;
-  providerAccountId: string;
+  accountId: string;
+  accountName: string | null;
   expiresAt: string;
   isExpired: boolean;
   connectionValid: boolean;
-  scope: string[];
+  scopes: string[];
   metadata: {
     firstName: string;
     lastName: string;
@@ -211,7 +212,7 @@ export default function SocialPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Account ID:</span>
                   <span className="font-mono text-gray-900">
-                    {status.account.providerAccountId}
+                    {status.account.accountId}
                   </span>
                 </div>
                 
@@ -239,7 +240,7 @@ export default function SocialPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Permissions:</span>
                   <span className="text-gray-900">
-                    {status.account.scope.join(', ')}
+                    {status.account.scopes.join(', ')}
                   </span>
                 </div>
 

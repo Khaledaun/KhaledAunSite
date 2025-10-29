@@ -673,6 +673,8 @@ model ContentLibrary {
   summary               String?   @db.Text
   excerpt               String?   @db.Text
   keywords              String[]  @default([])
+  seoTitle              String?   @map("seo_title") @db.VarChar(100)
+  seoDescription        String?   @map("seo_description") @db.VarChar(200)
   seoScore              Int?      @map("seo_score")
   wordCount             Int?      @map("word_count")
   readingTimeMinutes    Int?      @map("reading_time_minutes")

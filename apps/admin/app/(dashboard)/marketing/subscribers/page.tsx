@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Clock, XCircle, Download, Mail } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getSubscribers(searchParams: { 
   status?: string; 
   search?: string; 

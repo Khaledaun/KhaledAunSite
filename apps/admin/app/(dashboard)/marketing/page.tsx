@@ -11,6 +11,8 @@ import {
   XCircle
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getMarketingStats() {
   try {
     // Get subscriber stats

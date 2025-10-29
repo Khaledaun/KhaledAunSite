@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, Send, Clock, CheckCircle2, Plus } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 async function getCampaigns() {
   try {
     const campaigns = await prisma.emailCampaign.findMany({

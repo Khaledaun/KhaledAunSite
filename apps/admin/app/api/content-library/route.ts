@@ -80,14 +80,11 @@ export async function POST(request: NextRequest) {
       topicId,
       title,
       content,
-      type = 'blog',
+      type = 'BLOG',
       format,
       summary,
-      excerpt,
       keywords = [],
       tags = [],
-      category,
-      featuredImageId,
       scheduledFor,
     } = body;
 
@@ -98,9 +95,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate word count and reading time
+    // Calculate word count
     const wordCount = content.split(/\s+/).length;
-    const readingTimeMinutes = Math.ceil(wordCount / 200); // Average reading speed
 
     const contentItem = await prisma.contentLibrary.create({
       data: {
@@ -110,15 +106,11 @@ export async function POST(request: NextRequest) {
         type,
         format,
         summary,
-        excerpt,
         keywords,
         tags,
-        category,
-        status: 'draft',
-        authorId: auth.user?.id,
+        status: 'DRAFT',
+        authorId: auth.user?.id || 'system',
         wordCount,
-        readingTimeMinutes,
-        featuredImageId,
         scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
       },
     });

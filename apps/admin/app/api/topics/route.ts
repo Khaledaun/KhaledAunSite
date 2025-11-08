@@ -70,16 +70,16 @@ export async function POST(request: NextRequest) {
       title,
       description,
       sourceUrl,
-      sourceType = 'manual',
+      sourceType = 'MANUAL',
       keywords = [],
-      priority = 0,
+      priority = 5,
       userNotes,
       scheduledFor,
     } = body;
 
-    if (!title) {
+    if (!title || !description) {
       return NextResponse.json(
-        { error: 'Title is required' },
+        { error: 'Title and description are required' },
         { status: 400 }
       );
     }
@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
         keywords,
         priority,
         userNotes,
-        status: 'pending',
+        status: 'PENDING',
+        scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
       },
     });
 

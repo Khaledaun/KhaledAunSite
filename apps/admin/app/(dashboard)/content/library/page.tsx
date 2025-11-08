@@ -10,8 +10,8 @@ import { format } from 'date-fns';
 interface Content {
   id: string;
   title: string;
-  type: 'blog' | 'linkedin_post' | 'linkedin_article' | 'linkedin_carousel';
-  status: 'draft' | 'review' | 'published' | 'archived';
+  type: 'BLOG' | 'LINKEDIN_POST' | 'LINKEDIN_ARTICLE' | 'LINKEDIN_CAROUSEL' | 'EMAIL' | 'TWITTER_POST';
+  status: 'DRAFT' | 'REVIEW' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED';
   seoScore?: number;
   aioScore?: number;
   wordCount?: number;
@@ -123,13 +123,14 @@ export default function ContentLibraryPage() {
       cell: ({ row }) => {
         const status = row.original.status;
         const colors = {
-          draft: 'bg-gray-100 text-gray-800',
-          review: 'bg-blue-100 text-blue-800',
-          published: 'bg-green-100 text-green-800',
-          archived: 'bg-red-100 text-red-800',
+          DRAFT: 'bg-gray-100 text-gray-800',
+          REVIEW: 'bg-blue-100 text-blue-800',
+          SCHEDULED: 'bg-yellow-100 text-yellow-800',
+          PUBLISHED: 'bg-green-100 text-green-800',
+          ARCHIVED: 'bg-red-100 text-red-800',
         };
         return (
-          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${colors[status]}`}>
+          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${colors[status as keyof typeof colors]}`}>
             {status}
           </span>
         );
@@ -232,13 +233,13 @@ export default function ContentLibraryPage() {
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">Drafts</dt>
           <dd className="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">
-            {content.filter(c => c.status === 'draft').length}
+            {content.filter(c => c.status === 'DRAFT').length}
           </dd>
         </div>
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">Published</dt>
           <dd className="mt-1 text-3xl font-semibold tracking-tight text-green-600">
-            {content.filter(c => c.status === 'published').length}
+            {content.filter(c => c.status === 'PUBLISHED').length}
           </dd>
         </div>
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
@@ -268,10 +269,12 @@ export default function ContentLibraryPage() {
           className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="all">All Types</option>
-          <option value="blog">Blog Post</option>
-          <option value="linkedin_post">LinkedIn Post</option>
-          <option value="linkedin_article">LinkedIn Article</option>
-          <option value="linkedin_carousel">LinkedIn Carousel</option>
+          <option value="BLOG">Blog Post</option>
+          <option value="LINKEDIN_POST">LinkedIn Post</option>
+          <option value="LINKEDIN_ARTICLE">LinkedIn Article</option>
+          <option value="LINKEDIN_CAROUSEL">LinkedIn Carousel</option>
+          <option value="EMAIL">Email</option>
+          <option value="TWITTER_POST">Twitter Post</option>
         </select>
         <select
           value={statusFilter}
@@ -279,10 +282,11 @@ export default function ContentLibraryPage() {
           className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="all">All Statuses</option>
-          <option value="draft">Draft</option>
-          <option value="review">In Review</option>
-          <option value="published">Published</option>
-          <option value="archived">Archived</option>
+          <option value="DRAFT">Draft</option>
+          <option value="REVIEW">In Review</option>
+          <option value="SCHEDULED">Scheduled</option>
+          <option value="PUBLISHED">Published</option>
+          <option value="ARCHIVED">Archived</option>
         </select>
         <button
           onClick={fetchContent}

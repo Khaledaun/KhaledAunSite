@@ -633,3 +633,157 @@ model LinkedInPost {
   @@index([authorId])
   @@map("linkedin_posts")
 }
+
+// AI Content System: Topic Research Queue
+enum TopicSourceType {
+  AI_SEARCH
+  WEB_CRAWL
+  RSS_FEED
+  MANUAL
+}
+
+enum TopicStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Topic {
+  id              String           @id @default(cuid())
+
+  // Content
+  title           String
+  description     String           @db.Text
+  sourceUrl       String?
+  sourceType      TopicSourceType  @default(MANUAL)
+
+  // Status & Priority
+  status          TopicStatus      @default(PENDING)
+  priority        Int              @default(5) // 1-10 scale
+  relevanceScore  Float?           // AI-calculated relevance score
+
+  // Lock mechanism (prevent concurrent edits)
+  locked          Boolean          @default(false)
+  lockedAt        DateTime?
+  lockedBy        String?
+
+  // Keywords & Tags
+  keywords        String[]         @default([])
+  tags            String[]         @default([])
+
+  // User notes
+  userNotes       String?          @db.Text
+
+  // Scheduling
+  scheduledFor    DateTime?
+
+  // Relations
+  contentLibrary  ContentLibrary[] @relation("TopicContent")
+
+  // Timestamps
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([status, priority])
+  @@index([locked])
+  @@index([createdAt])
+  @@map("topics")
+}
+
+// AI Content System: Content Library (Unified Storage)
+enum ContentType {
+  BLOG
+  LINKEDIN_POST
+  LINKEDIN_ARTICLE
+  LINKEDIN_CAROUSEL
+  EMAIL
+  TWITTER_POST
+}
+
+enum ContentFormat {
+  HOW_TO
+  CASE_STUDY
+  OPINION
+  NEWS
+  TUTORIAL
+  LISTICLE
+  STORY
+  INSIGHT
+}
+
+enum ContentStatus {
+  DRAFT
+  REVIEW
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PublishStatus {
+  DRAFT
+  QUEUED
+  POSTING
+  POSTED
+  FAILED
+}
+
+model ContentLibrary {
+  id              String          @id @default(cuid())
+
+  // Topic relation
+  topicId         String?
+  topic           Topic?          @relation("TopicContent", fields: [topicId], references: [id])
+
+  // Content details
+  type            ContentType
+  format          ContentFormat?
+  title           String
+  content         String          @db.Text
+  summary         String?         @db.Text // LinkedIn description or meta
+
+  // SEO & Optimization
+  keywords        String[]        @default([])
+  seoScore        Float?          // 0-100
+  aioScore        Float?          // AI Optimization score 0-100
+  wordCount       Int?
+
+  // Status
+  status          ContentStatus   @default(DRAFT)
+
+  // Publishing
+  publishedTo     String[]        @default([]) // ['blog', 'linkedin', 'twitter']
+  publishStatus   PublishStatus?  @default(DRAFT)
+  publishedLinks  Json?           // { blog: 'url', linkedin: 'url' }
+  lastPublishError String?        @db.Text
+  publishAttempts Int             @default(0)
+  lastPublishAttempt DateTime?
+  scheduledFor    DateTime?
+
+  // Relations
+  linkedInPostId  String?
+  blogPostId      String?
+  mediaIds        String[]        @default([])
+
+  // Tags & Organization
+  tags            String[]        @default([])
+
+  // Author
+  authorId        String
+
+  // AI Generation tracking
+  aiGenerated     Boolean         @default(false)
+  aiGenerationId  String?
+
+  // Timestamps
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  publishedAt     DateTime?
+
+  @@index([type, status])
+  @@index([topicId])
+  @@index([authorId])
+  @@index([publishStatus, scheduledFor])
+  @@map("content_library")
+}

@@ -634,6 +634,42 @@ model LinkedInPost {
   @@map("linkedin_posts")
 }
 
+// Sprint 4: Social Accounts (OAuth tokens)
+model SocialAccount {
+  id              String   @id @default(uuid())
+
+  // User relation
+  userId          String
+
+  // Provider info
+  provider        String   // 'linkedin', 'instagram', etc.
+  accountId       String   // Provider's user ID
+  accountName     String?  // Display name
+
+  // OAuth tokens (encrypted)
+  accessToken     String   @db.Text
+  refreshToken    String?  @db.Text
+  tokenExpiresAt  DateTime?
+  scopes          String[] @default([])
+
+  // Metadata
+  metadata        Json     @default("{}")
+  isActive        Boolean  @default(true)
+
+  // Computed field helper (not in DB, added in query)
+  isExpired       Boolean  @ignore
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, provider, accountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([isActive])
+  @@map("social_accounts")
+}
+
 // AI Content System: Topic Research Queue
 enum TopicSourceType {
   AI_SEARCH

@@ -86,15 +86,14 @@ export async function POST(request: NextRequest) {
 
     // Create media record in database using Prisma
     try {
-      const media = await prisma.mediaLibrary.create({
+      const media = await prisma.mediaAsset.create({
         data: {
           filename: fileName,
-          originalFilename: file.name,
+          originalName: file.name,
           url: urlData.publicUrl,
-          type: mediaType,
-          sizeBytes: file.size,
+          size: file.size,
           mimeType: file.type,
-          altText,
+          alt: altText,
           caption,
           tags: tags ? tags.split(',').map(t => t.trim()) : [],
           folder,

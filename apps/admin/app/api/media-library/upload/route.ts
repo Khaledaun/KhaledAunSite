@@ -85,6 +85,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Create media record in database using Prisma
+    if (!auth.user?.id) {
+      // Clean up uploaded file if user is not authenticated
+      await supabase.storage.from('media').remove([filePath]);
+      return NextResponse.json(
+        { error: 'User authentication required' },
+        { status: 401 }
+      );
+    }
+
     try {
       const media = await prisma.mediaAsset.create({
         data: {
@@ -97,7 +106,7 @@ export async function POST(request: NextRequest) {
           caption,
           tags: tags ? tags.split(',').map(t => t.trim()) : [],
           folder,
-          uploadedBy: auth.user?.id,
+          uploadedBy: auth.user.id,
         },
       });
 

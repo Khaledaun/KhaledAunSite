@@ -92,6 +92,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!auth.user?.id) {
+      return NextResponse.json(
+        { error: 'User authentication required' },
+        { status: 401 }
+      );
+    }
+
     const media = await prisma.mediaAsset.create({
       data: {
         filename,
@@ -107,7 +114,7 @@ export async function POST(request: NextRequest) {
         caption,
         tags,
         folder,
-        uploadedBy: auth.user?.id,
+        uploadedBy: auth.user.id,
       },
     });
 

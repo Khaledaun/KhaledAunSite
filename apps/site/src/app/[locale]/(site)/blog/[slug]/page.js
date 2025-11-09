@@ -5,6 +5,7 @@ import { draftMode } from 'next/headers';
 import Link from 'next/link';
 import Script from 'next/script';
 import { generateSchemaMarkup } from '@khaledaun/utils/aio-optimizer';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -168,13 +169,15 @@ export default async function BlogPostPage({ params: { slug, locale }, searchPar
       {/* Article Header */}
       <article className="py-20">
         <div className="container mx-auto px-6 max-w-4xl">
-          {/* Back Link */}
-          <Link 
-            href={`/${locale}/blog`}
-            className="inline-block mb-8 text-brand-gold hover:text-brand-gold/80 transition-colors"
-          >
-            ← Back to Blog
-          </Link>
+          {/* Breadcrumbs */}
+          <Breadcrumbs
+            items={[
+              { label: 'Home', href: `/${locale}` },
+              { label: 'Blog', href: `/${locale}/blog` },
+              { label: post.title, href: null },
+            ]}
+            className="mb-8"
+          />
 
           {/* Title */}
           <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl mb-6">

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { Inter, Poppins, Cairo } from 'next/font/google';
 import { ModalProvider } from '../../context/ModalContext';
 import { locales } from '../../i18n/config';
+import WebVitalsReporter from '../../components/analytics/WebVitalsReporter';
 import '../globals.css';
 
 // Dennis theme-inspired fonts: Poppins for headings, Inter for body
@@ -114,6 +115,7 @@ export default async function LocaleLayout({children, params: {locale}}) {
       className={`${inter.variable} ${poppins.variable} ${cairo.variable}`}
     >
       <body className={`${locale === 'ar' ? 'font-cairo' : 'font-poppins'} text-base text-black dark:text-white dark:bg-slate-900`}>
+        <WebVitalsReporter />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-brand-gold text-brand-navy px-4 py-2 rounded z-50"

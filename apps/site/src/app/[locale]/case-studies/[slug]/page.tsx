@@ -4,6 +4,7 @@ import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 import Script from 'next/script';
 import { generateSchemaMarkup } from '@khaledaun/utils/aio-optimizer';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 
 // Force dynamic rendering since we need database access
 export const dynamic = 'force-dynamic';
@@ -162,15 +163,15 @@ export default async function CaseStudyPage({ params }: Props) {
 
       <section className="relative md:py-24 py-16">
         <div className="container">
-        {/* Breadcrumb */}
-        <div className="mb-8">
-          <Link
-            href="/case-studies"
-            className="text-sm text-slate-400 hover:text-brand-gold transition-colors"
-          >
-            ← Back to Case Studies
-          </Link>
-        </div>
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { label: 'Home', href: `/${params.locale}` },
+            { label: 'Case Studies', href: `/${params.locale}/case-studies` },
+            { label: caseStudy.title, href: null },
+          ]}
+          className="mb-8"
+        />
 
         {/* Header */}
         <div className="max-w-4xl mx-auto">

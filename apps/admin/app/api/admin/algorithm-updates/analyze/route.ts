@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
               insights: {
                 ...batchAnalysis,
                 individualSummary: `Part of batch analysis of ${updates.length} updates`,
-              },
+              } as any,
               promptUpdates: JSON.stringify(batchAnalysis.priorityUpdates),
             },
           })
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
             where: { id: update.id },
             data: {
               analyzed: true,
-              insights: analysis.insights,
+              insights: analysis.insights as any,
               promptUpdates: JSON.stringify(analysis.promptUpdates),
             },
           });

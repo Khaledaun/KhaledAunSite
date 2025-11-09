@@ -35,20 +35,63 @@ export function generateStaticParams() {
 export const dynamicParams = true;
 
 export const metadata = {
-  title: 'Khaled Aun - Legal Strategy & Business Growth',
-  description: 'Expert legal counsel for complex business challenges and growth opportunities.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledaun.com'),
+  title: {
+    default: 'Khaled Aun - Legal Strategy & Business Growth',
+    template: '%s | Khaled Aun'
+  },
+  description: 'Expert legal counsel for complex business challenges and growth opportunities. Litigation expert, certified arbitrator, and cross-border legal advisor.',
+  keywords: ['legal counsel', 'litigation expert', 'arbitrator', 'business law', 'cross-border legal', 'conflict resolution', 'legal strategy'],
+  authors: [{ name: 'Khaled Aun' }],
+  creator: 'Khaled Aun',
+  publisher: 'Khaled Aun',
+
+  // Open Graph
   openGraph: {
-    title: 'Khaled Aun - Legal Strategy & Business Growth',
-    description: 'Expert legal counsel for complex business challenges and growth opportunities.',
     type: 'website',
     locale: 'en_US',
     alternateLocale: 'ar_SA',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledaun.com',
+    siteName: 'Khaled Aun',
+    title: 'Khaled Aun - Legal Strategy & Business Growth',
+    description: 'Expert legal counsel for complex business challenges and growth opportunities. Litigation expert, certified arbitrator, and cross-border legal advisor.',
+    images: [
+      {
+        url: '/images/og-homepage.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Khaled Aun - Legal Strategy & Business Growth',
+      },
+    ],
   },
+
+  // Twitter Card
   twitter: {
     card: 'summary_large_image',
+    site: '@khaledaun',
+    creator: '@khaledaun',
     title: 'Khaled Aun - Legal Strategy & Business Growth',
     description: 'Expert legal counsel for complex business challenges and growth opportunities.',
+    images: ['/images/og-homepage.jpg'],
   },
+
+  // Robots
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+
+  // Verification (add your verification tokens when ready)
+  // verification: {
+  //   google: 'your-google-verification-token',
+  //   yandex: 'your-yandex-verification-token',
+  // },
 };
 
 export default async function LocaleLayout({children, params: {locale}}) {

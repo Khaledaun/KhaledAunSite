@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
           where: {
             OR: [
               { category: { in: ['seo', 'content-generation', 'linkedin'] } },
-              { useCase: { in: ['CONTENT_DRAFT', 'SEO_METADATA'] } },
+              { useCase: { in: ['CONTENT_GENERATION', 'SEO_OPTIMIZATION'] } },
             ],
           },
         });
@@ -176,10 +176,10 @@ function filterRelevantUpdates(
     }
 
     // Match by use case
-    if (templateUseCase === 'CONTENT_DRAFT' && section.includes('content')) {
+    if (templateUseCase === 'CONTENT_GENERATION' && section.includes('content')) {
       return true;
     }
-    if (templateUseCase === 'SEO_METADATA' && section.includes('metadata')) {
+    if (templateUseCase === 'SEO_OPTIMIZATION' && section.includes('metadata')) {
       return true;
     }
 

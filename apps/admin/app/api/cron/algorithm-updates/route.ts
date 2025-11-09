@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
               where: { id: update.id },
               data: {
                 analyzed: true,
-                insights: batchAnalysis,
+                insights: batchAnalysis as any,
                 promptUpdates: JSON.stringify(batchAnalysis.priorityUpdates),
               },
             })

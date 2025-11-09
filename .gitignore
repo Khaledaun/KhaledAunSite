@@ -60,3 +60,6 @@ prisma/migrations/**/migration.lock
 
 # Sentry
 .sentryclirc
+
+# TypeScript
+*.tsbuildinfo

@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,13 +47,17 @@ jobs:
       - name: Generate Prisma Client
         run: pnpm --filter @khaledaun/db run db:generate
         env:
-          # Mock DATABASE_URL for Prisma generation
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+
+      - name: Run database migrations
+        run: cd packages/db && npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
 
       - name: Build site
         run: pnpm --filter @khaledaun/site build
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           NEXT_PUBLIC_SUPABASE_URL: https://mock.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2siLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxOTAwMDAwMDAwfQ.mock
           REVALIDATE_SECRET: test-secret
@@ -48,7 +67,7 @@ jobs:
       - name: Build admin
         run: pnpm --filter @khaledaun/admin build
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           NEXT_PUBLIC_SUPABASE_URL: https://mock.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2siLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxOTAwMDAwMDAwfQ.mock
           REVALIDATE_SECRET: test-secret
@@ -62,7 +81,7 @@ jobs:
           echo $! > ../../site.pid
           sleep 5
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           NEXT_PUBLIC_SUPABASE_URL: https://mock.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2siLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxOTAwMDAwMDAwfQ.mock
           REVALIDATE_SECRET: test-secret
@@ -77,7 +96,7 @@ jobs:
           echo $! > ../../admin.pid
           sleep 5
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           NEXT_PUBLIC_SUPABASE_URL: https://mock.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2siLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYwMDAwMDAwMCwiZXhwIjoxOTAwMDAwMDAwfQ.mock
           REVALIDATE_SECRET: test-secret

@@ -38,11 +38,11 @@ export async function processScheduledPosts(): Promise<{
     // Find content that's scheduled and due to be published
     const dueContent = await prisma.contentLibrary.findMany({
       where: {
-        publishStatus: 'queued',
+        publishStatus: 'QUEUED',
         scheduledFor: {
           lte: new Date(), // Due now or in the past
         },
-        publishTargets: {
+        publishedTo: {
           has: 'linkedin',
         },
       },
@@ -59,16 +59,16 @@ export async function processScheduledPosts(): Promise<{
         await prisma.contentLibrary.update({
           where: { id: content.id },
           data: {
-            publishStatus: 'posting',
+            publishStatus: 'POSTING',
             lastPublishAttempt: new Date(),
           },
         });
 
         // Attempt to post
         const result = await postToLinkedIn(content.authorId || '', {
-          text: `${content.title}\n\n${content.excerpt || content.summary || ''}`,
-          url: content.blogSlug
-            ? `https://khaledaun.com/blog/${content.blogSlug}`
+          text: `${content.title}\n\n${content.summary || ''}`,
+          url: content.blogPostId
+            ? `https://khaledaun.com/blog/${content.blogPostId}`
             : undefined,
           imageUrl:
             content.mediaIds && content.mediaIds.length > 0
@@ -85,7 +85,7 @@ export async function processScheduledPosts(): Promise<{
           await prisma.contentLibrary.update({
             where: { id: content.id },
             data: {
-              publishStatus: 'posted',
+              publishStatus: 'POSTED',
               publishedLinks,
               publishAttempts: {
                 increment: 1,
@@ -107,7 +107,7 @@ export async function processScheduledPosts(): Promise<{
             await prisma.contentLibrary.update({
               where: { id: content.id },
               data: {
-                publishStatus: 'failed',
+                publishStatus: 'FAILED',
                 publishAttempts: attempts,
                 lastPublishAttempt: new Date(),
                 lastPublishError: result.error || 'Unknown error',
@@ -128,7 +128,7 @@ export async function processScheduledPosts(): Promise<{
             await prisma.contentLibrary.update({
               where: { id: content.id },
               data: {
-                publishStatus: 'queued',
+                publishStatus: 'QUEUED',
                 publishAttempts: attempts,
                 scheduledFor: nextRetry,
                 lastPublishAttempt: new Date(),
@@ -152,7 +152,7 @@ export async function processScheduledPosts(): Promise<{
         await prisma.contentLibrary.update({
           where: { id: content.id },
           data: {
-            publishStatus: 'failed',
+            publishStatus: 'FAILED',
             publishAttempts: {
               increment: 1,
             },
@@ -185,8 +185,8 @@ export async function schedulePost(
   await prisma.contentLibrary.update({
     where: { id: contentId },
     data: {
-      publishStatus: 'queued',
-      publishTargets: targets,
+      publishStatus: 'QUEUED',
+      publishedTo: targets,
       scheduledFor,
       publishAttempts: 0,
       lastPublishError: null,
@@ -203,8 +203,8 @@ export async function cancelScheduledPost(contentId: string): Promise<void> {
   await prisma.contentLibrary.update({
     where: { id: contentId },
     data: {
-      publishStatus: 'draft',
-      publishTargets: [],
+      publishStatus: 'DRAFT',
+      publishedTo: [],
       scheduledFor: null,
       lastPublishError: null,
     },
@@ -240,17 +240,17 @@ export async function getQueueStats(): Promise<{
 }> {
   const [queued, processing, failed, next] = await Promise.all([
     prisma.contentLibrary.count({
-      where: { publishStatus: 'queued' },
+      where: { publishStatus: 'QUEUED' },
     }),
     prisma.contentLibrary.count({
-      where: { publishStatus: 'posting' },
+      where: { publishStatus: 'POSTING' },
     }),
     prisma.contentLibrary.count({
-      where: { publishStatus: 'failed' },
+      where: { publishStatus: 'FAILED' },
     }),
     prisma.contentLibrary.findFirst({
       where: {
-        publishStatus: 'queued',
+        publishStatus: 'QUEUED',
         scheduledFor: { gte: new Date() },
       },
       orderBy: { scheduledFor: 'asc' },

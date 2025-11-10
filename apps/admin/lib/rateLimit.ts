@@ -207,7 +207,7 @@ export async function rateLimit(
   }
 
   // Prepare headers
-  const headers = {
+  const headers: Record<string, string> = {
     'X-RateLimit-Limit': result.limit.toString(),
     'X-RateLimit-Remaining': result.remaining.toString(),
     'X-RateLimit-Reset': new Date(result.reset).toISOString(),

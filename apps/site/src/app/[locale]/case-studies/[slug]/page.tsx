@@ -6,8 +6,8 @@ import Script from 'next/script';
 import { generateSchemaMarkup } from '@khaledaun/utils/aio-optimizer';
 import Breadcrumbs from '@/components/seo/Breadcrumbs';
 
-// Force dynamic rendering since we need database access
-export const dynamic = 'force-dynamic';
+// Use ISR with 1 hour revalidation for better performance
+export const revalidate = 3600; // Revalidate every 1 hour
 
 interface Props {
   params: {

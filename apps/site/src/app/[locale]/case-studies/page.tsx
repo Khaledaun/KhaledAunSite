@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 
-// Force dynamic rendering since we need database access
-export const dynamic = 'force-dynamic';
+// Use ISR with 1 hour revalidation for better performance
+export const revalidate = 3600; // Revalidate every 1 hour
 
 export const metadata: Metadata = {
   title: 'Case Studies | Khaled Aun',

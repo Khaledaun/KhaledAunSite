@@ -145,8 +145,8 @@ export default async function CaseStudyPage({ params }: Props) {
     title: caseStudy.title,
     description: caseStudy.problem.substring(0, 160),
     author: caseStudy.author?.name || 'Khaled Aun',
-    datePublished: caseStudy.createdAt?.toISOString(),
-    dateModified: caseStudy.updatedAt?.toISOString(),
+    datePublished: caseStudy.createdAt?.toISOString() || new Date().toISOString(),
+    dateModified: caseStudy.updatedAt?.toISOString() || new Date().toISOString(),
     image: caseStudy.featuredImage?.url || `${baseUrl}/images/og-case-study-default.jpg`,
     url: `${baseUrl}/${params.locale}/case-studies/${params.slug}`,
     keywords: caseStudy.categories,
@@ -168,7 +168,7 @@ export default async function CaseStudyPage({ params }: Props) {
           items={[
             { label: 'Home', href: `/${params.locale}` },
             { label: 'Case Studies', href: `/${params.locale}/case-studies` },
-            { label: caseStudy.title, href: null },
+            { label: caseStudy.title },
           ]}
           className="mb-8"
         />

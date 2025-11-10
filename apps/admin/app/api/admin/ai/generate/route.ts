@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateContent, generateOutline, generateSEOMetadata, improveContent, generateIdeas } from '@khaledaun/utils';
 import { z } from 'zod';
+import { rateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
 // Validation schemas
 const generateContentSchema = z.object({
@@ -23,6 +24,13 @@ export async function POST(request: NextRequest) {
   try {
     // TODO: Get actual user from auth
     const userId = 'mock-user-id';
+
+    // Apply rate limiting (10 AI generations per hour)
+    const rateLimitResult = await rateLimit(request, 'aiGeneration', userId);
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult.reset);
+    }
 
     const body = await request.json();
     const data = generateContentSchema.parse(body);

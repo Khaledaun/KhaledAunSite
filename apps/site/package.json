@@ -12,6 +12,8 @@
     "@iconscout/react-unicons": "^2.2.5",
     "@khaledaun/db": "file:../../packages/db",
     "@khaledaun/utils": "file:../../packages/utils",
+    "@upstash/ratelimit": "^2.0.7",
+    "@upstash/redis": "^1.35.6",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "lucide-react": "0.263.1",

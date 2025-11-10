@@ -5,6 +5,8 @@ import { Inter, Poppins, Cairo } from 'next/font/google';
 import { ModalProvider } from '../../context/ModalContext';
 import { locales } from '../../i18n/config';
 import WebVitalsReporter from '../../components/analytics/WebVitalsReporter';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import '../globals.css';
 
 // Dennis theme-inspired fonts: Poppins for headings, Inter for body
@@ -127,6 +129,8 @@ export default async function LocaleLayout({children, params: {locale}}) {
             {children}
           </ModalProvider>
         </NextIntlClientProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

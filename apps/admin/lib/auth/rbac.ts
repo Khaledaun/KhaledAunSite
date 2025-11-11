@@ -4,7 +4,7 @@
  */
 
 import { getUser } from './supabase-server';
-import { prisma } from '../prisma';
+import { prisma } from '@/lib/prisma';
 
 // Role definitions
 export type Role = 'admin' | 'editor' | 'viewer';

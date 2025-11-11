@@ -8,11 +8,19 @@ import Link from 'next/link';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function generateMetadata({ params: { slug } }) {
+export async function generateMetadata({ params: { slug, locale } }) {
   try {
     const post = await prisma.post.findUnique({
       where: { slug },
-      select: { title: true, excerpt: true }
+      select: {
+        title: true,
+        excerpt: true,
+        publishedAt: true,
+        updatedAt: true,
+        author: {
+          select: { name: true, email: true }
+        }
+      }
     });
 
     if (!post) {
@@ -21,9 +29,39 @@ export async function generateMetadata({ params: { slug } }) {
       };
     }
 
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledaun.com';
+    const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`;
+    const author = post.author.name || post.author.email;
+
     return {
       title: post.title,
       description: post.excerpt || `Read ${post.title} on Khaled Aun's blog`,
+
+      // Canonical URL
+      alternates: {
+        canonical: canonicalUrl,
+      },
+
+      // Open Graph Tags
+      openGraph: {
+        title: post.title,
+        description: post.excerpt || `Read ${post.title} on Khaled Aun's blog`,
+        url: canonicalUrl,
+        siteName: 'Khaled Aun',
+        locale: locale,
+        type: 'article',
+        publishedTime: post.publishedAt?.toISOString(),
+        modifiedTime: post.updatedAt?.toISOString(),
+        authors: [author],
+      },
+
+      // Twitter Card Tags
+      twitter: {
+        card: 'summary_large_image',
+        title: post.title,
+        description: post.excerpt || `Read ${post.title} on Khaled Aun's blog`,
+        creator: '@khaledaun', // Update with actual Twitter handle if different
+      },
     };
   } catch (error) {
     console.warn('Unable to generate metadata (database not available):', error.message);
@@ -63,15 +101,49 @@ export default async function BlogPostPage({ params: { slug, locale }, searchPar
   unstable_setRequestLocale(locale);
   const { isEnabled: isDraftMode } = draftMode();
   const isPreview = searchParams?.preview === '1';
-  
+
   const post = await getPost(slug, isDraftMode || isPreview);
 
   if (!post) {
     notFound();
   }
 
+  // Generate JSON-LD structured data for Article
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledaun.com';
+  const canonicalUrl = `${siteUrl}/${locale}/blog/${slug}`;
+  const author = post.author.name || post.author.email;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt || post.title,
+    author: {
+      '@type': 'Person',
+      name: author,
+    },
+    publisher: {
+      '@type': 'Person',
+      name: 'Khaled Aun',
+    },
+    datePublished: post.publishedAt?.toISOString(),
+    dateModified: post.updatedAt?.toISOString(),
+    url: canonicalUrl,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+    inLanguage: locale,
+  };
+
   return (
     <main className="min-h-screen bg-brand-ink text-brand-sand">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Preview Banner */}
       {(isDraftMode || isPreview) && post.status === 'DRAFT' && (
         <div className="bg-yellow-500 text-black py-3 px-6 text-center">

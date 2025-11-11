@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const state = generateSecureRandom(32);
     
     // Store state in cookie (will be verified in callback)
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     cookieStore.set('linkedin_oauth_state', state, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

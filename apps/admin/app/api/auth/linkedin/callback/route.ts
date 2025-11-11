@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify state parameter (CSRF protection)
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const savedState = cookieStore.get('linkedin_oauth_state')?.value;
     
     if (!savedState || savedState !== state) {

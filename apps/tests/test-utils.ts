@@ -47,17 +47,24 @@ export const TEST_DATA = {
 // Mock authentication helper
 export async function mockLogin(page: Page, userType: 'admin' | 'editor' | 'ops') {
   const user = TEST_USERS[userType];
-  
+
+  // Navigate to admin page first to establish proper context for localStorage
+  // This prevents "Access is denied" SecurityError
+  const currentUrl = page.url();
+  if (!currentUrl || currentUrl === 'about:blank' || currentUrl === '') {
+    await page.goto(process.env.ADMIN_URL || 'http://localhost:3000');
+  }
+
   // Set mock JWT token in localStorage
   await page.evaluate((token) => {
     localStorage.setItem('supabase.auth.token', token);
   }, user.token);
-  
+
   // Set user role in localStorage for testing
   await page.evaluate((role) => {
     localStorage.setItem('user.role', role);
   }, user.role);
-  
+
   return user;
 }
 

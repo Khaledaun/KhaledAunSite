@@ -36,13 +36,13 @@ export async function GET(request: NextRequest) {
     }
 
     const [media, total] = await Promise.all([
-      prisma.mediaLibrary.findMany({
+      prisma.mediaAsset.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
       }),
-      prisma.mediaLibrary.count({ where }),
+      prisma.mediaAsset.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -74,7 +74,6 @@ export async function POST(request: NextRequest) {
       originalFilename,
       url,
       thumbnailUrl,
-      type,
       sizeBytes,
       mimeType,
       width,
@@ -86,30 +85,36 @@ export async function POST(request: NextRequest) {
       folder = 'uncategorized',
     } = body;
 
-    if (!filename || !url || !type) {
+    if (!filename || !url || !mimeType) {
       return NextResponse.json(
-        { error: 'Filename, url, and type are required' },
+        { error: 'Filename, url, and mimeType are required' },
         { status: 400 }
       );
     }
 
-    const media = await prisma.mediaLibrary.create({
+    if (!auth.user?.id) {
+      return NextResponse.json(
+        { error: 'User authentication required' },
+        { status: 401 }
+      );
+    }
+
+    const media = await prisma.mediaAsset.create({
       data: {
         filename,
-        originalFilename: originalFilename || filename,
+        originalName: originalFilename || filename,
         url,
         thumbnailUrl,
-        type,
-        sizeBytes,
+        size: sizeBytes,
         mimeType,
         width,
         height,
-        durationSeconds,
-        altText,
+        duration: durationSeconds,
+        alt: altText,
         caption,
         tags,
         folder,
-        uploadedBy: auth.user?.id,
+        uploadedBy: auth.user.id,
       },
     });
 

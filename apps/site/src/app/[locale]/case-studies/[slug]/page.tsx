@@ -2,9 +2,12 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
+import Script from 'next/script';
+import { generateSchemaMarkup } from '@khaledaun/utils/aio-optimizer';
+import Breadcrumbs from '@/components/seo/Breadcrumbs';
 
-// Force dynamic rendering since we need database access
-export const dynamic = 'force-dynamic';
+// Use ISR with 1 hour revalidation for better performance
+export const revalidate = 3600; // Revalidate every 1 hour
 
 interface Props {
   params: {
@@ -19,6 +22,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       slug: params.slug,
       published: true,
     },
+    include: {
+      featuredImage: {
+        select: { url: true, alt: true }
+      },
+      author: {
+        select: { name: true }
+      }
+    }
   });
 
   if (!caseStudy) {
@@ -27,9 +38,65 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledaun.com';
+  const canonicalUrl = `${baseUrl}/${params.locale}/case-studies/${params.slug}`;
+  const description = caseStudy.problem.substring(0, 160);
+  const imageUrl = caseStudy.featuredImage?.url || `${baseUrl}/images/og-case-study-default.jpg`;
+
   return {
     title: `${caseStudy.title} | Case Studies | Khaled Aun`,
-    description: caseStudy.problem.substring(0, 160),
+    description,
+
+    // Canonical URL and language alternates
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        'en': `${baseUrl}/en/case-studies/${params.slug}`,
+        'ar': `${baseUrl}/ar/case-studies/${params.slug}`,
+      },
+    },
+
+    // Open Graph
+    openGraph: {
+      title: caseStudy.title,
+      description,
+      type: 'article',
+      url: canonicalUrl,
+      publishedTime: caseStudy.createdAt?.toISOString(),
+      modifiedTime: caseStudy.updatedAt?.toISOString(),
+      authors: caseStudy.author?.name ? [caseStudy.author.name] : ['Khaled Aun'],
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: caseStudy.featuredImage?.alt || caseStudy.title,
+        },
+      ],
+      locale: params.locale === 'ar' ? 'ar_SA' : 'en_US',
+      siteName: 'Khaled Aun',
+    },
+
+    // Twitter Card
+    twitter: {
+      card: 'summary_large_image',
+      title: caseStudy.title,
+      description,
+      images: [imageUrl],
+      creator: '@khaledaun',
+    },
+
+    // Robots meta tags
+    robots: {
+      index: caseStudy.published,
+      follow: true,
+      googleBot: {
+        index: caseStudy.published,
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 
@@ -72,18 +139,39 @@ export default async function CaseStudyPage({ params }: Props) {
     notFound();
   }
 
+  // Generate Article schema markup
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://khaledaun.com';
+  const articleSchema = generateSchemaMarkup('Article', {
+    title: caseStudy.title,
+    description: caseStudy.problem.substring(0, 160),
+    author: caseStudy.author?.name || 'Khaled Aun',
+    datePublished: caseStudy.createdAt?.toISOString() || new Date().toISOString(),
+    dateModified: caseStudy.updatedAt?.toISOString() || new Date().toISOString(),
+    image: caseStudy.featuredImage?.url || `${baseUrl}/images/og-case-study-default.jpg`,
+    url: `${baseUrl}/${params.locale}/case-studies/${params.slug}`,
+    keywords: caseStudy.categories,
+  });
+
   return (
-    <section className="relative md:py-24 py-16">
-      <div className="container">
-        {/* Breadcrumb */}
-        <div className="mb-8">
-          <Link
-            href="/case-studies"
-            className="text-sm text-slate-400 hover:text-brand-gold transition-colors"
-          >
-            ← Back to Case Studies
-          </Link>
-        </div>
+    <>
+      {/* Article Schema Markup */}
+      <Script
+        id="case-study-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+
+      <section className="relative md:py-24 py-16">
+        <div className="container">
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { label: 'Home', href: `/${params.locale}` },
+            { label: 'Case Studies', href: `/${params.locale}/case-studies` },
+            { label: caseStudy.title },
+          ]}
+          className="mb-8"
+        />
 
         {/* Header */}
         <div className="max-w-4xl mx-auto">
@@ -230,6 +318,7 @@ export default async function CaseStudyPage({ params }: Props) {
         </div>
       </div>
     </section>
+    </>
   );
 }
 

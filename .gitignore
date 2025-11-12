@@ -32,6 +32,9 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 
+# Setup files with actual secrets (keep local only)
+COMPLETE-ENV-SETUP.md
+
 # Debug
 debug.log
 
@@ -60,3 +63,6 @@ prisma/migrations/**/migration.lock
 
 # Sentry
 .sentryclirc
+
+# TypeScript
+*.tsbuildinfo

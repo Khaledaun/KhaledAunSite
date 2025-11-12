@@ -67,15 +67,16 @@ const navigation: NavItem[] = [
       { name: 'Credentials', href: '/profile/credentials' },
     ]
   },
-  { 
-    name: 'AI Assistant', 
-    href: '/ai', 
+  {
+    name: 'AI Assistant',
+    href: '/ai',
     icon: SparklesIcon,
     children: [
       { name: 'Topic Queue', href: '/topics' },
       { name: 'Content Generation', href: '/ai' },
       { name: 'Templates', href: '/ai/templates' },
       { name: 'Configuration', href: '/ai/config' },
+      { name: 'Algorithm Updates', href: '/admin/algorithm-updates' },
     ]
   },
   { 

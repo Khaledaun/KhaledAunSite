@@ -1,12 +1,14 @@
 /**
  * LinkedIn Post API
  * POST /api/linkedin/post - Post content to LinkedIn immediately
+ * Rate limited to 5 posts per hour per user
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/auth/supabase-server';
 import { postToLinkedIn } from '@/lib/linkedin/posting';
 import { prisma } from '@/lib/prisma';
+import { rateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +23,7 @@ interface PostRequest {
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -29,6 +31,13 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized' },
         { status: 401 }
       );
+    }
+
+    // Apply rate limiting (5 LinkedIn posts per hour)
+    const rateLimitResult = await rateLimit(request, 'linkedInPost', user.id);
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult.reset);
     }
 
     // Parse request body

@@ -16,7 +16,7 @@ export async function GET(
       return auth.response;
     }
 
-    const media = await prisma.mediaLibrary.findUnique({
+    const media = await prisma.mediaAsset.findUnique({
       where: { id: params.id },
     });
 
@@ -50,7 +50,7 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const media = await prisma.mediaLibrary.update({
+    const media = await prisma.mediaAsset.update({
       where: { id: params.id },
       data: body,
     });
@@ -77,7 +77,7 @@ export async function DELETE(
     }
 
     // First, get the media to find the storage path
-    const media = await prisma.mediaLibrary.findUnique({
+    const media = await prisma.mediaAsset.findUnique({
       where: { id: params.id },
     });
 
@@ -94,7 +94,7 @@ export async function DELETE(
       // Extract the file path from the URL
       const urlParts = new URL(media.url);
       const path = urlParts.pathname.split('/').slice(3).join('/'); // Extract path after bucket name
-      
+
       const { error: storageError } = await supabase.storage
         .from('media')
         .remove([path]);
@@ -106,7 +106,7 @@ export async function DELETE(
     }
 
     // Delete from database
-    await prisma.mediaLibrary.delete({
+    await prisma.mediaAsset.delete({
       where: { id: params.id },
     });
 

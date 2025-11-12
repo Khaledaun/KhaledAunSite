@@ -19,3 +19,7 @@ export * from './ai-config-service';
 // Sprint 2: SEO & AIO Optimization
 export * from './seo-analyzer';
 export * from './aio-optimizer';
+
+// Algorithm Update Tracking System
+export * from './algorithm-update-fetcher';
+export * from './prompt-update-analyzer';

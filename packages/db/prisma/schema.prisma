@@ -584,6 +584,54 @@ model AIPromptTemplate {
   @@map("ai_prompt_templates")
 }
 
+// Algorithm Updates Tracking
+model AlgorithmUpdate {
+  id          String   @id @default(cuid())
+
+  // Source Info
+  source      AlgorithmSource  // SEO, AIO, LINKEDIN
+  title       String
+  description String?          @db.Text
+  url         String
+  publishedAt DateTime
+
+  // Classification
+  category    String[]         // ["ranking", "content-quality", "technical-seo"]
+  impact      UpdateImpact     // LOW, MEDIUM, HIGH, CRITICAL
+  platform    String?          // "google", "chatgpt", "perplexity", "linkedin"
+
+  // Analysis
+  analyzed    Boolean          @default(false)
+  insights    Json?            // LLM-extracted actionable insights
+  promptUpdates String?        @db.Text // Recommended prompt changes
+
+  // Status
+  applied     Boolean          @default(false)
+  appliedAt   DateTime?
+  appliedBy   String?
+
+  // Metadata
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([source, publishedAt])
+  @@index([applied, analyzed])
+  @@map("algorithm_updates")
+}
+
+enum AlgorithmSource {
+  SEO        // Google Search algorithm updates
+  AIO        // AI Optimization (ChatGPT, Perplexity, SGE)
+  LINKEDIN   // LinkedIn ranking algorithm
+}
+
+enum UpdateImpact {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 // Site Logo Management
 model SiteLogo {
   id        String   @id @default(cuid())
@@ -632,4 +680,194 @@ model LinkedInPost {
   @@index([published, isPinned])
   @@index([authorId])
   @@map("linkedin_posts")
+}
+
+// Sprint 4: Social Accounts (OAuth tokens)
+model SocialAccount {
+  id              String   @id @default(uuid())
+
+  // User relation
+  userId          String
+
+  // Provider info
+  provider        String   // 'linkedin', 'instagram', etc.
+  accountId       String   // Provider's user ID
+  accountName     String?  // Display name
+
+  // OAuth tokens (encrypted)
+  accessToken     String   @db.Text
+  refreshToken    String?  @db.Text
+  tokenExpiresAt  DateTime?
+  scopes          String[] @default([])
+
+  // Metadata
+  metadata        Json     @default("{}")
+  isActive        Boolean  @default(true)
+
+  // Computed field helper (not in DB, added in query)
+  isExpired       Boolean  @ignore
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, provider, accountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([isActive])
+  @@map("social_accounts")
+}
+
+// AI Content System: Topic Research Queue
+enum TopicSourceType {
+  AI_SEARCH
+  WEB_CRAWL
+  RSS_FEED
+  MANUAL
+}
+
+enum TopicStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model Topic {
+  id              String           @id @default(cuid())
+
+  // Content
+  title           String
+  description     String           @db.Text
+  sourceUrl       String?
+  sourceType      TopicSourceType  @default(MANUAL)
+
+  // Status & Priority
+  status          TopicStatus      @default(PENDING)
+  priority        Int              @default(5) // 1-10 scale
+  relevanceScore  Float?           // AI-calculated relevance score
+
+  // Lock mechanism (prevent concurrent edits)
+  locked          Boolean          @default(false)
+  lockedAt        DateTime?
+  lockedBy        String?
+
+  // Keywords & Tags
+  keywords        String[]         @default([])
+  tags            String[]         @default([])
+
+  // User notes
+  userNotes       String?          @db.Text
+
+  // Scheduling
+  scheduledFor    DateTime?
+
+  // Relations
+  contentLibrary  ContentLibrary[] @relation("TopicContent")
+
+  // Timestamps
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([status, priority])
+  @@index([locked])
+  @@index([createdAt])
+  @@map("topics")
+}
+
+// AI Content System: Content Library (Unified Storage)
+enum ContentType {
+  BLOG
+  LINKEDIN_POST
+  LINKEDIN_ARTICLE
+  LINKEDIN_CAROUSEL
+  EMAIL
+  TWITTER_POST
+}
+
+enum ContentFormat {
+  HOW_TO
+  CASE_STUDY
+  OPINION
+  NEWS
+  TUTORIAL
+  LISTICLE
+  STORY
+  INSIGHT
+}
+
+enum ContentStatus {
+  DRAFT
+  REVIEW
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PublishStatus {
+  DRAFT
+  QUEUED
+  POSTING
+  POSTED
+  FAILED
+}
+
+model ContentLibrary {
+  id              String          @id @default(cuid())
+
+  // Topic relation
+  topicId         String?
+  topic           Topic?          @relation("TopicContent", fields: [topicId], references: [id])
+
+  // Content details
+  type            ContentType
+  format          ContentFormat?
+  title           String
+  content         String          @db.Text
+  summary         String?         @db.Text // LinkedIn description or meta
+
+  // SEO & Optimization
+  keywords        String[]        @default([])
+  seoScore        Float?          // 0-100
+  aioScore        Float?          // AI Optimization score 0-100
+  wordCount       Int?
+
+  // Status
+  status          ContentStatus   @default(DRAFT)
+
+  // Publishing
+  publishedTo     String[]        @default([]) // ['blog', 'linkedin', 'twitter']
+  publishStatus   PublishStatus?  @default(DRAFT)
+  publishedLinks  Json?           // { blog: 'url', linkedin: 'url' }
+  lastPublishError String?        @db.Text
+  publishAttempts Int             @default(0)
+  lastPublishAttempt DateTime?
+  scheduledFor    DateTime?
+
+  // Relations
+  linkedInPostId  String?
+  blogPostId      String?
+  mediaIds        String[]        @default([])
+
+  // Tags & Organization
+  tags            String[]        @default([])
+
+  // Author
+  authorId        String
+
+  // AI Generation tracking
+  aiGenerated     Boolean         @default(false)
+  aiGenerationId  String?
+
+  // Timestamps
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  publishedAt     DateTime?
+
+  @@index([type, status])
+  @@index([topicId])
+  @@index([authorId])
+  @@index([publishStatus, scheduledFor])
+  @@map("content_library")
 }

@@ -10,7 +10,7 @@ interface Topic {
   id: string;
   title: string;
   description: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'IN_PROGRESS' | 'COMPLETED';
   priority: number;
   keywords: string[];
   locked: boolean;
@@ -62,14 +62,15 @@ export default function TopicsPage() {
       cell: ({ row }) => {
         const status = row.original.status;
         const colors = {
-          pending: 'bg-yellow-100 text-yellow-800',
-          processing: 'bg-blue-100 text-blue-800',
-          completed: 'bg-green-100 text-green-800',
-          failed: 'bg-red-100 text-red-800',
+          PENDING: 'bg-yellow-100 text-yellow-800',
+          APPROVED: 'bg-green-100 text-green-800',
+          REJECTED: 'bg-red-100 text-red-800',
+          IN_PROGRESS: 'bg-blue-100 text-blue-800',
+          COMPLETED: 'bg-gray-100 text-gray-800',
         };
         return (
-          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${colors[status]}`}>
-            {status}
+          <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${colors[status as keyof typeof colors]}`}>
+            {status.replace('_', ' ')}
           </span>
         );
       },
@@ -149,19 +150,19 @@ export default function TopicsPage() {
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">Pending</dt>
           <dd className="mt-1 text-3xl font-semibold tracking-tight text-yellow-600">
-            {topics.filter(t => t.status === 'pending').length}
+            {topics.filter(t => t.status === 'PENDING').length}
           </dd>
         </div>
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
-          <dt className="truncate text-sm font-medium text-gray-500">Processing</dt>
+          <dt className="truncate text-sm font-medium text-gray-500">In Progress</dt>
           <dd className="mt-1 text-3xl font-semibold tracking-tight text-blue-600">
-            {topics.filter(t => t.status === 'processing').length}
+            {topics.filter(t => t.status === 'IN_PROGRESS').length}
           </dd>
         </div>
         <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt className="truncate text-sm font-medium text-gray-500">Completed</dt>
           <dd className="mt-1 text-3xl font-semibold tracking-tight text-green-600">
-            {topics.filter(t => t.status === 'completed').length}
+            {topics.filter(t => t.status === 'COMPLETED').length}
           </dd>
         </div>
       </div>

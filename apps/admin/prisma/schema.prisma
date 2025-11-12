@@ -584,6 +584,54 @@ model AIPromptTemplate {
   @@map("ai_prompt_templates")
 }
 
+// Algorithm Updates Tracking
+model AlgorithmUpdate {
+  id          String   @id @default(cuid())
+
+  // Source Info
+  source      AlgorithmSource  // SEO, AIO, LINKEDIN
+  title       String
+  description String?          @db.Text
+  url         String
+  publishedAt DateTime
+
+  // Classification
+  category    String[]         // ["ranking", "content-quality", "technical-seo"]
+  impact      UpdateImpact     // LOW, MEDIUM, HIGH, CRITICAL
+  platform    String?          // "google", "chatgpt", "perplexity", "linkedin"
+
+  // Analysis
+  analyzed    Boolean          @default(false)
+  insights    Json?            // LLM-extracted actionable insights
+  promptUpdates String?        @db.Text // Recommended prompt changes
+
+  // Status
+  applied     Boolean          @default(false)
+  appliedAt   DateTime?
+  appliedBy   String?
+
+  // Metadata
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([source, publishedAt])
+  @@index([applied, analyzed])
+  @@map("algorithm_updates")
+}
+
+enum AlgorithmSource {
+  SEO        // Google Search algorithm updates
+  AIO        // AI Optimization (ChatGPT, Perplexity, SGE)
+  LINKEDIN   // LinkedIn ranking algorithm
+}
+
+enum UpdateImpact {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 // Site Logo Management
 model SiteLogo {
   id        String   @id @default(cuid())

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAdmin } from '@khaledaun/auth';
-import { revalidatePath } from 'next/cache';
+import { revalidateCaseStudy } from '@/lib/revalidation';
 
 /**
  * POST /api/admin/case-studies/[id]/publish
@@ -55,10 +55,8 @@ export async function POST(
       },
     });
 
-    // Revalidate case studies pages
-    revalidatePath('/case-studies');
-    revalidatePath(`/case-studies/${caseStudy.slug}`);
-    revalidatePath('/'); // Home page might list case studies
+    // Revalidate case studies pages (both locales)
+    await revalidateCaseStudy(caseStudy.slug);
 
     return NextResponse.json({
       ...caseStudy,

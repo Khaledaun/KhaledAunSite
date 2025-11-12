@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@khaledaun/db';
+import { rateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
 /**
  * POST /api/contact
  * Public contact form submission endpoint
  * Creates a lead in the admin system
+ * Rate limited to 3 requests per hour per IP
  */
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting (3 submissions per hour)
+    const rateLimitResult = await rateLimit(request, 'contactForm');
+
+    if (!rateLimitResult.success) {
+      return rateLimitResponse(rateLimitResult.reset);
+    }
+
     const body = await request.json();
     
     const {
@@ -80,13 +89,21 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      { 
-        success: true, 
+    // Return success with rate limit headers
+    const response = NextResponse.json(
+      {
+        success: true,
         message: 'Thank you for your message! We will get back to you soon.',
       },
       { status: 201 }
     );
+
+    // Add rate limit headers
+    Object.entries(rateLimitResult.headers).forEach(([key, value]) => {
+      response.headers.set(key, value);
+    });
+
+    return response;
   } catch (error) {
     console.error('Error processing contact form:', error);
     return NextResponse.json(

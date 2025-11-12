@@ -43,16 +43,19 @@ jobs:
         run: npm run db:generate --workspace=@khaledaun/db
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DIRECT_URL: postgresql://testuser:testpass@localhost:5432/testdb
 
       - name: Setup database schema
         run: npm run db:push --workspace=@khaledaun/db
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DIRECT_URL: postgresql://testuser:testpass@localhost:5432/testdb
 
       - name: Build site
         run: npm run build --workspace=@khaledaun/site
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DIRECT_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
@@ -61,6 +64,7 @@ jobs:
         run: npm run build --workspace=@khaledaun/admin
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DIRECT_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
@@ -75,6 +79,7 @@ jobs:
           sleep 5
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DIRECT_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
@@ -88,6 +93,7 @@ jobs:
           sleep 5
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DIRECT_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001

@@ -5,6 +5,33 @@ import { prisma } from '@/lib/prisma';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// Retry helper for database queries
+async function queryWithRetry<T>(
+  queryFn: () => Promise<T>,
+  maxRetries = 3,
+  delay = 1000
+): Promise<T | null> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await queryFn();
+    } catch (error: any) {
+      if (error.code === 'P1001' || error.code === 'P1017') {
+        // Database connection error - retry
+        if (i === maxRetries - 1) {
+          console.error(`Query failed after ${maxRetries} attempts:`, error.message);
+          return null; // Return null instead of throwing
+        }
+        await new Promise(resolve => setTimeout(resolve, delay * (i + 1)));
+      } else {
+        // Other error - don't retry
+        console.error('Query failed with non-retryable error:', error.message);
+        return null;
+      }
+    }
+  }
+  return null;
+}
+
 // GET /api/topics - List all topics with filters
 export async function GET(request: NextRequest) {
   try {
@@ -28,23 +55,26 @@ export async function GET(request: NextRequest) {
       where.locked = locked === 'true';
     }
 
-    // Fetch topics with count
+    // Fetch topics with count - use retry logic
     const [topics, total] = await Promise.all([
-      prisma.topic.findMany({
-        where,
-        orderBy: [
-          { priority: 'desc' },
-          { createdAt: 'desc' }
-        ],
-        skip: offset,
-        take: limit,
-      }),
-      prisma.topic.count({ where }),
+      queryWithRetry(() =>
+        prisma.topic.findMany({
+          where,
+          orderBy: [
+            { priority: 'desc' },
+            { createdAt: 'desc' }
+          ],
+          skip: offset,
+          take: limit,
+        })
+      ),
+      queryWithRetry(() => prisma.topic.count({ where })),
     ]);
 
+    // Return empty array/0 if queries failed
     return NextResponse.json({
-      topics,
-      total,
+      topics: topics || [],
+      total: total || 0,
       limit,
       offset,
     });

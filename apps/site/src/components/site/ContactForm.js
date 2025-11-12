@@ -37,7 +37,8 @@ export default function ContactForm() {
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('https://admin.khaledaun.com/api/admin/leads', {
+      // Use relative URL - proxy route in site app forwards to admin app
+      const response = await fetch('/api/admin/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

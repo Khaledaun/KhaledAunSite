@@ -3,7 +3,18 @@
   "crons": [
     {
       "path": "/api/scheduler/run",
-      "schedule": "* * * * *"
+      "schedule": "* * * * *",
+      "description": "LinkedIn post scheduler - runs every minute"
+    },
+    {
+      "path": "/api/email/scheduler/run",
+      "schedule": "* * * * *",
+      "description": "Email campaign scheduler - runs every minute"
+    },
+    {
+      "path": "/api/crm/sync",
+      "schedule": "0 2 * * *",
+      "description": "HubSpot CRM sync - runs daily at 2 AM"
     }
   ]
 }

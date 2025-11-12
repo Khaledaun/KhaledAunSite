@@ -2,6 +2,10 @@
   "name": "khaledaun-monorepo",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev:admin": "pnpm --filter @khaledaun/admin dev",
     "dev:site": "pnpm --filter @khaledaun/site dev",
@@ -19,11 +23,10 @@
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "verify:env": "tsx packages/env/schema.ts",
+    "db:generate": "npm run db:generate --workspace=@khaledaun/db",
     "db:seed": "tsx packages/db/seed.ts",
     "verify:types": "tsc --noEmit",
-    "verify:prisma": "prisma validate && prisma generate",
-    "audit": "pnpm audit --audit-level moderate",
-    "audit:fix": "pnpm audit --fix"
+    "verify:prisma": "prisma validate && prisma generate"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.1",

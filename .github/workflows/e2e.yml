@@ -45,6 +45,8 @@ jobs:
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
+          NEXT_PUBLIC_SUPABASE_URL: https://mock.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-testing
 
       - name: Start site in background
         run: |
@@ -71,6 +73,8 @@ jobs:
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
           PORT: 3000
+          NEXT_PUBLIC_SUPABASE_URL: https://mock.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-anon-key-for-testing
 
       - name: Wait for apps to be ready
         run: |

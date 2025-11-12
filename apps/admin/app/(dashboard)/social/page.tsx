@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Linkedin, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface LinkedInAccount {
   id: string;
   provider: string;
-  providerAccountId: string;
-  expiresAt: string;
+  accountId: string;
+  accountName: string | null;
+  tokenExpiresAt: string | null;
   isExpired: boolean;
   connectionValid: boolean;
-  scope: string[];
+  scopes: string[];
   metadata: {
     firstName: string;
     lastName: string;
@@ -26,7 +27,7 @@ interface ConnectionStatus {
   account: LinkedInAccount | null;
 }
 
-export default function SocialPage() {
+function SocialPageContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,10 +212,10 @@ export default function SocialPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Account ID:</span>
                   <span className="font-mono text-gray-900">
-                    {status.account.providerAccountId}
+                    {status.account.accountId}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Connected:</span>
                   <span className="text-gray-900">
@@ -231,7 +232,7 @@ export default function SocialPage() {
                         : 'text-gray-900'
                     }
                   >
-                    {new Date(status.account.expiresAt).toLocaleString()}
+                    {status.account.tokenExpiresAt ? new Date(status.account.tokenExpiresAt).toLocaleString() : 'Never'}
                     {status.account.isExpired && ' (Expired)'}
                   </span>
                 </div>
@@ -239,7 +240,7 @@ export default function SocialPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Permissions:</span>
                   <span className="text-gray-900">
-                    {status.account.scope.join(', ')}
+                    {status.account.scopes.join(', ')}
                   </span>
                 </div>
 
@@ -394,5 +395,20 @@ export default function SocialPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SocialPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Social Accounts</h1>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SocialPageContent />
+    </Suspense>
   );
 }

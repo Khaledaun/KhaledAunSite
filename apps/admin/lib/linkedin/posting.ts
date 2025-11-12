@@ -316,7 +316,7 @@ export async function postToLinkedIn(
     }
 
     const accessToken = account.accessToken;
-    const authorUrn = `urn:li:person:${account.providerAccountId}`;
+    const authorUrn = `urn:li:person:${account.accountId}`;
 
     let response: any;
 

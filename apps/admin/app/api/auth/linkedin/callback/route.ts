@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify state parameter (CSRF protection)
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const savedState = cookieStore.get('linkedin_oauth_state')?.value;
     
     if (!savedState || savedState !== state) {

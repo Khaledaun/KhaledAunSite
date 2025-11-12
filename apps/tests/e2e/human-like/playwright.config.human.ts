@@ -33,7 +33,7 @@ export default defineConfig({
   ],
   
   // Global setup/teardown
-  // globalSetup: require.resolve('./global-setup.ts'),
+  globalSetup: require.resolve('./test-setup-enhanced.ts'),
   // globalTeardown: require.resolve('./global-teardown.ts'),
   
   use: {
@@ -119,14 +119,35 @@ export default defineConfig({
     },
   ],
   
-  // Web server (start dev server)
-  webServer: {
-    command: 'npm run dev:admin',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  // Web servers (start both admin and site apps)
+  webServer: [
+    {
+      command: 'npm run dev:admin',
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: {
+        // Pass DATABASE_URL to web server so it can connect to database
+        DATABASE_URL: process.env.DATABASE_URL || '',
+        DIRECT_URL: process.env.DIRECT_URL || process.env.DATABASE_URL || '',
+        NODE_ENV: 'test',
+      },
+    },
+    {
+      command: 'npm run dev:site',
+      url: 'http://localhost:3001',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: {
+        DATABASE_URL: process.env.DATABASE_URL || '',
+        DIRECT_URL: process.env.DIRECT_URL || process.env.DATABASE_URL || '',
+        NODE_ENV: 'test',
+      },
+    },
+  ],
 });
 

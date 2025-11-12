@@ -87,6 +87,38 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Idempotency: Check if this event was already processed
+    // Use providerMessageId + eventType + eventTimestamp as unique key
+    // OR use providerEventId if provided in the webhook payload
+    const eventId = (event as any).id || `${event.data.email_id}-${eventType}-${event.created_at}`;
+    const existingEvent = await prisma.emailEvent.findFirst({
+      where: {
+        OR: [
+          { providerEventId: eventId },
+          {
+            providerMessageId: event.data.email_id,
+            eventType,
+            eventTimestamp: new Date(event.created_at),
+          },
+        ],
+      },
+    });
+
+    // If event already exists, skip processing (idempotency)
+    if (existingEvent) {
+      console.log('Duplicate webhook event detected, skipping:', {
+        eventId,
+        providerMessageId: event.data.email_id,
+        eventType,
+      });
+      return NextResponse.json({
+        received: true,
+        eventType,
+        processed: false,
+        duplicate: true,
+      });
+    }
+
     // Create email event
     await prisma.emailEvent.create({
       data: {
@@ -101,6 +133,7 @@ export async function POST(request: NextRequest) {
         complaintFeedbackType: event.data.complaint?.feedback_type,
         provider: 'resend',
         providerMessageId: event.data.email_id,
+        providerEventId: eventId,
         eventTimestamp: new Date(event.created_at),
       },
     });
@@ -176,6 +209,12 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Resend webhook error:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      eventType: (event as any)?.type,
+      emailId: (event as any)?.data?.email_id,
+    });
 
     // Always return 200 to prevent Resend from retrying
     // Log the error for investigation

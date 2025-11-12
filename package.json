@@ -28,10 +28,12 @@
   "devDependencies": {
     "@faker-js/faker": "^10.1.0",
     "@playwright/test": "^1.45.1",
+    "@types/node": "^24.9.2",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.45.0",
     "eslint-config-next": "^14.2.33",
+    "nock": "^14.0.10",
     "prettier": "^3.0.0",
     "prisma": "^5.17.0",
     "tsx": "^4.16.2",

@@ -89,7 +89,13 @@ export default function ContentLibraryPage() {
       header: 'Title',
       cell: ({ row }) => (
         <div className="max-w-md">
-          <div className="font-medium text-gray-900">{row.original.title}</div>
+          <Link 
+            href={`/content/library/${row.original.id}`}
+            className="font-medium text-gray-900 hover:text-blue-600"
+            data-testid="content-title-link"
+          >
+            {row.original.title}
+          </Link>
           <div className="mt-1 flex items-center gap-2 text-xs text-gray-500">
             <span className="rounded bg-gray-100 px-2 py-0.5">{row.original.type}</span>
             {row.original.wordCount && <span>{row.original.wordCount} words</span>}
@@ -274,6 +280,7 @@ export default function ContentLibraryPage() {
           <option value="linkedin_carousel">LinkedIn Carousel</option>
         </select>
         <select
+          name="status"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"

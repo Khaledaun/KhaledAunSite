@@ -11,6 +11,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,13 +42,17 @@ jobs:
       - name: Generate Prisma Client
         run: npm run db:generate --workspace=@khaledaun/db
         env:
-          # Mock DATABASE_URL for Prisma generation
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+
+      - name: Setup database schema
+        run: npm run db:push --workspace=@khaledaun/db
+        env:
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
 
       - name: Build site
         run: npm run build --workspace=@khaledaun/site
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
@@ -41,7 +60,7 @@ jobs:
       - name: Build admin
         run: npm run build --workspace=@khaledaun/admin
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
@@ -55,7 +74,7 @@ jobs:
           echo $! > ../../site.pid
           sleep 5
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001
@@ -68,7 +87,7 @@ jobs:
           echo $! > ../../admin.pid
           sleep 5
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
           REVALIDATE_SECRET: test-secret
           PREVIEW_SECRET: test-secret
           SITE_URL: http://localhost:3001

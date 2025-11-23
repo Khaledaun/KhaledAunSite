@@ -2,10 +2,14 @@
 export type Role = 'USER' | 'AUTHOR' | 'REVIEWER' | 'EDITOR' | 'ADMIN' | 'OWNER';
 
 export const isAdmin = (role?: string | null): boolean => {
-  return role === 'ADMIN' || role === 'OWNER';
+  if (!role) return false;
+  const upperRole = role.toUpperCase();
+  return upperRole === 'ADMIN' || upperRole === 'OWNER';
 };
 
 export const isUser = (role?: string | null): boolean => {
-  return role === 'USER' || role === 'AUTHOR' || role === 'REVIEWER' || role === 'EDITOR' || role === 'ADMIN' || role === 'OWNER';
+  if (!role) return false;
+  const upperRole = role.toUpperCase();
+  return ['USER', 'AUTHOR', 'REVIEWER', 'EDITOR', 'ADMIN', 'OWNER'].includes(upperRole);
 };
 

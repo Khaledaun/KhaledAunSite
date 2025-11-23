@@ -1,20 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { PrismaClient } from '@prisma/client';
 import { isAdmin, type Role } from './roles';
 
-// Create Prisma client instance (replaces @khaledaun/db import)
-const prisma = new PrismaClient();
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mock.supabase.co';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'mock-service-key';
-
-// Only throw error in production when variables are truly needed
-if ((!supabaseUrl || !supabaseServiceKey) && process.env.NODE_ENV === 'production') {
-  throw new Error('Supabase URL or Service Key is missing.');
-}
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Phase 6 Lite: User interface matching Prisma
 export interface User {
@@ -25,42 +14,69 @@ export interface User {
 }
 
 /**
- * Get the current session user from cookies/headers
- * Phase 6 Lite: Simple implementation, can be enhanced later
+ * Create Supabase client for server-side auth
+ */
+async function createSupabaseClient() {
+  const cookieStore = await cookies();
+
+  return createServerClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            // Ignore - can't set cookies in Server Components
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: '', ...options });
+          } catch (error) {
+            // Ignore - can't set cookies in Server Components
+          }
+        },
+      },
+    }
+  );
+}
+
+/**
+ * Get the current session user from Supabase Auth
  */
 export async function getSessionUser(): Promise<User | null> {
-  // TEMPORARY: Bypass auth checks for testing
-  // TODO: Re-enable after fixing Supabase auth
-  return {
-    id: 'temp-admin-id',
-    email: 'admin@khaledaun.com',
-    name: 'Admin User',
-    role: 'ADMIN' as Role,
-  };
-  
-  /* COMMENTED OUT - Auth check code kept for reference
   try {
-    // For Phase 6 Lite, we'll use a simple cookie-based session
-    // In production, integrate with your auth provider (Supabase Auth, NextAuth, etc.)
-    const cookieStore = cookies();
-    const sessionCookie = cookieStore.get('session-user-id');
-    
-    if (!sessionCookie?.value) {
+    const supabase = await createSupabaseClient();
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
       return null;
     }
 
-    // Look up user in database
-    const user = await prisma.user.findUnique({
-      where: { id: sessionCookie.value },
-      select: { id: true, email: true, name: true, role: true }
-    });
+    // Get user role from user_roles table
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
 
-    return user;
+    const role = (roleData?.role?.toUpperCase() || 'USER') as Role;
+
+    return {
+      id: user.id,
+      email: user.email || '',
+      name: user.user_metadata?.name || user.email?.split('@')[0] || null,
+      role,
+    };
   } catch (error) {
     console.error('Error getting session user:', error);
     return null;
   }
-  */
 }
 
 /**
@@ -68,28 +84,17 @@ export async function getSessionUser(): Promise<User | null> {
  * Returns user or throws error
  */
 export async function requireAdmin(): Promise<User> {
-  // TEMPORARY: Bypass auth checks for testing
-  // TODO: Re-enable after fixing Supabase auth
-  return {
-    id: 'temp-admin-id',
-    email: 'admin@khaledaun.com',
-    name: 'Admin User',
-    role: 'ADMIN' as Role,
-  };
-  
-  /* COMMENTED OUT - Auth check code kept for reference
   const user = await getSessionUser();
-  
+
   if (!user) {
     throw new Error('UNAUTHORIZED');
   }
-  
+
   if (!isAdmin(user.role)) {
     throw new Error('FORBIDDEN');
   }
-  
+
   return user;
-  */
 }
 
 /**

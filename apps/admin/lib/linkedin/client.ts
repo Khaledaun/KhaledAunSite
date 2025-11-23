@@ -237,7 +237,7 @@ export async function getLinkedInAccount(userId: string) {
   }
 
   // Check if token is expired
-  const isExpired = new Date() >= account.expiresAt;
+  const isExpired = new Date() >= account.tokenExpiresAt;
 
   // If expired and we have refresh token, try to refresh
   if (isExpired && account.refreshToken) {

@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         provider: account.provider,
         accountId: account.accountId,
         accountName: account.accountName,
-        expiresAt: account.tokenExpiresAt,
+        tokenExpiresAt: account.tokenExpiresAt,
         isExpired: account.isExpired,
         connectionValid,
         scopes: account.scopes,

@@ -12,6 +12,7 @@
     "@types/cheerio": "^0.22.35",
     "@ai-sdk/openai": "^1.0.8",
     "@ai-sdk/anthropic": "^1.0.4",
-    "ai": "^4.0.25"
+    "ai": "^4.0.25",
+    "rss-parser": "^3.13.0"
   }
 }

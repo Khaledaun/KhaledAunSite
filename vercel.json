@@ -4,6 +4,10 @@
     {
       "path": "/api/scheduler/run",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/topics/auto-generate",
+      "schedule": "0 9 * * *"
     }
   ]
 }

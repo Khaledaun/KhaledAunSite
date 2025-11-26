@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkAuth } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
 import { generateBilingualArticles } from '@khaledaun/utils/content-workflow';
+import { selectRelevantImages } from '@khaledaun/utils/ai-image-selector';
+import { isAutomationEnabled } from '@khaledaun/utils/automation-config';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120; // 2 minutes for article generation
@@ -57,11 +59,57 @@ export async function POST(request: NextRequest) {
       data: { status: 'article_generating' },
     });
 
+    // AI Image Selection (if enabled and no manual selection)
+    let finalMediaIds = mediaIds;
+
+    if (mediaIds.length === 0) {
+      const aiImageSelectionEnabled = await isAutomationEnabled('aiImageSelection');
+
+      if (aiImageSelectionEnabled) {
+        console.log('🤖 AI Image Selection is enabled, selecting relevant images...');
+
+        // Fetch available images from media library
+        const availableImages = await prisma.mediaAsset.findMany({
+          where: {
+            status: 'ACTIVE',
+            mimeType: { startsWith: 'image/' },
+          },
+          select: {
+            id: true,
+            url: true,
+            alt: true,
+            caption: true,
+            tags: true,
+            filename: true,
+          },
+        });
+
+        if (availableImages.length > 0) {
+          const selectedImages = await selectRelevantImages(
+            topic.title,
+            topic.description || metadata.promptEn.substring(0, 500),
+            topic.keywords || [],
+            availableImages
+          );
+
+          finalMediaIds = selectedImages.map((img) => img.mediaId);
+
+          console.log(
+            `✅ AI selected ${finalMediaIds.length} relevant images (scores: ${selectedImages.map((s) => s.relevanceScore).join(', ')})`
+          );
+        } else {
+          console.log('No images available in media library');
+        }
+      }
+    } else {
+      console.log(`Using ${mediaIds.length} manually selected images`);
+    }
+
     // Generate articles
     const { articleEn, articleAr } = await generateBilingualArticles(
       metadata.promptEn,
       metadata.promptAr,
-      mediaIds
+      finalMediaIds
     );
 
     // Create content library entries

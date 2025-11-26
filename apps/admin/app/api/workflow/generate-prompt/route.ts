@@ -6,6 +6,8 @@ import {
   type AuthorProfile,
   type ContentStrategy,
 } from '@khaledaun/utils/prompt-generator';
+import { checkPromptQuality } from '@khaledaun/utils/prompt-quality-checker';
+import { isAutomationEnabled } from '@khaledaun/utils/automation-config';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -80,17 +82,44 @@ export async function POST(request: NextRequest) {
       contentStrategy
     );
 
+    // Check prompt quality for auto-approval (if enabled)
+    const autoApprovalEnabled = await isAutomationEnabled('autoApprovePrompts');
+    let finalStatus = 'prompt_ready';
+    let qualityCheck = null;
+
+    if (autoApprovalEnabled) {
+      console.log('🤖 Checking prompt quality for auto-approval...');
+
+      qualityCheck = await checkPromptQuality(promptEn, topic.title);
+
+      if (qualityCheck.recommendation === 'auto_approve') {
+        finalStatus = 'prompt_approved';
+        console.log(`✅ Auto-approved prompt (score: ${qualityCheck.score}/100)`);
+      } else if (qualityCheck.recommendation === 'reject') {
+        console.log(`⚠️ Prompt quality insufficient (score: ${qualityCheck.score}/100)`);
+      } else {
+        console.log(`📋 Flagging for manual review (score: ${qualityCheck.score}/100)`);
+      }
+    }
+
     // Update topic with generated prompts
     const updatedTopic = await prisma.topic.update({
       where: { id: topicId },
       data: {
-        status: 'prompt_ready',
+        status: finalStatus,
         metadata: {
           ...(topic.metadata as any),
           promptEn,
           promptAr,
           keywords,
           generatedAt: new Date().toISOString(),
+          qualityCheck: qualityCheck ? {
+            score: qualityCheck.score,
+            passed: qualityCheck.passed,
+            recommendation: qualityCheck.recommendation,
+            reasoning: qualityCheck.reasoning,
+            autoApproved: qualityCheck.recommendation === 'auto_approve',
+          } : undefined,
         },
       },
     });
@@ -98,6 +127,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       topic: updatedTopic,
+      autoApproved: finalStatus === 'prompt_approved',
+      qualityScore: qualityCheck?.score,
       promptEn,
       promptAr,
       keywords,

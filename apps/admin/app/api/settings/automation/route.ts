@@ -20,7 +20,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET(request: NextRequest) {
   try {
-    const auth = await checkAuth('manageSettings');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
-    const auth = await checkAuth('manageSettings');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }
@@ -91,7 +91,7 @@ export async function PATCH(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const auth = await checkAuth('manageSettings');
+    const auth = await checkAuth('manageCMS');
     if (!auth.authorized) {
       return auth.response;
     }

@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkAuth } from '@/lib/supabase';
 import { prisma } from '@/lib/prisma';
-import {
-  generatePromptForTopic,
-  type AuthorProfile,
-  type ContentStrategy,
-} from '@khaledaun/utils/prompt-generator';
+import { generatePromptForTopic } from '@khaledaun/utils/content-workflow';
+import type { AuthorProfile, ContentStrategy } from '@khaledaun/utils/prompt-generator';
 import { checkPromptQuality } from '@khaledaun/utils/prompt-quality-checker';
 import { isAutomationEnabled } from '@khaledaun/utils/automation-config';
 

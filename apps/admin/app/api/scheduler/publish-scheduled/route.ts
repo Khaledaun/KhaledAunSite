@@ -309,9 +309,10 @@ async function autoPostLinkedIn(topicId: string, metadata: any, publishResult: a
 
   // Post English version
   try {
-    const linkedinEnResult = await postToLinkedIn({
+    // TODO: Get actual admin user ID instead of 'system'
+    const linkedinEnResult = await postToLinkedIn('system', {
       text: updatedMetadata.linkedinEn,
-      userId: 'system', // Will need to use admin user ID
+      url: publishResult.enUrl,
     });
 
     if (linkedinEnResult.success) {
@@ -327,7 +328,7 @@ async function autoPostLinkedIn(topicId: string, metadata: any, publishResult: a
           publishedAt: new Date(),
           metadata: {
             language: 'en',
-            linkedinUrl: linkedinEnResult.postUrl,
+            linkedinUrl: linkedinEnResult.permalink,
             articleUrl: publishResult.enUrl,
             postedAt: new Date().toISOString(),
             autoPosted: true,
@@ -335,7 +336,7 @@ async function autoPostLinkedIn(topicId: string, metadata: any, publishResult: a
         },
       });
 
-      linkedinUrls.push(linkedinEnResult.postUrl || '');
+      linkedinUrls.push(linkedinEnResult.permalink || '');
       postsCreated++;
     }
   } catch (error) {
@@ -344,9 +345,9 @@ async function autoPostLinkedIn(topicId: string, metadata: any, publishResult: a
 
   // Post Arabic version
   try {
-    const linkedinArResult = await postToLinkedIn({
+    const linkedinArResult = await postToLinkedIn('system', {
       text: updatedMetadata.linkedinAr,
-      userId: 'system',
+      url: publishResult.arUrl,
     });
 
     if (linkedinArResult.success) {
@@ -361,7 +362,7 @@ async function autoPostLinkedIn(topicId: string, metadata: any, publishResult: a
           publishedAt: new Date(),
           metadata: {
             language: 'ar',
-            linkedinUrl: linkedinArResult.postUrl,
+            linkedinUrl: linkedinArResult.permalink,
             articleUrl: publishResult.arUrl,
             postedAt: new Date().toISOString(),
             autoPosted: true,
@@ -369,7 +370,7 @@ async function autoPostLinkedIn(topicId: string, metadata: any, publishResult: a
         },
       });
 
-      linkedinUrls.push(linkedinArResult.postUrl || '');
+      linkedinUrls.push(linkedinArResult.permalink || '');
       postsCreated++;
     }
   } catch (error) {

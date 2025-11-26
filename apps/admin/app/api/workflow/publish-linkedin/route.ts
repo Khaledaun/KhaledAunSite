@@ -62,9 +62,9 @@ export async function POST(request: NextRequest) {
       }
 
       // Post to LinkedIn
-      const linkedinResult = await postToLinkedIn({
+      const linkedinResult = await postToLinkedIn(user.id, {
         text: linkedinText,
-        userId: user.id,
+        url: articleUrl,
       });
 
       if (!linkedinResult.success) {
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
           publishedAt: new Date(),
           metadata: {
             language,
-            linkedinUrl: linkedinResult.postUrl,
+            linkedinUrl: linkedinResult.permalink,
             articleUrl,
             postedAt: new Date().toISOString(),
           },
@@ -100,17 +100,17 @@ export async function POST(request: NextRequest) {
             ...metadata,
             [updateKey]: true,
             linkedinPostId: linkedinPost.id,
-            linkedinUrl: linkedinResult.postUrl,
+            linkedinUrl: linkedinResult.permalink,
             linkedinPublishedAt: new Date().toISOString(),
           },
         },
       });
 
-      console.log(`✅ LinkedIn post published: ${linkedinResult.postUrl}`);
+      console.log(`✅ LinkedIn post published: ${linkedinResult.permalink}`);
 
       return NextResponse.json({
         success: true,
-        linkedinUrl: linkedinResult.postUrl,
+        linkedinUrl: linkedinResult.permalink,
         postId: linkedinPost.id,
       });
     } catch (publishError) {

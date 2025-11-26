@@ -50,8 +50,8 @@ function FeatureCard({
 
   return (
     <div
-      className={`rounded-lg border-2 p-4 ${
-        enabled ? 'border-green-200 bg-green-50/30' : 'border-gray-200 bg-white'
+      className={`rounded-lg border-2 p-5 transition-all duration-200 hover:shadow-md ${
+        enabled ? 'border-green-300 bg-green-50/40 shadow-sm' : 'border-gray-200 bg-white'
       }`}
     >
       <div className="flex items-start justify-between">
@@ -216,12 +216,12 @@ export default function AutomationSettingsPage() {
       )}
 
       {/* Info Banner */}
-      <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
+      <div className="rounded-lg bg-blue-50 border border-blue-200 p-5 shadow-sm">
         <div className="flex items-start gap-3">
-          <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium">How Automation Works</p>
-            <ul className="mt-2 space-y-1 list-disc list-inside">
+            <p className="font-semibold mb-2">How Automation Works</p>
+            <ul className="mt-2 space-y-1.5 list-disc list-inside">
               <li>
                 <strong>Phase 1</strong> features are proven and safe (zero risk)
               </li>
@@ -240,7 +240,10 @@ export default function AutomationSettingsPage() {
 
       {/* Phase 1 - Already Implemented */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Phase 1: Proven Automations</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900">Phase 1: Proven Automations</h2>
+          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">Production Ready</span>
+        </div>
 
         <FeatureCard
           title="Scheduled Publishing"
@@ -293,7 +296,10 @@ export default function AutomationSettingsPage() {
 
       {/* Phase 2 - New Features */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Phase 2: AI-Enhanced Automations</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900">Phase 2: AI-Enhanced Automations</h2>
+          <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 font-medium">AI-Powered</span>
+        </div>
 
         <FeatureCard
           title="AI Image Selection"
@@ -346,7 +352,10 @@ export default function AutomationSettingsPage() {
 
       {/* Future Features */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Future: Advanced Automations</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900">Future: Advanced Automations</h2>
+          <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 font-medium">Experimental</span>
+        </div>
 
         <FeatureCard
           title="Auto-Approve Articles"
@@ -379,26 +388,26 @@ export default function AutomationSettingsPage() {
       </div>
 
       {/* Stats Summary */}
-      <div className="rounded-lg bg-gray-50 border border-gray-200 p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Current Automation Status</h3>
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <p className="text-2xl font-bold text-green-600">
+      <div className="rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 p-6 shadow-sm">
+        <h3 className="font-semibold text-gray-900 mb-5">Current Automation Status</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+            <p className="text-3xl font-bold text-green-600">
               {Object.values(config).filter((f) => f.enabled).length}
             </p>
-            <p className="text-sm text-gray-600">Features Enabled</p>
+            <p className="text-sm text-gray-600 mt-1 font-medium">Features Enabled</p>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-blue-600">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+            <p className="text-3xl font-bold text-blue-600">
               {Object.values(config).length}
             </p>
-            <p className="text-sm text-gray-600">Total Features</p>
+            <p className="text-sm text-gray-600 mt-1 font-medium">Total Features</p>
           </div>
-          <div>
-            <p className="text-2xl font-bold text-purple-600">
+          <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+            <p className="text-3xl font-bold text-purple-600">
               ~{calculateTimeSaved(config)} min
             </p>
-            <p className="text-sm text-gray-600">Time Saved Per Topic</p>
+            <p className="text-sm text-gray-600 mt-1 font-medium">Time Saved Per Topic</p>
           </div>
         </div>
       </div>

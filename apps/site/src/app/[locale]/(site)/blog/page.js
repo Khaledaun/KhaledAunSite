@@ -2,6 +2,8 @@ import { unstable_setRequestLocale } from 'next-intl/server';
 import { prisma } from '@khaledaun/db';
 import Link from 'next/link';
 import { draftMode } from 'next/headers';
+import Navbar from '@/components/site/Navbar';
+import FooterDennis from '@/components/site/FooterDennis';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -39,9 +41,11 @@ export default async function BlogPage({ params: { locale } }) {
   const posts = await getPosts(isDraftMode);
 
   return (
-    <main className="min-h-screen bg-brand-ink text-brand-sand">
-      {/* Header */}
-      <section className="py-20 border-b border-brand-gold/20">
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-brand-ink text-brand-sand pt-16">
+        {/* Header */}
+        <section className="py-20 border-b border-brand-gold/20">
         <div className="container mx-auto px-6">
           <h1 className="font-heading text-5xl md:text-6xl mb-4">
             Blog
@@ -108,6 +112,8 @@ export default async function BlogPage({ params: { locale } }) {
         </div>
       </section>
     </main>
+    <FooterDennis />
+    </>
   );
 }
 

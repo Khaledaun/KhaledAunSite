@@ -98,11 +98,12 @@ const navigation: NavItem[] = [
     href: '/analytics', 
     icon: ChartBarIcon 
   },
-  { 
-    name: 'Settings', 
-    href: '/settings', 
+  {
+    name: 'Settings',
+    href: '/settings',
     icon: Cog6ToothIcon,
     children: [
+      { name: 'Automation', href: '/settings/automation' },
       { name: 'Social Embeds', href: '/social' },
       { name: 'Hero Media', href: '/cms/hero-media' },
     ]
@@ -115,7 +116,7 @@ function classNames(...classes: string[]) {
 
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Insights Engine', 'AI Assistant']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Insights Engine', 'AI Assistant', 'Settings']);
   const pathname = usePathname();
 
   const toggleExpanded = (itemName: string) => {

@@ -5,13 +5,14 @@
   "main": "index.ts",
   "types": "index.ts",
   "dependencies": {
-    "sanitize-html": "^2.17.0",
-    "@types/sanitize-html": "^2.11.0",
-    "openai": "^4.73.1",
-    "cheerio": "^1.0.0",
-    "@types/cheerio": "^0.22.35",
-    "@ai-sdk/openai": "^1.0.8",
     "@ai-sdk/anthropic": "^1.0.4",
-    "ai": "^4.0.25"
+    "@ai-sdk/openai": "^1.0.8",
+    "@types/cheerio": "^0.22.35",
+    "@types/sanitize-html": "^2.11.0",
+    "ai": "^4.0.25",
+    "cheerio": "^1.0.0",
+    "openai": "^4.73.1",
+    "rss-parser": "^3.13.0",
+    "sanitize-html": "^2.17.0"
   }
 }

@@ -4,6 +4,14 @@
     {
       "path": "/api/scheduler/run",
       "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/topics/auto-generate",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/scheduler/publish-scheduled",
+      "schedule": "0 * * * *"
     }
   ]
 }

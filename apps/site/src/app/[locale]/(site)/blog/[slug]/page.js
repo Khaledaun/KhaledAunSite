@@ -3,6 +3,8 @@ import { prisma } from '@khaledaun/db';
 import { notFound } from 'next/navigation';
 import { draftMode } from 'next/headers';
 import Link from 'next/link';
+import Navbar from '@/components/site/Navbar';
+import FooterDennis from '@/components/site/FooterDennis';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
@@ -71,16 +73,18 @@ export default async function BlogPostPage({ params: { slug, locale }, searchPar
   }
 
   return (
-    <main className="min-h-screen bg-brand-ink text-brand-sand">
-      {/* Preview Banner */}
-      {(isDraftMode || isPreview) && post.status === 'DRAFT' && (
-        <div className="bg-yellow-500 text-black py-3 px-6 text-center">
-          <strong>Preview Mode:</strong> You are viewing a draft post. This post is not publicly visible.
-        </div>
-      )}
+    <>
+      <Navbar />
+      <main className="min-h-screen bg-brand-ink text-brand-sand pt-16">
+        {/* Preview Banner */}
+        {(isDraftMode || isPreview) && post.status === 'DRAFT' && (
+          <div className="bg-yellow-500 text-black py-3 px-6 text-center">
+            <strong>Preview Mode:</strong> You are viewing a draft post. This post is not publicly visible.
+          </div>
+        )}
 
-      {/* Article Header */}
-      <article className="py-20">
+        {/* Article Header */}
+        <article className="py-20">
         <div className="container mx-auto px-6 max-w-4xl">
           {/* Back Link */}
           <Link 
@@ -145,6 +149,8 @@ export default async function BlogPostPage({ params: { slug, locale }, searchPar
         </div>
       </article>
     </main>
+    <FooterDennis />
+    </>
   );
 }
 

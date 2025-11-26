@@ -5,8 +5,7 @@
   "main": "index.ts",
   "types": "index.ts",
   "dependencies": {
-    "@khaledaun/db": "file:../db",
-    "@supabase/supabase-js": "^2.44.4",
-    "@prisma/client": "^5.17.0"
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.44.4"
   }
 }

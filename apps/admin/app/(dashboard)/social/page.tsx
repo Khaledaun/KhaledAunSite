@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Linkedin, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface LinkedInAccount {
   id: string;
   provider: string;
-  providerAccountId: string;
-  expiresAt: string;
+  accountId: string;
+  tokenExpiresAt: string;
   isExpired: boolean;
   connectionValid: boolean;
-  scope: string[];
+  scopes: string[];
   metadata: {
     firstName: string;
     lastName: string;
@@ -26,7 +26,7 @@ interface ConnectionStatus {
   account: LinkedInAccount | null;
 }
 
-export default function SocialPage() {
+function SocialPageContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -211,7 +211,7 @@ export default function SocialPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Account ID:</span>
                   <span className="font-mono text-gray-900">
-                    {status.account.providerAccountId}
+                    {status.account.accountId}
                   </span>
                 </div>
                 
@@ -231,7 +231,7 @@ export default function SocialPage() {
                         : 'text-gray-900'
                     }
                   >
-                    {new Date(status.account.expiresAt).toLocaleString()}
+                    {new Date(status.account.tokenExpiresAt).toLocaleString()}
                     {status.account.isExpired && ' (Expired)'}
                   </span>
                 </div>
@@ -239,7 +239,7 @@ export default function SocialPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Permissions:</span>
                   <span className="text-gray-900">
-                    {status.account.scope.join(', ')}
+                    {status.account.scopes.join(', ')}
                   </span>
                 </div>
 
@@ -394,5 +394,13 @@ export default function SocialPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SocialPage() {
+  return (
+    <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <SocialPageContent />
+    </Suspense>
   );
 }

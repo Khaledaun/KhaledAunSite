@@ -207,11 +207,11 @@ export async function storeSocialAccount(
     data: {
       userId,
       provider: 'linkedin',
-      providerAccountId: profile.id,
+      accountId: profile.id,
       accessToken: encryptedAccessToken,
       refreshToken: encryptedRefreshToken,
-      expiresAt: tokens.expiresAt,
-      scope: (process.env.LINKEDIN_SCOPES || 'w_member_social').split(','),
+      tokenExpiresAt: tokens.expiresAt,
+      scopes: (process.env.LINKEDIN_SCOPES || 'w_member_social').split(','),
       metadata: {
         firstName: profile.firstName,
         lastName: profile.lastName,
@@ -236,8 +236,8 @@ export async function getLinkedInAccount(userId: string) {
     return null;
   }
 
-  // Check if token is expired
-  const isExpired = new Date() >= account.expiresAt;
+  // Check if token is expired (if no expiry date, assume expired)
+  const isExpired = !account.tokenExpiresAt || new Date() >= account.tokenExpiresAt;
 
   // If expired and we have refresh token, try to refresh
   if (isExpired && account.refreshToken) {
@@ -253,7 +253,7 @@ export async function getLinkedInAccount(userId: string) {
           refreshToken: newTokens.refreshToken
             ? encrypt(newTokens.refreshToken)
             : account.refreshToken,
-          expiresAt: newTokens.expiresAt,
+          tokenExpiresAt: newTokens.expiresAt,
         },
       });
 

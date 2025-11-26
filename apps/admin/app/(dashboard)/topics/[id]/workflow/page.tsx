@@ -35,6 +35,9 @@ export default function TopicWorkflowPage() {
   const [selectedMedia, setSelectedMedia] = useState<string[]>([]);
   const [showPrompt, setShowPrompt] = useState(false);
   const [showLinkedIn, setShowLinkedIn] = useState(false);
+  const [scheduledPublishDate, setScheduledPublishDate] = useState('');
+  const [autoPostLinkedIn, setAutoPostLinkedIn] = useState(true);
+  const [showScheduling, setShowScheduling] = useState(false);
 
   useEffect(() => {
     fetchTopic();
@@ -127,16 +130,41 @@ export default function TopicWorkflowPage() {
 
     setProcessing(true);
     try {
+      // Build metadata with scheduling and automation settings
+      const metadata = {
+        ...(topic?.metadata || {}),
+      };
+
+      // Add scheduling if set
+      if (scheduledPublishDate) {
+        metadata.scheduledPublishDate = new Date(scheduledPublishDate).toISOString();
+      }
+
+      // Add auto LinkedIn posting preference
+      metadata.autoPostLinkedIn = autoPostLinkedIn;
+      metadata.autoGenerateLinkedIn = true; // Always auto-generate
+
       const response = await fetch(`/api/topics/${topicId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'article_approved' }),
+        body: JSON.stringify({
+          status: 'article_approved',
+          metadata,
+        }),
       });
 
       if (!response.ok) throw new Error('Failed to approve articles');
 
       await fetchTopic();
-      alert('Articles approved!');
+
+      if (scheduledPublishDate) {
+        const schedDate = new Date(scheduledPublishDate);
+        alert(
+          `Articles approved and scheduled for publishing on ${schedDate.toLocaleString()}!`
+        );
+      } else {
+        alert('Articles approved!');
+      }
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to approve articles');
     } finally {
@@ -409,7 +437,7 @@ export default function TopicWorkflowPage() {
             }
           >
             {topic.status === 'article_ready' && metadata.articleEnId && (
-              <div className="mt-3 space-y-2">
+              <div className="mt-3 space-y-3">
                 <div className="flex gap-3">
                   <a
                     href={`/content/${metadata.articleEnId}`}
@@ -426,6 +454,59 @@ export default function TopicWorkflowPage() {
                     📄 View Arabic Article →
                   </a>
                 </div>
+
+                {/* Publishing Options */}
+                <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">Publishing Options</span>
+                    <button
+                      onClick={() => setShowScheduling(!showScheduling)}
+                      className="text-xs text-blue-600 hover:text-blue-700"
+                    >
+                      {showScheduling ? 'Hide' : 'Configure'} →
+                    </button>
+                  </div>
+
+                  {showScheduling && (
+                    <div className="space-y-3 pt-2 border-t">
+                      {/* Scheduled Publishing */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          📅 Schedule Publishing (Optional)
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={scheduledPublishDate}
+                          onChange={(e) => setScheduledPublishDate(e.target.value)}
+                          className="w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">
+                          Leave empty to publish immediately when clicking "Publish"
+                        </p>
+                      </div>
+
+                      {/* Auto LinkedIn Posting */}
+                      <div className="flex items-start gap-2">
+                        <input
+                          type="checkbox"
+                          id="autoPostLinkedIn"
+                          checked={autoPostLinkedIn}
+                          onChange={(e) => setAutoPostLinkedIn(e.target.checked)}
+                          className="mt-1"
+                        />
+                        <div>
+                          <label htmlFor="autoPostLinkedIn" className="text-xs font-medium text-gray-700 cursor-pointer">
+                            🤖 Auto-post to LinkedIn
+                          </label>
+                          <p className="text-xs text-gray-500">
+                            Automatically generate and post LinkedIn updates when article is published (skips review)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   onClick={handleApproveArticles}
                   disabled={processing}
@@ -433,6 +514,7 @@ export default function TopicWorkflowPage() {
                 >
                   <CheckCircle className="h-4 w-4" />
                   Approve Articles
+                  {scheduledPublishDate && ' (Schedule for Later)'}
                 </button>
               </div>
             )}
@@ -446,18 +528,35 @@ export default function TopicWorkflowPage() {
             status={getStepStatus('published')}
             action={
               topic.status === 'article_approved' && (
-                <button
-                  onClick={handlePublishArticles}
-                  disabled={processing}
-                  className="mt-3 flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
-                >
-                  {processing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Globe className="h-4 w-4" />
+                <div className="mt-3 space-y-2">
+                  {metadata.scheduledPublishDate && (
+                    <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium text-blue-900">
+                          Scheduled for:{' '}
+                          {new Date(metadata.scheduledPublishDate).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-blue-700">
+                        Articles will be published automatically at this time
+                        {metadata.autoPostLinkedIn && ' and LinkedIn posts will be created'}
+                      </p>
+                    </div>
                   )}
-                  Publish Articles
-                </button>
+                  <button
+                    onClick={handlePublishArticles}
+                    disabled={processing}
+                    className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {processing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Globe className="h-4 w-4" />
+                    )}
+                    {metadata.scheduledPublishDate ? 'Publish Now (Override Schedule)' : 'Publish Articles'}
+                  </button>
+                </div>
               )
             }
           >

@@ -13,6 +13,7 @@ import {
   filterByAIRelevance,
   type NewsArticle,
 } from '@khaledaun/utils/rss-scraper';
+import { checkForDuplicates, quickDuplicateCheck } from '@khaledaun/utils/duplicate-detection';
 import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
@@ -68,8 +69,17 @@ export async function GET(request: NextRequest) {
       aiTopics: 0,
       newsTopics: 0,
       skipped: 0,
+      duplicates: 0,
+      similarTopics: 0,
       errors: [] as string[],
     };
+
+    // Get existing topics for duplicate checking
+    const existingTopics = await prisma.topic.findMany({
+      select: { id: true, title: true, description: true },
+    });
+
+    console.log(`Loaded ${existingTopics.length} existing topics for duplicate detection`);
 
     // PART 1: Generate AI-powered topic ideas
     console.log('💡 Generating AI topic suggestions...');
@@ -80,35 +90,84 @@ export async function GET(request: NextRequest) {
 
         for (const idea of ideas) {
           try {
-            // Check if similar topic already exists
-            const existing = await prisma.topic.findFirst({
-              where: {
-                title: {
-                  contains: idea.substring(0, 50), // Check first 50 chars
-                },
-              },
-            });
+            const description = `AI-generated topic for ${category}`;
 
-            if (!existing) {
+            // Quick check first (fast, no API calls)
+            const quickDupe = quickDuplicateCheck(
+              idea,
+              existingTopics.map((t) => t.title)
+            );
+
+            if (quickDupe) {
+              results.duplicates++;
+              console.log(`Skipped duplicate (quick check): ${idea}`);
+              continue;
+            }
+
+            // Semantic similarity check (more thorough but slower)
+            const duplicateCheck = await checkForDuplicates(idea, description, existingTopics);
+
+            if (duplicateCheck.isDuplicate) {
+              results.duplicates++;
+              console.log(
+                `Skipped duplicate (${(duplicateCheck.maxSimilarity * 100).toFixed(1)}% similar): ${idea}`
+              );
+              continue;
+            }
+
+            if (duplicateCheck.isSimilar) {
+              // Flag similar topics for manual review
+              results.similarTopics++;
+              console.log(
+                `Flagging similar topic (${(duplicateCheck.maxSimilarity * 100).toFixed(1)}% similar): ${idea}`
+              );
+
               await prisma.topic.create({
                 data: {
                   title: idea,
-                  description: `AI-generated topic for ${category}`,
+                  description,
                   sourceType: 'ai_auto_generation',
                   keywords: [category],
                   priority: 5,
-                  status: 'pending',
+                  status: 'needs_review', // Flag for manual review
                   metadata: {
                     category,
                     generatedBy: 'auto_cron',
                     timestamp: new Date().toISOString(),
+                    similarityFlag: true,
+                    similarTo: duplicateCheck.matches.map((m) => ({
+                      id: m.id,
+                      title: m.title,
+                      similarity: m.similarity,
+                    })),
                   },
                 },
               });
               results.aiTopics++;
-            } else {
-              results.skipped++;
+              continue;
             }
+
+            // No duplicates or similar topics, create it
+            await prisma.topic.create({
+              data: {
+                title: idea,
+                description,
+                sourceType: 'ai_auto_generation',
+                keywords: [category],
+                priority: 5,
+                status: 'pending',
+                metadata: {
+                  category,
+                  generatedBy: 'auto_cron',
+                  timestamp: new Date().toISOString(),
+                },
+              },
+            });
+
+            // Add to existing topics list for next iteration
+            existingTopics.push({ id: 'temp', title: idea, description });
+
+            results.aiTopics++;
           } catch (error) {
             results.errors.push(`Failed to create AI topic: ${idea}`);
           }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Linkedin, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
@@ -26,7 +26,7 @@ interface ConnectionStatus {
   account: LinkedInAccount | null;
 }
 
-export default function SocialPage() {
+function SocialPageContent() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function SocialPage() {
     if (success === 'linkedin_connected') {
       setMessage({
         type: 'success',
-        text: 'LinkedIn account connected successfully! 🎉',
+        text: 'LinkedIn account connected successfully!',
       });
       // Clear URL params
       window.history.replaceState({}, '', '/social');
@@ -214,7 +214,7 @@ export default function SocialPage() {
                     {status.account.accountId}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Connected:</span>
                   <span className="text-gray-900">
@@ -394,5 +394,13 @@ export default function SocialPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SocialPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}>
+      <SocialPageContent />
+    </Suspense>
   );
 }

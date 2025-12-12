@@ -16,9 +16,9 @@ export default function Footer() {
   const navItems = [
     { href: `/${locale}`, label: t('home') },
     { href: `/${locale}/about`, label: t('about') },
-    { href: `/${locale}/ventures`, label: t('ventures') },
+    { href: `/${locale}/#process`, label: t('process') },
     { href: `/${locale}/insights`, label: t('insights') },
-    { href: `/${locale}/contact`, label: t('contact') },
+    { href: `/${locale}/#contact`, label: t('contact') },
   ];
 
   const socialLinks = [
@@ -29,7 +29,7 @@ export default function Footer() {
     },
     {
       name: 'Email',
-      href: 'mailto:consultation@khaledaun.com',
+      href: 'mailto:contact@khaledaun.com',
       icon: Mail
     }
   ];
@@ -47,7 +47,7 @@ export default function Footer() {
                   Khaled Aun
                 </span>
               </Link>
-              
+
               <p className="text-gray-300 mb-6 max-w-md">
                 {t('description')}
               </p>
@@ -56,19 +56,14 @@ export default function Footer() {
               <div className="space-y-3">
                 <div className="flex items-center space-x-3 text-gray-300">
                   <Mail className="w-4 h-4 text-brand-gold" />
-                  <a 
-                    href="mailto:consultation@khaledaun.com"
+                  <a
+                    href="mailto:contact@khaledaun.com"
                     className="hover:text-brand-gold transition-colors duration-200"
                   >
-                    consultation@khaledaun.com
+                    contact@khaledaun.com
                   </a>
                 </div>
-                
-                <div className="flex items-center space-x-3 text-gray-300">
-                  <Phone className="w-4 h-4 text-brand-gold" />
-                  <span>+1 (555) 123-4567</span>
-                </div>
-                
+
                 <div className="flex items-center space-x-3 text-gray-300">
                   <MapPin className="w-4 h-4 text-brand-gold" />
                   <span>{t('location')}</span>
@@ -102,19 +97,16 @@ export default function Footer() {
               </h3>
               <ul className="space-y-3">
                 <li>
-                  <span className="text-gray-300">{t('litigation')}</span>
+                  <span className="text-gray-300">{t('disputeStrategy')}</span>
                 </li>
                 <li>
-                  <span className="text-gray-300">{t('arbitration')}</span>
+                  <span className="text-gray-300">{t('governance')}</span>
                 </li>
                 <li>
                   <span className="text-gray-300">{t('crossBorder')}</span>
                 </li>
                 <li>
-                  <span className="text-gray-300">{t('businessAdvisory')}</span>
-                </li>
-                <li>
-                  <span className="text-gray-300">{t('mentorship')}</span>
+                  <span className="text-gray-300">{t('advisory')}</span>
                 </li>
               </ul>
             </div>

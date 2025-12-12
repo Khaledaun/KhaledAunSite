@@ -237,7 +237,7 @@ export default function MediaLibraryPage() {
                 </div>
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
                   <p className="truncate text-xs font-medium text-white">{item.originalFilename}</p>
-                  <p className="text-xs text-gray-300">{formatFileSize(item.fileSize)}</p>
+                  <p className="text-xs text-gray-300">{formatFileSize(item.sizeBytes)}</p>
                 </div>
               </div>
             ))}
@@ -270,7 +270,7 @@ export default function MediaLibraryPage() {
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">{item.originalFilename}</p>
                   <p className="text-sm text-gray-500">
-                    {formatFileSize(item.fileSize)} • {new Date(item.createdAt).toLocaleDateString()}
+                    {formatFileSize(item.sizeBytes)} • {new Date(item.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <button
@@ -334,7 +334,7 @@ export default function MediaLibraryPage() {
                 </div>
                 <div>
                   <dt className="font-medium text-gray-700">File Size</dt>
-                  <dd className="text-gray-900">{formatFileSize(selectedMedia.fileSize)}</dd>
+                  <dd className="text-gray-900">{formatFileSize(selectedMedia.sizeBytes)}</dd>
                 </div>
                 <div>
                   <dt className="font-medium text-gray-700">Type</dt>

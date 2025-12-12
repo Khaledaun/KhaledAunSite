@@ -8,10 +8,10 @@ interface Media {
   id: string;
   filename: string;
   originalFilename: string;
-  publicUrl: string;
+  url: string;
   thumbnailUrl?: string;
   mimeType: string;
-  fileSize: number;
+  sizeBytes: number;
   altText?: string;
   caption?: string;
   tags: string[];
@@ -221,7 +221,7 @@ export default function MediaLibraryPage() {
                 <div className="aspect-square">
                   {item.mimeType.startsWith('image/') ? (
                     <img
-                      src={item.thumbnailUrl || item.publicUrl}
+                      src={item.thumbnailUrl || item.url}
                       alt={item.altText || item.filename}
                       className="h-full w-full object-cover"
                     />
@@ -253,7 +253,7 @@ export default function MediaLibraryPage() {
                 <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded bg-gray-100">
                   {item.mimeType.startsWith('image/') ? (
                     <img
-                      src={item.thumbnailUrl || item.publicUrl}
+                      src={item.thumbnailUrl || item.url}
                       alt={item.altText || item.filename}
                       className="h-full w-full object-cover"
                     />
@@ -313,12 +313,12 @@ export default function MediaLibraryPage() {
               <div className="overflow-hidden rounded-lg bg-gray-100">
                 {selectedMedia.mimeType.startsWith('image/') ? (
                   <img
-                    src={selectedMedia.publicUrl}
+                    src={selectedMedia.url}
                     alt={selectedMedia.altText || selectedMedia.filename}
                     className="w-full"
                   />
                 ) : selectedMedia.mimeType.startsWith('video/') ? (
-                  <video src={selectedMedia.publicUrl} controls className="w-full" />
+                  <video src={selectedMedia.url} controls className="w-full" />
                 ) : (
                   <div className="flex h-64 items-center justify-center">
                     <span className="text-6xl">📄</span>
@@ -347,8 +347,8 @@ export default function MediaLibraryPage() {
                 <div>
                   <dt className="font-medium text-gray-700">URL</dt>
                   <dd className="break-all text-blue-600">
-                    <a href={selectedMedia.publicUrl} target="_blank" rel="noopener noreferrer">
-                      {selectedMedia.publicUrl}
+                    <a href={selectedMedia.url} target="_blank" rel="noopener noreferrer">
+                      {selectedMedia.url}
                     </a>
                   </dd>
                 </div>
@@ -357,7 +357,7 @@ export default function MediaLibraryPage() {
               {/* Actions */}
               <div className="flex gap-2 pt-4">
                 <a
-                  href={selectedMedia.publicUrl}
+                  href={selectedMedia.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-700"
@@ -366,7 +366,7 @@ export default function MediaLibraryPage() {
                 </a>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText(selectedMedia.publicUrl);
+                    navigator.clipboard.writeText(selectedMedia.url);
                     alert('URL copied to clipboard!');
                   }}
                   className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"

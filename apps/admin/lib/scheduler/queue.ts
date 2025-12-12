@@ -220,9 +220,9 @@ async function getMediaUrl(mediaId: string): Promise<string | undefined> {
   try {
     const media = await prisma.mediaLibrary.findUnique({
       where: { id: mediaId },
-      select: { publicUrl: true },
+      select: { url: true },
     });
-    return media?.publicUrl || undefined;
+    return media?.url || undefined;
   } catch (error) {
     console.error('Failed to get media URL:', error);
     return undefined;

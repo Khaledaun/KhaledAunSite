@@ -33,20 +33,20 @@ export default function CredentialsTimeline({ locale }) {
       color: 'from-purple-500 to-purple-600',
     },
     {
-      id: 'angel',
-      year: '2022',
-      icon: TrendingUp,
-      logo: '/images/credentials/tel-aviv-university.png',
-      logoAlt: 'Tel Aviv University Entrepreneurship Center',
-      color: 'from-green-500 to-green-600',
-    },
-    {
       id: 'mediation',
-      year: '2023–2024',
+      year: '2023',
       icon: Gavel,
       logo: '/images/credentials/israel-bar-association.png',
       logoAlt: 'Israel Bar Association - National Mediation Institute',
       color: 'from-amber-500 to-amber-600',
+    },
+    {
+      id: 'ciarb',
+      year: '2024–',
+      icon: TrendingUp,
+      logo: '/images/credentials/ciarb.png',
+      logoAlt: 'Chartered Institute of Arbitrators',
+      color: 'from-green-500 to-green-600',
     },
   ];
 

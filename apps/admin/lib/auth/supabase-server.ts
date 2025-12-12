@@ -5,13 +5,11 @@
 
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { cache } from 'react';
 
 /**
  * Create a Supabase client for Server Components
- * Cached per request to avoid creating multiple clients
  */
-export const createClient = cache(async () => {
+export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -43,29 +41,29 @@ export const createClient = cache(async () => {
       },
     }
   );
-});
+}
 
 /**
- * Get the current user session (cached per request)
+ * Get the current user session
  */
-export const getSession = cache(async () => {
+export async function getSession() {
   const supabase = await createClient();
   const {
     data: { session },
   } = await supabase.auth.getSession();
   return session;
-});
+}
 
 /**
- * Get the current user (cached per request)
+ * Get the current user
  */
-export const getUser = cache(async () => {
+export async function getUser() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   return user;
-});
+}
 
 /**
  * Check if user is authenticated
@@ -74,4 +72,3 @@ export async function isAuthenticated(): Promise<boolean> {
   const session = await getSession();
   return !!session;
 }
-

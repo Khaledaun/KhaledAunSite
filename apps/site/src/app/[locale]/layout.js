@@ -35,19 +35,25 @@ export function generateStaticParams() {
 export const dynamicParams = true;
 
 export const metadata = {
-  title: 'Khaled Aun - Legal Strategy & Business Growth',
-  description: 'Expert legal counsel for complex business challenges and growth opportunities.',
+  title: 'Khaled Aun - Dispute Resolution & Governance Counsel',
+  description: 'I help founders, partners, and businesses resolve high-stakes disputes and prevent escalation — with clear strategy and decisive execution.',
+  keywords: ['dispute resolution', 'governance counsel', 'commercial litigation', 'arbitration', 'conflict prevention', 'cross-border risk', 'business disputes', 'partner conflicts'],
   openGraph: {
-    title: 'Khaled Aun - Legal Strategy & Business Growth',
-    description: 'Expert legal counsel for complex business challenges and growth opportunities.',
+    title: 'Khaled Aun - Dispute Resolution & Governance Counsel',
+    description: 'I help founders, partners, and businesses resolve high-stakes disputes and prevent escalation — with clear strategy and decisive execution.',
     type: 'website',
     locale: 'en_US',
     alternateLocale: 'ar_SA',
+    siteName: 'Khaled Aun',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Khaled Aun - Legal Strategy & Business Growth',
-    description: 'Expert legal counsel for complex business challenges and growth opportunities.',
+    title: 'Khaled Aun - Dispute Resolution & Governance Counsel',
+    description: 'I help founders, partners, and businesses resolve high-stakes disputes and prevent escalation — with clear strategy and decisive execution.',
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

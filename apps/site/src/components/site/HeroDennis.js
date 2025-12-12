@@ -1,17 +1,19 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { Link as ScrollLink } from 'react-scroll';
 import { TypeAnimation } from 'react-type-animation';
 import CountUp from 'react-countup';
 import Image from "next/image";
 import { useTranslations } from 'next-intl';
+import * as Icon from 'react-feather';
 
 export default function HeroDennis({ locale }) {
   const t = useTranslations('Hero');
   const [titles, setTitles] = useState(
-    locale === 'ar' 
-      ? ['خبير التقاضي', 1000, 'مستشار حل ومنع النزاعات', 1000, 'محكم معتمد (CiArb)', 1000, 'مستشار قانوني عبر الحدود', 1000]
-      : ['Litigation Expert', 1000, 'Conflict Resolution and Prevention Advisor', 1000, 'Certified Arbitrator (CiArb)', 1000, 'Cross Border Legal Counsel', 1000]
+    locale === 'ar'
+      ? ['مستشار حل النزاعات والحوكمة', 1000, 'استراتيجية النزاعات', 1000, 'منع النزاعات والحوكمة', 1000, 'المخاطر التجارية عبر الحدود', 1000]
+      : ['Dispute Resolution & Governance Counsel', 1000, 'Dispute Strategy', 1000, 'Conflict Prevention & Governance', 1000, 'Cross-Border Business Risk', 1000]
   );
   const [heroMedia, setHeroMedia] = useState(null);
 
@@ -142,27 +144,73 @@ export default function HeroDennis({ locale }) {
         <div className="container">
           <div className="grid md:grid-cols-2 grid-cols-1 items-center gap-[30px]">
             <div>
-              <h4 className="font-bold lg:text-[40px] text-3xl lg:leading-normal leading-normal mb-4">
-                {t('greeting')}<br />
-                <TypeAnimation
-                  sequence={titles}
-                  wrapper="span"
-                  speed={50}
-                  className="typewrite text-brand-gold"
-                  repeat={Infinity}
-                />
-              </h4>
-              <p className="text-slate-400 max-w-xl">
-                {t('description')}
+              {/* Primary Identity Badge */}
+              <div className="inline-block mb-4 px-4 py-2 bg-brand-gold/10 border border-brand-gold/20 rounded-full">
+                <span className="text-brand-gold font-medium text-sm">{t('primaryIdentity')}</span>
+              </div>
+
+              <h1 className="font-bold lg:text-[36px] text-2xl lg:leading-tight leading-normal mb-4">
+                {t('headline')}
+              </h1>
+
+              <p className="text-slate-500 dark:text-slate-400 max-w-xl text-lg mb-6">
+                {t('subheadline')}
               </p>
 
-              <div className="mt-6">
-                <Link href="#contact" className="btn btn-primary">
-                  {t('hireCTA')}
+              {/* Positioning Bullets */}
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center space-x-3 text-slate-600 dark:text-slate-300">
+                  <Icon.Check className="w-5 h-5 text-brand-gold flex-shrink-0" />
+                  <span>{t('bullet1')}</span>
+                </li>
+                <li className="flex items-center space-x-3 text-slate-600 dark:text-slate-300">
+                  <Icon.Check className="w-5 h-5 text-brand-gold flex-shrink-0" />
+                  <span>{t('bullet2')}</span>
+                </li>
+                <li className="flex items-center space-x-3 text-slate-600 dark:text-slate-300">
+                  <Icon.Check className="w-5 h-5 text-brand-gold flex-shrink-0" />
+                  <span>{t('bullet3')}</span>
+                </li>
+              </ul>
+
+              {/* Who I Help */}
+              <p className="text-slate-400 text-sm mb-6">
+                {t('whoIHelp')}
+              </p>
+
+              {/* CTAs */}
+              <div className="flex flex-wrap gap-3 mb-8">
+                <Link href="#contact" className="btn bg-brand-gold hover:bg-brand-gold/90 text-white border-brand-gold">
+                  {t('bookConsultation')}
                 </Link>
-                <Link href="/Khaled_Aun_CV.pdf" className="btn btn-secondary ms-2" target="_blank">
-                  {t('downloadCV')}
-                </Link>
+                <ScrollLink
+                  to="process"
+                  smooth={true}
+                  duration={500}
+                  className="btn btn-secondary cursor-pointer"
+                >
+                  {t('seeHowIWork')}
+                </ScrollLink>
+              </div>
+
+              {/* Credibility Strip */}
+              <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-slate-500 dark:text-slate-400 border-t border-slate-200 dark:border-slate-700 pt-4">
+                <span className="flex items-center gap-1">
+                  <Icon.Briefcase className="w-4 h-4 text-brand-gold" />
+                  {t('credibility1')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon.Target className="w-4 h-4 text-brand-gold" />
+                  {t('credibility2')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon.Award className="w-4 h-4 text-brand-gold" />
+                  {t('credibility3')}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Icon.Globe className="w-4 h-4 text-brand-gold" />
+                  {t('credibility4')}
+                </span>
               </div>
             </div>
 
@@ -183,9 +231,9 @@ export default function HeroDennis({ locale }) {
                 </h6>
               </div>
 
-              <div className="absolute lg:top-80 md:top-56 top-48 ltr:md:-right-0 ltr:right-2 rtl:md:-left-0 rtl:left-2 p-4 rounded-lg shadow-md dark:shadow-gray-800 bg-white dark:bg-slate-900 m-3 w-44 text-center">
-                <h6 className="font-semibold">{t('role')}</h6>
-                <h6 className="text-sm text-slate-400 mt-1">{t('specialization')}</h6>
+              <div className="absolute lg:top-80 md:top-56 top-48 ltr:md:-right-0 ltr:right-2 rtl:md:-left-0 rtl:left-2 p-4 rounded-lg shadow-md dark:shadow-gray-800 bg-white dark:bg-slate-900 m-3 w-48 text-center">
+                <h6 className="font-semibold text-sm">{t('role')}</h6>
+                <h6 className="text-xs text-slate-400 mt-1">{t('specialization')}</h6>
               </div>
             </div>
           </div>

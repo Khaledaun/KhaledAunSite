@@ -146,12 +146,25 @@ export default function Navbar({ locale }) {
               </ScrollLink>
             </li>
             <li className="nav-item">
-              <ScrollLink 
-                to="experience" 
-                activeClass="active" 
-                spy={true} 
-                smooth={true} 
-                duration={500} 
+              <ScrollLink
+                to="process"
+                activeClass="active"
+                spy={true}
+                smooth={true}
+                duration={500}
+                className="nav-link"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('process')}
+              </ScrollLink>
+            </li>
+            <li className="nav-item">
+              <ScrollLink
+                to="experience"
+                activeClass="active"
+                spy={true}
+                smooth={true}
+                duration={500}
                 className="nav-link"
                 onClick={() => setIsMenuOpen(false)}
               >
@@ -159,25 +172,12 @@ export default function Navbar({ locale }) {
               </ScrollLink>
             </li>
             <li className="nav-item">
-              <ScrollLink 
-                to="ventures" 
-                activeClass="active" 
-                spy={true} 
-                smooth={true} 
-                duration={500} 
-                className="nav-link"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {t('ventures')}
-              </ScrollLink>
-            </li>
-            <li className="nav-item">
-              <ScrollLink 
-                to="contact" 
-                activeClass="active" 
-                spy={true} 
-                smooth={true} 
-                duration={500} 
+              <ScrollLink
+                to="contact"
+                activeClass="active"
+                spy={true}
+                smooth={true}
+                duration={500}
                 className="nav-link"
                 onClick={() => setIsMenuOpen(false)}
               >

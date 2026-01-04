@@ -1,0 +1,56 @@
+{
+  "name": "LaWra AI",
+  "description": "Hebrew-first legal practice management system for Israeli law firms",
+  "version": "0.1.0",
+  "language": "typescript",
+  "framework": "nextjs",
+  
+  "paths": {
+    "app": "apps/lawra",
+    "docs": "docs",
+    "skills": "skills"
+  },
+  
+  "conventions": {
+    "language": {
+      "ui": "hebrew",
+      "code": "english",
+      "comments": "english"
+    },
+    "direction": "rtl",
+    "primaryFont": "Heebo",
+    "cssProperties": "logical"
+  },
+  
+  "commands": {
+    "dev": "pnpm dev:lawra",
+    "build": "pnpm build:lawra",
+    "db:generate": "pnpm db:generate",
+    "db:push": "npx prisma db push"
+  },
+  
+  "documentation": {
+    "readFirst": [
+      "CLAUDE.md",
+      "docs/BUSINESS_PLAN.md",
+      "docs/IMPLEMENTATION_GUIDE.md"
+    ],
+    "skills": [
+      "skills/hebrew-rtl/SKILL.md",
+      "skills/ai-agents/SKILL.md",
+      "skills/legal-documents/SKILL.md",
+      "skills/legal-research/SKILL.md",
+      "skills/billing/SKILL.md"
+    ]
+  },
+  
+  "priorities": [
+    "Authentication",
+    "Clients CRUD",
+    "Cases CRUD", 
+    "Tasks Kanban",
+    "Document Factory",
+    "Legal Mind AI",
+    "Time & Billing"
+  ]
+}

@@ -42,8 +42,8 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
-    if (!checks.storage) {
-      overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded';
+    if (!checks.storage && overallStatus === 'healthy') {
+      overallStatus = 'degraded';
     }
 
     // Check Auth configuration
@@ -52,12 +52,13 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
-    if (!checks.adminAuth) {
-      overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded';
+    if (!checks.adminAuth && overallStatus === 'healthy') {
+      overallStatus = 'degraded';
     }
 
     const responseTime = Date.now() - startTime;
-    const statusCode = overallStatus === 'healthy' ? 200 : overallStatus === 'degraded' ? 200 : 503;
+    // Always return 200 for healthy/degraded, 503 only for unhealthy (catch block)
+    const statusCode = 200;
 
     return NextResponse.json({
       status: overallStatus,

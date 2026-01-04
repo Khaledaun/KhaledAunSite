@@ -15,6 +15,27 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4]
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/testdb
+      REVALIDATE_SECRET: test-secret
+      PREVIEW_SECRET: test-secret
+      SITE_URL: http://localhost:3001
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,24 +51,16 @@ jobs:
 
       - name: Generate Prisma Client
         run: npm run db:generate --workspace=@khaledaun/db
-        env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+
+      - name: Push database schema
+        run: npx prisma db push --skip-generate
+        working-directory: packages/db
 
       - name: Build site
         run: npm run build --workspace=@khaledaun/site
-        env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
-          REVALIDATE_SECRET: test-secret
-          PREVIEW_SECRET: test-secret
-          SITE_URL: http://localhost:3001
 
       - name: Build admin
         run: npm run build --workspace=@khaledaun/admin
-        env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
-          REVALIDATE_SECRET: test-secret
-          PREVIEW_SECRET: test-secret
-          SITE_URL: http://localhost:3001
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -70,10 +83,6 @@ jobs:
           PORT=3001 npm start > ../../site.log 2>&1 &
           echo $! > ../../site.pid
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
-          REVALIDATE_SECRET: test-secret
-          PREVIEW_SECRET: test-secret
-          SITE_URL: http://localhost:3001
           PORT: 3001
 
       - name: Start admin in background
@@ -82,10 +91,6 @@ jobs:
           PORT=3000 npm start > ../../admin.log 2>&1 &
           echo $! > ../../admin.pid
         env:
-          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
-          REVALIDATE_SECRET: test-secret
-          PREVIEW_SECRET: test-secret
-          SITE_URL: http://localhost:3001
           PORT: 3000
 
       - name: Wait for apps to be ready
@@ -101,7 +106,6 @@ jobs:
         env:
           ADMIN_URL: http://localhost:3000
           NEXT_PUBLIC_SITE_URL: http://localhost:3001
-          REVALIDATE_SECRET: test-secret
           REQUIRE_AR_FOR_PUBLISH: "false"
 
       - name: Cleanup

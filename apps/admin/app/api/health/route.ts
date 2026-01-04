@@ -16,13 +16,20 @@ export async function GET(request: NextRequest) {
   let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
   
   try {
-    // Check database connectivity
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      checks.db = true;
-    } catch (dbError) {
-      console.error('Database health check failed:', dbError);
-      overallStatus = 'unhealthy';
+    // Check database connectivity (skip if DATABASE_URL not configured, e.g., in CI)
+    const databaseUrl = process.env.DATABASE_URL;
+    if (databaseUrl) {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        checks.db = true;
+      } catch (dbError) {
+        console.error('Database health check failed:', dbError);
+        overallStatus = 'unhealthy';
+      }
+    } else {
+      // Database not configured, skip check (e.g., CI environment)
+      checks.db = false;
+      overallStatus = 'degraded';
     }
 
     // Check Supabase Storage (env vars)

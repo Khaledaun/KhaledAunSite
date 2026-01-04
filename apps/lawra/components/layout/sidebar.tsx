@@ -17,6 +17,7 @@ import {
   Settings,
   UsersRound,
   LogOut,
+  Calendar,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -73,6 +74,12 @@ const navItems = [
     titleEn: 'Finance and Billing',
     href: '/finance',
     icon: Receipt,
+  },
+  {
+    title: 'יומן',
+    titleEn: 'Calendar',
+    href: '/calendar',
+    icon: Calendar,
   },
   {
     title: 'מאגר ידע',

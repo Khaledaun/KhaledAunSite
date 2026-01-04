@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 // Health check endpoint for monitoring and load balancers
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
-  
+
   const checks = {
     db: false,
     storage: false,
@@ -14,12 +13,14 @@ export async function GET(request: NextRequest) {
   };
 
   let overallStatus: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-  
+
   try {
     // Check database connectivity (skip if DATABASE_URL not configured, e.g., in CI)
     const databaseUrl = process.env.DATABASE_URL;
     if (databaseUrl) {
       try {
+        // Dynamic import to avoid initialization errors when DATABASE_URL is not set
+        const { prisma } = await import('@/lib/prisma');
         await prisma.$queryRaw`SELECT 1`;
         checks.db = true;
       } catch (dbError) {
@@ -50,10 +51,10 @@ export async function GET(request: NextRequest) {
     if (!checks.adminAuth) {
       overallStatus = overallStatus === 'unhealthy' ? 'unhealthy' : 'degraded';
     }
-    
+
     const responseTime = Date.now() - startTime;
     const statusCode = overallStatus === 'healthy' ? 200 : overallStatus === 'degraded' ? 200 : 503;
-    
+
     return NextResponse.json({
       status: overallStatus,
       timestamp: new Date().toISOString(),
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
       commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) || 'local',
       checks,
       responseTime,
-    }, { 
+    }, {
       status: statusCode,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -71,17 +72,17 @@ export async function GET(request: NextRequest) {
         'Expires': '0'
       }
     });
-    
+
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    
+
     return NextResponse.json({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       checks,
       error: error instanceof Error ? error.message : 'Unknown error',
       responseTime
-    }, { 
+    }, {
       status: 503,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
 
 // Simple ping endpoint for basic connectivity checks
 export async function HEAD(request: NextRequest) {
-  return new NextResponse(null, { 
+  return new NextResponse(null, {
     status: 200,
     headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',

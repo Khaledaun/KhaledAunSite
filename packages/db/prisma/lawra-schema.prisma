@@ -1,0 +1,534 @@
+// LaWra AI - Prisma Schema Extension
+// Add these models to your existing schema.prisma file in packages/db/prisma/
+
+// =====================================================
+// LAWRA MODELS - Add to your existing schema.prisma
+// =====================================================
+
+// Clients (לקוחות)
+model Client {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  
+  // Basic Info
+  name          String
+  clientType    ClientType @default(INDIVIDUAL) @map("client_type")
+  idNumber      String?    @map("id_number") // ת.ז או ח.פ
+  
+  // Contact
+  email         String?
+  phone         String?
+  phoneSecondary String?  @map("phone_secondary")
+  address       String?
+  
+  // Status
+  status        ClientStatus @default(ACTIVE)
+  
+  // Financial
+  billingRate   Decimal?     @map("billing_rate") @db.Decimal(10, 2)
+  paymentTerms  Int          @default(30) @map("payment_terms")
+  
+  // Metadata
+  notes         String?
+  customFields  Json         @default("{}") @map("custom_fields")
+  
+  // Timestamps
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  
+  // Relations
+  cases         Case[]
+  tasks         Task[]
+  timeEntries   TimeEntry[]
+  invoices      Invoice[]
+  aiConversations AIConversation[]
+  
+  @@map("lawra_clients")
+}
+
+enum ClientType {
+  INDIVIDUAL
+  COMPANY
+  GOVERNMENT
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  POTENTIAL
+  ARCHIVED
+}
+
+// Cases/Matters (תיקים)
+model Case {
+  id                String    @id @default(cuid())
+  userId            String    @map("user_id")
+  clientId          String    @map("client_id")
+  
+  // Identification
+  title             String
+  caseNumber        String?   @map("case_number") // מספר תיק בית משפט
+  internalReference String?   @map("internal_reference") // מספר תיק פנימי
+  
+  // Classification
+  caseType          CaseType  @default(LITIGATION) @map("case_type")
+  practiceArea      PracticeArea? @map("practice_area")
+  
+  // Court Info
+  court             String?
+  judge             String?
+  
+  // Status
+  status            CaseStatus @default(ACTIVE)
+  priority          Priority   @default(MEDIUM)
+  progress          Int        @default(0)
+  
+  // Dates
+  openedDate        DateTime?  @map("opened_date") @db.Date
+  deadline          DateTime?  @db.Date
+  nextHearing       DateTime?  @map("next_hearing")
+  closedDate        DateTime?  @map("closed_date") @db.Date
+  
+  // Opposing Party
+  opposingParty     String?    @map("opposing_party")
+  opposingCounsel   String?    @map("opposing_counsel")
+  opposingCounselContact String? @map("opposing_counsel_contact")
+  
+  // Financial
+  feeType           FeeType    @default(HOURLY) @map("fee_type")
+  feeAmount         Decimal?   @map("fee_amount") @db.Decimal(10, 2)
+  retainerAmount    Decimal?   @map("retainer_amount") @db.Decimal(10, 2)
+  
+  // Metadata
+  description       String?
+  notes             String?
+  tags              String[]   @default([])
+  customFields      Json       @default("{}") @map("custom_fields")
+  
+  // Timestamps
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  client            Client     @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  tasks             Task[]
+  documents         Document[]
+  timeEntries       TimeEntry[]
+  calendarEvents    CalendarEvent[]
+  aiConversations   AIConversation[]
+  
+  @@map("lawra_cases")
+}
+
+enum CaseType {
+  LITIGATION
+  ARBITRATION
+  MEDIATION
+  ADVISORY
+  TRANSACTION
+}
+
+enum PracticeArea {
+  CIVIL
+  COMMERCIAL
+  REAL_ESTATE
+  FAMILY
+  CRIMINAL
+  EMPLOYMENT
+  TORT
+  ADMINISTRATIVE
+  CORPORATE
+  IP
+  TAX
+  BANKRUPTCY
+}
+
+enum CaseStatus {
+  DRAFT
+  ACTIVE
+  PENDING
+  ON_HOLD
+  CLOSED
+  WON
+  LOST
+  SETTLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum FeeType {
+  HOURLY
+  FIXED
+  CONTINGENCY
+  RETAINER
+  HYBRID
+}
+
+// Tasks (משימות)
+model Task {
+  id               String     @id @default(cuid())
+  userId           String     @map("user_id")
+  caseId           String?    @map("case_id")
+  clientId         String?    @map("client_id")
+  assigneeId       String?    @map("assignee_id")
+  
+  // Content
+  title            String
+  description      String?
+  
+  // Status
+  status           TaskStatus @default(INBOX)
+  priority         Priority   @default(MEDIUM)
+  
+  // Position (for Kanban ordering)
+  position         Int        @default(0)
+  
+  // Dates
+  dueDate          DateTime?  @map("due_date") @db.Date
+  completedAt      DateTime?  @map("completed_at")
+  
+  // Time tracking
+  estimatedMinutes Int?       @map("estimated_minutes")
+  actualMinutes    Int?       @map("actual_minutes")
+  
+  // Recurrence
+  isRecurring      Boolean    @default(false) @map("is_recurring")
+  recurrenceRule   String?    @map("recurrence_rule") // RRULE format
+  parentTaskId     String?    @map("parent_task_id")
+  
+  // Metadata
+  tags             String[]   @default([])
+  
+  // Timestamps
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+  
+  // Relations
+  case             Case?      @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  client           Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  parentTask       Task?      @relation("TaskRecurrence", fields: [parentTaskId], references: [id])
+  childTasks       Task[]     @relation("TaskRecurrence")
+  timeEntries      TimeEntry[]
+  
+  @@map("lawra_tasks")
+}
+
+enum TaskStatus {
+  INBOX
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+  CANCELLED
+}
+
+// Documents (מסמכים)
+model Document {
+  id              String        @id @default(cuid())
+  userId          String        @map("user_id")
+  caseId          String?       @map("case_id")
+  
+  // File Info
+  filename        String
+  storagePath     String        @map("storage_path")
+  mimeType        String        @map("mime_type")
+  size            Int
+  
+  // Classification
+  documentType    DocumentType? @map("document_type")
+  
+  // Content
+  extractedText   String?       @map("extracted_text")
+  summary         String?
+  
+  // Metadata
+  description     String?
+  tags            String[]      @default([])
+  
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  // Relations
+  case            Case?         @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  
+  @@map("lawra_documents")
+}
+
+enum DocumentType {
+  CLAIM
+  DEFENSE
+  REPLY
+  COUNTERCLAIM
+  MOTION
+  URGENT_MOTION
+  EX_PARTE
+  AFFIDAVIT
+  EXPERT_OPINION
+  EVIDENCE
+  JUDGMENT
+  DECISION
+  ORDER
+  CONTRACT
+  AGREEMENT
+  MOU
+  NDA
+  LETTER
+  DEMAND_LETTER
+  OPINION
+  POWER_OF_ATTORNEY
+  RETAINER
+  INVOICE
+  OTHER
+}
+
+// Time Entries (רישומי זמן)
+model TimeEntry {
+  id              String       @id @default(cuid())
+  userId          String       @map("user_id")
+  caseId          String?      @map("case_id")
+  clientId        String?      @map("client_id")
+  taskId          String?      @map("task_id")
+  invoiceId       String?      @map("invoice_id")
+  
+  // Time
+  date            DateTime     @db.Date
+  durationMinutes Int          @map("duration_minutes")
+  
+  // Classification
+  activityType    ActivityType? @map("activity_type")
+  
+  // Billing
+  description     String
+  isBillable      Boolean      @default(true) @map("is_billable")
+  hourlyRate      Decimal?     @map("hourly_rate") @db.Decimal(10, 2)
+  
+  // Timestamps
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+  
+  // Relations
+  case            Case?        @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  client          Client?      @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  task            Task?        @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  invoice         Invoice?     @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  
+  @@map("lawra_time_entries")
+}
+
+enum ActivityType {
+  RESEARCH
+  DRAFTING
+  REVIEW
+  COURT_APPEARANCE
+  NEGOTIATION
+  MEETING_CLIENT
+  MEETING_OTHER
+  EMAIL
+  PHONE_CALL
+  CORRESPONDENCE
+  TRAVEL
+  FILING
+  ADMINISTRATIVE
+}
+
+// Calendar Events (אירועי יומן)
+model CalendarEvent {
+  id              String        @id @default(cuid())
+  userId          String        @map("user_id")
+  caseId          String?       @map("case_id")
+  
+  // Event Info
+  title           String
+  description     String?
+  location        String?
+  
+  // Time
+  startTime       DateTime      @map("start_time")
+  endTime         DateTime      @map("end_time")
+  allDay          Boolean       @default(false) @map("all_day")
+  
+  // Type
+  eventType       EventType?    @map("event_type")
+  
+  // Sync
+  outlookId       String?       @map("outlook_id")
+  googleId        String?       @map("google_id")
+  lastSyncedAt    DateTime?     @map("last_synced_at")
+  isLocalOnly     Boolean       @default(false) @map("is_local_only")
+  
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  // Relations
+  case            Case?         @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  
+  @@map("lawra_calendar_events")
+}
+
+enum EventType {
+  HEARING
+  MEETING
+  DEADLINE
+  REMINDER
+  INTERNAL
+  MARKETING
+  OTHER
+}
+
+// Invoices (חשבוניות)
+model Invoice {
+  id              String        @id @default(cuid())
+  userId          String        @map("user_id")
+  clientId        String        @map("client_id")
+  
+  // Invoice Info
+  invoiceNumber   String        @map("invoice_number")
+  issueDate       DateTime      @map("issue_date") @db.Date
+  dueDate         DateTime      @map("due_date") @db.Date
+  
+  // Amounts
+  subtotal        Decimal       @db.Decimal(10, 2)
+  taxAmount       Decimal       @default(0) @map("tax_amount") @db.Decimal(10, 2)
+  total           Decimal       @db.Decimal(10, 2)
+  
+  // Status
+  status          InvoiceStatus @default(DRAFT)
+  
+  // Payment
+  paidAmount      Decimal       @default(0) @map("paid_amount") @db.Decimal(10, 2)
+  paidDate        DateTime?     @map("paid_date") @db.Date
+  
+  // Metadata
+  notes           String?
+  
+  // Timestamps
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  // Relations
+  client          Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  timeEntries     TimeEntry[]
+  
+  @@map("lawra_invoices")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+// Knowledge Base (מאגר ידע)
+model KnowledgeItem {
+  id              String              @id @default(cuid())
+  userId          String              @map("user_id")
+  
+  // Content
+  title           String
+  content         String?
+  filePath        String?             @map("file_path")
+  
+  // Classification
+  category        KnowledgeCategory   @default(OTHER)
+  practiceArea    PracticeArea?       @map("practice_area")
+  
+  // Search
+  tags            String[]            @default([])
+  embedding       Unsupported("vector(1536)")? // For AI semantic search
+  
+  // Source
+  sourceType      KnowledgeSourceType @default(INTERNAL) @map("source_type")
+  sourceUrl       String?             @map("source_url")
+  
+  // Timestamps
+  createdAt       DateTime            @default(now()) @map("created_at")
+  updatedAt       DateTime            @updatedAt @map("updated_at")
+  
+  @@map("lawra_knowledge_items")
+}
+
+enum KnowledgeCategory {
+  ARTICLE
+  COURT_DECISION
+  TEMPLATE
+  INTERNAL_MEMO
+  BOOK
+  TRAINING
+  PROCEDURE
+  OTHER
+}
+
+enum KnowledgeSourceType {
+  INTERNAL
+  TAKDIN
+  NEVO
+  NET_HAMISHPAT
+  ACADEMIC
+  WEB
+}
+
+// AI Conversations (שיחות AI)
+model AIConversation {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id")
+  caseId          String?   @map("case_id")
+  clientId        String?   @map("client_id")
+  
+  // Agent Info
+  agentType       String    @map("agent_type")
+  
+  // Messages stored as JSON array
+  messages        Json      @default("[]")
+  
+  // Context (for per-client memory)
+  context         Json      @default("{}")
+  
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  case            Case?     @relation(fields: [caseId], references: [id], onDelete: SetNull)
+  client          Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  @@map("lawra_ai_conversations")
+}
+
+// User Roles & Permissions
+model TeamMember {
+  id              String    @id @default(cuid())
+  userId          String    @map("user_id") // Supabase Auth user ID
+  
+  // Profile
+  fullName        String    @map("full_name")
+  email           String    @unique
+  avatar          String?
+  
+  // Role
+  role            TeamRole  @default(ASSOCIATE)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+  
+  @@map("lawra_team_members")
+}
+
+enum TeamRole {
+  ADMIN
+  PARTNER
+  ASSOCIATE
+  PARALEGAL
+  SECRETARY
+  SERVICE_PROVIDER
+}

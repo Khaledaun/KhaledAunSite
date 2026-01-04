@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* RTL base styles */
+  html {
+    direction: rtl;
+  }
+  
+  /* Ensure proper text alignment for Hebrew */
+  body, 
+  input, 
+  textarea, 
+  select, 
+  button {
+    text-align: right;
+  }
+  
+  /* Numbers and emails should remain LTR */
+  .ltr,
+  [dir="ltr"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="url"],
+  .font-mono,
+  code,
+  pre {
+    direction: ltr;
+    text-align: left;
+  }
+  
+  /* Case numbers (e.g., CC: 12345-10-25) */
+  .case-number {
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+  
+  /* Mixed content - let browser decide */
+  .bidi-auto {
+    unicode-bidi: plaintext;
+  }
+}
+
+@layer components {
+  /* Card styles matching mockup */
+  .lawra-card {
+    @apply bg-card rounded-2xl border border-border shadow-sm p-4;
+  }
+  
+  /* Sidebar styles */
+  .lawra-sidebar {
+    @apply bg-card border-e border-border h-screen;
+  }
+  
+  /* Sidebar item */
+  .lawra-sidebar-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground 
+           hover:bg-muted hover:text-foreground transition-colors;
+  }
+  
+  .lawra-sidebar-item.active {
+    @apply bg-primary text-primary-foreground;
+  }
+  
+  /* Avatar with initials */
+  .lawra-avatar {
+    @apply w-10 h-10 rounded-full flex items-center justify-center 
+           text-sm font-semibold text-white;
+  }
+  
+  /* Task status badges */
+  .lawra-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .lawra-badge-urgent {
+    @apply bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400;
+  }
+  
+  .lawra-badge-pending {
+    @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400;
+  }
+  
+  .lawra-badge-active {
+    @apply bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400;
+  }
+  
+  /* Calendar event dots */
+  .calendar-dot {
+    @apply w-1.5 h-1.5 rounded-full;
+  }
+  
+  .calendar-dot-meeting {
+    @apply bg-calendar-meeting;
+  }
+  
+  .calendar-dot-hearing {
+    @apply bg-calendar-hearing;
+  }
+  
+  .calendar-dot-deadline {
+    @apply bg-calendar-deadline;
+  }
+  
+  /* Update feed item */
+  .update-item {
+    @apply flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors;
+  }
+  
+  /* Action icon buttons */
+  .action-icon {
+    @apply p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground 
+           hover:text-foreground;
+  }
+}
+
+@layer utilities {
+  /* RTL-aware margin/padding using logical properties */
+  .ms-auto {
+    margin-inline-start: auto;
+  }
+  
+  .me-auto {
+    margin-inline-end: auto;
+  }
+  
+  /* Flip icons for RTL */
+  .rtl-flip {
+    transform: scaleX(-1);
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hebrew text utilities */
+  .text-hebrew {
+    font-family: var(--font-heebo), 'Heebo', sans-serif;
+    direction: rtl;
+  }
+  
+  /* Number formatting */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Focus visible styles */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    direction: rtl;
+  }
+}

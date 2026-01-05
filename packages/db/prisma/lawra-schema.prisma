@@ -532,3 +532,248 @@ enum TeamRole {
   SECRETARY
   SERVICE_PROVIDER
 }
+
+// =====================================================
+// AMENDMENT 13 COMPLIANCE MODELS (תיקון 13)
+// =====================================================
+
+// Audit Log (יומן ביקורת)
+model AuditLog {
+  id                  String              @id @default(cuid())
+  userId              String              @map("user_id")
+
+  // Action Details
+  action              AuditAction
+  entityType          String              @map("entity_type")
+  entityId            String?             @map("entity_id")
+
+  // Change Tracking
+  oldValue            Json?               @map("old_value")
+  newValue            Json?               @map("new_value")
+  changedFields       String[]            @default([]) @map("changed_fields")
+  hasSensitiveChanges Boolean             @default(false) @map("has_sensitive_changes")
+
+  // Data Classification
+  dataClassification  DataClassification  @default(INTERNAL) @map("data_classification")
+
+  // Request Context
+  ipAddress           String              @map("ip_address")
+  userAgent           String              @map("user_agent")
+  sessionId           String?             @map("session_id")
+
+  // Status
+  success             Boolean             @default(true)
+  errorMessage        String?             @map("error_message")
+
+  // Timestamp
+  createdAt           DateTime            @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+  @@index([dataClassification, createdAt])
+  @@map("lawra_audit_logs")
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  EXPORT
+  SHARE
+  LOGIN
+  LOGOUT
+  FAILED_LOGIN
+  PERMISSION_CHANGE
+  CONSENT_GRANTED
+  CONSENT_REVOKED
+  DATA_SUBJECT_REQUEST
+}
+
+enum DataClassification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  PRIVILEGED
+  SENSITIVE
+}
+
+// Consent Records (רשומות הסכמה)
+model Consent {
+  id              String        @id @default(cuid())
+  userId          String        @map("user_id")
+  clientId        String?       @map("client_id") // If consent is on behalf of client
+
+  // Consent Details
+  consentType     ConsentType   @map("consent_type")
+  granted         Boolean
+
+  // Consent Metadata
+  version         String        // Version of consent form
+  formText        String?       @map("form_text") // Actual text user agreed to
+
+  // Collection Context
+  ipAddress       String?       @map("ip_address")
+  userAgent       String?       @map("user_agent")
+  collectionMethod String       @default("WEB") @map("collection_method")
+
+  // Timestamps
+  grantedAt       DateTime?     @map("granted_at")
+  revokedAt       DateTime?     @map("revoked_at")
+  expiresAt       DateTime?     @map("expires_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  @@unique([userId, consentType, clientId])
+  @@index([userId, consentType])
+  @@map("lawra_consents")
+}
+
+enum ConsentType {
+  DATA_PROCESSING
+  MARKETING
+  THIRD_PARTY_SHARING
+  AI_PROCESSING
+  DATA_RETENTION
+  CROSS_BORDER_TRANSFER
+}
+
+// Data Subject Requests (בקשות נושא מידע)
+model DataSubjectRequest {
+  id                  String                    @id @default(cuid())
+
+  // Requester
+  requesterId         String                    @map("requester_id")
+  requesterType       RequesterType             @map("requester_type")
+  requesterEmail      String                    @map("requester_email")
+
+  // Request Details
+  rightType           DataSubjectRight          @map("right_type")
+  description         String?
+
+  // Verification
+  verificationMethod  String                    @map("verification_method")
+  verifiedAt          DateTime?                 @map("verified_at")
+  verifiedBy          String?                   @map("verified_by")
+
+  // Processing
+  status              RequestStatus             @default(PENDING)
+  handledBy           String?                   @map("handled_by")
+  notes               String?
+
+  // Response
+  responseData        Json?                     @map("response_data")
+  rejectionReason     String?                   @map("rejection_reason")
+
+  // Deadlines
+  deadlineAt          DateTime                  @map("deadline_at")
+
+  // Timestamps
+  requestedAt         DateTime                  @default(now()) @map("requested_at")
+  completedAt         DateTime?                 @map("completed_at")
+  updatedAt           DateTime                  @updatedAt @map("updated_at")
+
+  @@index([requesterId, rightType])
+  @@index([status, deadlineAt])
+  @@map("lawra_data_subject_requests")
+}
+
+enum RequesterType {
+  USER
+  CLIENT
+  THIRD_PARTY
+}
+
+enum DataSubjectRight {
+  ACCESS
+  CORRECTION
+  DELETION
+  PORTABILITY
+  OBJECTION
+}
+
+enum RequestStatus {
+  PENDING
+  VERIFIED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  EXPIRED
+}
+
+// Data Breach Records (רשומות הפרת אבטחה)
+model DataBreach {
+  id                    String          @id @default(cuid())
+
+  // Detection
+  detectedAt            DateTime        @map("detected_at")
+  detectedBy            String          @map("detected_by")
+
+  // Classification
+  severity              BreachSeverity
+  category              BreachCategory
+
+  // Description
+  title                 String
+  description           String
+
+  // Impact Assessment
+  affectedRecords       Int             @map("affected_records")
+  affectedDataTypes     String[]        @map("affected_data_types")
+  affectedUsers         String[]        @map("affected_users")
+
+  // Root Cause
+  rootCause             String?         @map("root_cause")
+  attackVector          String?         @map("attack_vector")
+
+  // Containment
+  containmentActions    String[]        @map("containment_actions")
+  containedAt           DateTime?       @map("contained_at")
+
+  // Notification Status
+  authorityNotified     Boolean         @default(false) @map("authority_notified")
+  authorityNotifiedAt   DateTime?       @map("authority_notified_at")
+  authorityReference    String?         @map("authority_reference")
+
+  usersNotified         Boolean         @default(false) @map("users_notified")
+  usersNotifiedAt       DateTime?       @map("users_notified_at")
+
+  // Remediation
+  preventiveMeasures    String[]        @map("preventive_measures")
+  remediationStatus     RemediationStatus @default(PENDING) @map("remediation_status")
+
+  // Timestamps
+  createdAt             DateTime        @default(now()) @map("created_at")
+  updatedAt             DateTime        @updatedAt @map("updated_at")
+  closedAt              DateTime?       @map("closed_at")
+
+  @@index([severity, createdAt])
+  @@index([authorityNotified, detectedAt])
+  @@map("lawra_data_breaches")
+}
+
+enum BreachSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BreachCategory {
+  UNAUTHORIZED_ACCESS
+  DATA_LEAK
+  RANSOMWARE
+  PHISHING
+  INSIDER_THREAT
+  SYSTEM_COMPROMISE
+  PHYSICAL_BREACH
+  OTHER
+}
+
+enum RemediationStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  ONGOING_MONITORING
+}

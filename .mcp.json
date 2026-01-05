@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/mcp-config-schema.json",
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PAT}"
+      },
+      "description": "GitHub MCP for PR management, issues, and repository operations"
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/KhaledAunSite"],
+      "description": "File system access for the project directory"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory for storing context across sessions"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Breaking down complex tasks into structured steps"
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "description": "Browser automation for testing and web interactions"
+    }
+  },
+  "defaults": {
+    "timeout": 60000,
+    "retries": 3
+  }
+}

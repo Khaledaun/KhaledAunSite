@@ -4,13 +4,14 @@
   "version": "0.1.0",
   "language": "typescript",
   "framework": "nextjs",
-  
+
   "paths": {
     "app": "apps/lawra",
+    "site": "apps/site",
     "docs": "docs",
     "skills": "skills"
   },
-  
+
   "conventions": {
     "language": {
       "ui": "hebrew",
@@ -21,14 +22,15 @@
     "primaryFont": "Heebo",
     "cssProperties": "logical"
   },
-  
+
   "commands": {
     "dev": "pnpm dev:lawra",
+    "dev:site": "pnpm dev:site",
     "build": "pnpm build:lawra",
     "db:generate": "pnpm db:generate",
     "db:push": "npx prisma db push"
   },
-  
+
   "documentation": {
     "readFirst": [
       "CLAUDE.md",
@@ -43,14 +45,41 @@
       "skills/billing/SKILL.md"
     ]
   },
-  
+
   "priorities": [
     "Authentication",
     "Clients CRUD",
-    "Cases CRUD", 
+    "Cases CRUD",
     "Tasks Kanban",
     "Document Factory",
     "Legal Mind AI",
-    "Time & Billing"
-  ]
+    "Time & Billing",
+    "Calendar"
+  ],
+
+  "mcp": {
+    "configFile": ".mcp.json",
+    "servers": {
+      "recommended": [
+        "github",
+        "filesystem",
+        "memory"
+      ],
+      "optional": [
+        "sequential-thinking",
+        "puppeteer"
+      ]
+    }
+  },
+
+  "environment": {
+    "lawra": {
+      "port": 3002,
+      "url": "http://localhost:3002"
+    },
+    "site": {
+      "port": 3001,
+      "url": "http://localhost:3001"
+    }
+  }
 }

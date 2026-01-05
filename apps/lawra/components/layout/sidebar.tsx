@@ -18,6 +18,8 @@ import {
   UsersRound,
   LogOut,
   Calendar,
+  Calculator,
+  History,
 } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
@@ -86,6 +88,12 @@ const navItems = [
     titleEn: 'Knowledge Base',
     href: '/knowledge',
     icon: BookOpen,
+  },
+  {
+    title: 'כלים משפטיים',
+    titleEn: 'Legal Tools',
+    href: '/tools',
+    icon: Calculator,
   },
   {
     title: 'שיווק',

@@ -32,6 +32,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { ClientForm } from '@/components/clients/client-form'
 import { useToast } from '@/components/ui/use-toast'
+import { TableSkeleton } from '@/components/ui/skeletons'
 import { clientTypeLabels, clientStatusLabels, type CreateClientInput } from '@/lib/schemas/client'
 import {
   Plus,
@@ -42,7 +43,8 @@ import {
   Mail,
   MoreHorizontal,
   FolderOpen,
-  Loader2,
+  Sparkles,
+  Users,
 } from 'lucide-react'
 
 // Status badge variants
@@ -128,52 +130,65 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-6 p-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">לקוחות</h1>
-          <p className="text-muted-foreground">
-            ניהול כל הלקוחות שלך במקום אחד
-          </p>
-        </div>
+      {/* Header with gradient background */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent p-6 animate-fade-in-up">
+        <div className="absolute inset-0 bg-mesh-gradient opacity-30" />
+        <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-lg">
+                <Users className="h-5 w-5" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-l from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                לקוחות
+              </h1>
+            </div>
+            <p className="text-muted-foreground">
+              ניהול כל הלקוחות שלך במקום אחד
+            </p>
+          </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="me-2 h-4 w-4" />
-              לקוח חדש
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>הוספת לקוח חדש</DialogTitle>
-              <DialogDescription>
-                מלא את פרטי הלקוח ליצירת כרטיס לקוח חדש
-              </DialogDescription>
-            </DialogHeader>
-            <ClientForm
-              onSubmit={createMutation.mutateAsync}
-              isLoading={createMutation.isPending}
-              submitLabel="צור לקוח"
-            />
-          </DialogContent>
-        </Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-gradient-to-l from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                <Plus className="me-2 h-4 w-4" />
+                לקוח חדש
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass-premium border-white/20">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-violet-500" />
+                  הוספת לקוח חדש
+                </DialogTitle>
+                <DialogDescription>
+                  מלא את פרטי הלקוח ליצירת כרטיס לקוח חדש
+                </DialogDescription>
+              </DialogHeader>
+              <ClientForm
+                onSubmit={createMutation.mutateAsync}
+                isLoading={createMutation.isPending}
+                submitLabel="צור לקוח"
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Filters with glass effect */}
+      <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         <div className="relative flex-1">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="חיפוש לפי שם, אימייל או טלפון..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="ps-10"
+            className="ps-10 bg-background/50 backdrop-blur-sm border-muted/50 focus:border-violet-500/50 transition-colors"
           />
         </div>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[150px] bg-background/50 backdrop-blur-sm border-muted/50">
             <SelectValue placeholder="סטטוס" />
           </SelectTrigger>
           <SelectContent>
@@ -187,7 +202,7 @@ export default function ClientsPage() {
         </Select>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[150px] bg-background/50 backdrop-blur-sm border-muted/50">
             <SelectValue placeholder="סוג" />
           </SelectTrigger>
           <SelectContent>
@@ -201,52 +216,68 @@ export default function ClientsPage() {
         </Select>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl border bg-card">
+      {/* Table with premium styling */}
+      <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden shadow-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
+          <TableSkeleton rows={6} columns={5} />
         ) : error ? (
           <div className="text-center py-12 text-muted-foreground">
-            שגיאה בטעינת הלקוחות
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <Users className="h-8 w-8 text-destructive/60" />
+            </div>
+            <p>שגיאה בטעינת הלקוחות</p>
           </div>
         ) : data?.clients?.length === 0 ? (
-          <div className="text-center py-12">
-            <User className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <h3 className="mt-4 text-lg font-semibold">אין לקוחות</h3>
-            <p className="text-muted-foreground">
-              התחל להוסיף לקוחות חדשים למערכת
+          <div className="text-center py-16 px-4">
+            <div className="relative mx-auto w-24 h-24 mb-6">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-500/20 to-purple-500/20 animate-pulse" />
+              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-violet-500/10 to-purple-500/10 flex items-center justify-center">
+                <Users className="h-10 w-10 text-violet-500/60" />
+              </div>
+            </div>
+            <h3 className="text-xl font-semibold mb-2">אין לקוחות עדיין</h3>
+            <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
+              התחל להוסיף לקוחות חדשים למערכת כדי לנהל את התיקים והקשרים שלך
             </p>
+            <Button
+              onClick={() => setIsDialogOpen(true)}
+              className="bg-gradient-to-l from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white"
+            >
+              <Plus className="me-2 h-4 w-4" />
+              הוסף לקוח ראשון
+            </Button>
           </div>
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>לקוח</TableHead>
-                <TableHead>סוג</TableHead>
-                <TableHead>יצירת קשר</TableHead>
-                <TableHead>תיקים</TableHead>
-                <TableHead>סטטוס</TableHead>
+              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                <TableHead className="font-semibold">לקוח</TableHead>
+                <TableHead className="font-semibold">סוג</TableHead>
+                <TableHead className="font-semibold">יצירת קשר</TableHead>
+                <TableHead className="font-semibold">תיקים</TableHead>
+                <TableHead className="font-semibold">סטטוס</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data?.clients?.map((client: any) => (
+              {data?.clients?.map((client: any, index: number) => (
                 <TableRow
                   key={client.id}
-                  className="cursor-pointer"
+                  className="cursor-pointer group transition-all duration-200 hover:bg-violet-500/5 animate-fade-in-up"
+                  style={{ animationDelay: `${0.05 * index}s` }}
                   onClick={() => router.push(`/clients/${client.id}`)}
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarFallback className="bg-primary/10 text-primary">
+                      <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-violet-500/30 transition-all">
+                        <AvatarFallback className="bg-gradient-to-br from-violet-500/20 to-purple-500/20 text-violet-700 dark:text-violet-300 font-medium">
                           {getInitials(client.name)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-medium">{client.name}</div>
+                        <div className="font-medium group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                          {client.name}
+                        </div>
                         {client.idNumber && (
                           <div className="text-sm text-muted-foreground" dir="ltr">
                             {client.idNumber}
@@ -256,7 +287,7 @@ export default function ClientsPage() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       {getClientIcon(client.clientType)}
                       <span>{clientTypeLabels[client.clientType]}</span>
                     </div>
@@ -266,25 +297,30 @@ export default function ClientsPage() {
                       {client.phone && (
                         <div className="flex items-center gap-2 text-sm">
                           <Phone className="h-3 w-3 text-muted-foreground" />
-                          <span dir="ltr">{client.phone}</span>
+                          <span dir="ltr" className="text-muted-foreground">{client.phone}</span>
                         </div>
                       )}
                       {client.email && (
                         <div className="flex items-center gap-2 text-sm">
                           <Mail className="h-3 w-3 text-muted-foreground" />
-                          <span dir="ltr">{client.email}</span>
+                          <span dir="ltr" className="text-muted-foreground">{client.email}</span>
                         </div>
                       )}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <FolderOpen className="h-4 w-4 text-muted-foreground" />
-                      <span>{client._count?.cases || 0}</span>
+                      <div className="p-1.5 rounded-lg bg-muted/50 group-hover:bg-violet-500/10 transition-colors">
+                        <FolderOpen className="h-4 w-4 text-muted-foreground group-hover:text-violet-500 transition-colors" />
+                      </div>
+                      <span className="font-medium">{client._count?.cases || 0}</span>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={statusVariants[client.status] || 'outline'}>
+                    <Badge
+                      variant={statusVariants[client.status] || 'outline'}
+                      className="font-medium"
+                    >
                       {clientStatusLabels[client.status]}
                     </Badge>
                   </TableCell>
@@ -292,6 +328,7 @@ export default function ClientsPage() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={(e) => {
                         e.stopPropagation()
                         // TODO: Open actions menu
@@ -309,7 +346,7 @@ export default function ClientsPage() {
 
       {/* Pagination info */}
       {data?.pagination && (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
           מציג {data.clients.length} מתוך {data.pagination.total} לקוחות
         </div>
       )}

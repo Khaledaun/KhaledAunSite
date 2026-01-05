@@ -35,8 +35,9 @@ import {
 import { useToast } from '@/components/ui/use-toast'
 import { KanbanColumn } from '@/components/tasks/kanban-column'
 import { TaskCard } from '@/components/tasks/task-card'
+import { KanbanColumnSkeleton } from '@/components/ui/skeletons'
 import { kanbanColumns, priorityLabels, type CreateTaskInput } from '@/lib/schemas/task'
-import { Plus, Loader2, Search, Filter } from 'lucide-react'
+import { Plus, Loader2, Search, CheckSquare, Sparkles } from 'lucide-react'
 
 export default function TasksPage() {
   const searchParams = useSearchParams()
@@ -204,17 +205,27 @@ export default function TasksPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-6 border-b bg-background">
+      {/* Header with gradient */}
+      <div className="p-6 border-b bg-gradient-to-l from-amber-500/5 via-orange-500/5 to-transparent animate-fade-in-up">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold">משימות</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-lg">
+                <CheckSquare className="h-5 w-5" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-l from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                משימות
+              </h1>
+            </div>
             <p className="text-muted-foreground">
               ניהול משימות בתצוגת קנבן
             </p>
           </div>
 
-          <Button onClick={() => handleAddTask('TODO')}>
+          <Button
+            onClick={() => handleAddTask('TODO')}
+            className="bg-gradient-to-l from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          >
             <Plus className="me-2 h-4 w-4" />
             משימה חדשה
           </Button>
@@ -228,21 +239,26 @@ export default function TasksPage() {
               placeholder="חיפוש משימות..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="ps-10"
+              className="ps-10 bg-background/50 backdrop-blur-sm border-muted/50 focus:border-amber-500/50 transition-colors"
             />
           </div>
         </div>
       </div>
 
       {/* Kanban Board */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-6 bg-gradient-to-b from-transparent to-muted/20">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <div className="flex gap-4 pb-4" style={{ minWidth: 'max-content' }}>
+            {kanbanColumns.map((_, index) => (
+              <KanbanColumnSkeleton key={index} />
+            ))}
           </div>
         ) : error ? (
           <div className="text-center py-12 text-muted-foreground">
-            שגיאה בטעינת המשימות
+            <div className="mx-auto w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+              <CheckSquare className="h-8 w-8 text-destructive/60" />
+            </div>
+            <p>שגיאה בטעינת המשימות</p>
           </div>
         ) : (
           <DndContext
@@ -279,9 +295,12 @@ export default function TasksPage() {
 
       {/* Add Task Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
+        <DialogContent className="glass-premium border-white/20">
           <DialogHeader>
-            <DialogTitle>משימה חדשה</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              משימה חדשה
+            </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -340,12 +359,14 @@ export default function TasksPage() {
             <Button
               variant="outline"
               onClick={() => setIsAddDialogOpen(false)}
+              className="border-muted/50"
             >
               ביטול
             </Button>
             <Button
               onClick={handleCreateTask}
               disabled={!newTaskTitle.trim() || createMutation.isPending}
+              className="bg-gradient-to-l from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white"
             >
               {createMutation.isPending ? (
                 <>

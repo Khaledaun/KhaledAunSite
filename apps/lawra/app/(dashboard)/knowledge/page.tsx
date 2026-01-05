@@ -53,6 +53,9 @@ import {
   Tag,
   Trash2,
   Eye,
+  Bot,
+  Library,
+  Sparkles,
 } from 'lucide-react'
 import {
   knowledgeTypeLabels,
@@ -60,6 +63,7 @@ import {
   type KnowledgeType,
   type PracticeArea,
 } from '@/lib/schemas/knowledge'
+import { KnowledgeChat } from '@/components/knowledge/knowledge-chat'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 
@@ -147,20 +151,31 @@ export default function KnowledgePage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">מאגר ידע משפטי</h1>
-          <p className="text-muted-foreground">חוקים, פסיקה, תבניות ומידע משפטי</p>
-        </div>
+      {/* Header with gradient */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-transparent p-6 animate-fade-in-up">
+        <div className="absolute inset-0 bg-mesh-gradient opacity-30" />
+        <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg">
+                <Library className="h-5 w-5" />
+              </div>
+              <h1 className="text-2xl font-bold bg-gradient-to-l from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                מאגר ידע משפטי
+              </h1>
+            </div>
+            <p className="text-muted-foreground">
+              חוקים, פסיקה, תבניות ומידע משפטי • שאל את הסוכן או העלה מסמכים
+            </p>
+          </div>
 
-        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              הוסף פריט
-            </Button>
-          </DialogTrigger>
+          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 bg-gradient-to-l from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+                <Plus className="h-4 w-4" />
+                הוסף פריט
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>הוספת פריט למאגר הידע</DialogTitle>
@@ -258,42 +273,122 @@ export default function KnowledgePage() {
         </Dialog>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-wrap gap-4">
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="חיפוש במאגר..."
-            className="pe-10"
-          />
-        </div>
+      {/* Main Content with Tabs */}
+      <Tabs defaultValue="chat" className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/50 backdrop-blur-sm">
+          <TabsTrigger value="chat" className="gap-2 data-[state=active]:bg-gradient-to-l data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+            <Bot className="h-4 w-4" />
+            סוכן חכם
+          </TabsTrigger>
+          <TabsTrigger value="library" className="gap-2 data-[state=active]:bg-gradient-to-l data-[state=active]:from-blue-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+            <Library className="h-4 w-4" />
+            ספריה
+          </TabsTrigger>
+        </TabsList>
 
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="סוג פריט" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">הכל</SelectItem>
-            {Object.entries(knowledgeTypeLabels).map(([key, label]) => (
-              <SelectItem key={key} value={key}>{label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Chat Tab */}
+        <TabsContent value="chat" className="mt-6 animate-fade-in-up">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Chat Interface */}
+            <div className="lg:col-span-2">
+              <KnowledgeChat />
+            </div>
 
-        <Select value={practiceAreaFilter} onValueChange={setPracticeAreaFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="תחום משפט" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">הכל</SelectItem>
-            {Object.entries(practiceAreaLabels).map(([key, label]) => (
-              <SelectItem key={key} value={key}>{label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+            {/* Quick Stats Sidebar */}
+            <div className="space-y-4">
+              <Card className="glass-premium border-border/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-500" />
+                    מה הסוכן יכול לעשות
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-muted-foreground">
+                  <div className="flex items-start gap-2">
+                    <MessageSquare className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <span>לענות על שאלות משפטיות מהמאגר</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <FileText className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                    <span>לקרוא ולסווג מסמכים חדשים</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Tag className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                    <span>לתייג ולארגן תוכן אוטומטית</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <BookOpen className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <span>לחפש פסיקה וחקיקה רלוונטית</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Stats */}
+              <Card className="glass-premium border-border/50">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm">סטטיסטיקת מאגר</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">חוקים</span>
+                    <Badge variant="secondary">{data?.items?.filter((i: any) => i.type === 'STATUTE').length || 0}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">פסיקה</span>
+                    <Badge variant="secondary">{data?.items?.filter((i: any) => i.type === 'PRECEDENT').length || 0}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">תבניות</span>
+                    <Badge variant="secondary">{data?.items?.filter((i: any) => i.type === 'TEMPLATE').length || 0}</Badge>
+                  </div>
+                  <div className="flex items-center justify-between font-medium">
+                    <span className="text-sm">סה״כ</span>
+                    <Badge className="bg-gradient-to-l from-blue-500 to-indigo-600 text-white">{data?.total || 0}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Library Tab */}
+        <TabsContent value="library" className="mt-6 space-y-6 animate-fade-in-up">
+          {/* Search and Filters */}
+          <div className="flex flex-wrap gap-4">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="חיפוש במאגר..."
+                className="pe-10 bg-background/50 backdrop-blur-sm border-muted/50 focus:border-blue-500/50 transition-colors"
+              />
+            </div>
+
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[180px] bg-background/50 backdrop-blur-sm border-muted/50">
+                <SelectValue placeholder="סוג פריט" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">הכל</SelectItem>
+                {Object.entries(knowledgeTypeLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={practiceAreaFilter} onValueChange={setPracticeAreaFilter}>
+              <SelectTrigger className="w-[180px] bg-background/50 backdrop-blur-sm border-muted/50">
+                <SelectValue placeholder="תחום משפט" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">הכל</SelectItem>
+                {Object.entries(practiceAreaLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -418,19 +513,23 @@ export default function KnowledgePage() {
             </Card>
           ))
         )}
-      </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* View Item Dialog */}
       <Dialog open={!!selectedItem} onOpenChange={() => setSelectedItem(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto glass-premium border-border/50">
           {selectedItem && (
             <>
               <DialogHeader>
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="p-2 rounded-lg bg-muted">
+                  <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20">
                     {knowledgeTypeIcons[selectedItem.type as KnowledgeType]}
                   </div>
-                  <Badge>{knowledgeTypeLabels[selectedItem.type as KnowledgeType]}</Badge>
+                  <Badge className="bg-gradient-to-l from-blue-500 to-indigo-600 text-white">
+                    {knowledgeTypeLabels[selectedItem.type as KnowledgeType]}
+                  </Badge>
                   {selectedItem.practiceArea && (
                     <Badge variant="outline">
                       {practiceAreaLabels[selectedItem.practiceArea as PracticeArea]}
@@ -445,15 +544,15 @@ export default function KnowledgePage() {
 
               <div className="space-y-4">
                 {selectedItem.summary && (
-                  <div className="p-4 bg-muted/50 rounded-lg">
-                    <h4 className="font-semibold mb-2">תקציר</h4>
+                  <div className="p-4 bg-gradient-to-br from-blue-500/5 to-indigo-500/5 rounded-xl border border-border/50">
+                    <h4 className="font-semibold mb-2 text-blue-600 dark:text-blue-400">תקציר</h4>
                     <p>{selectedItem.summary}</p>
                   </div>
                 )}
 
                 <div>
                   <h4 className="font-semibold mb-2">תוכן</h4>
-                  <div className="prose prose-sm max-w-none whitespace-pre-wrap">
+                  <div className="prose prose-sm max-w-none whitespace-pre-wrap p-4 rounded-xl bg-muted/30">
                     {selectedItem.content}
                   </div>
                 </div>
@@ -468,7 +567,7 @@ export default function KnowledgePage() {
                         href={selectedItem.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-primary hover:underline"
+                        className="flex items-center gap-1 text-blue-500 hover:underline"
                       >
                         <ExternalLink className="h-3 w-3" />
                         קישור למקור
@@ -478,7 +577,7 @@ export default function KnowledgePage() {
                 )}
 
                 {selectedItem.tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <Tag className="h-4 w-4 text-muted-foreground" />
                     {selectedItem.tags.map((tag: string) => (
                       <Badge key={tag} variant="secondary">{tag}</Badge>
@@ -486,7 +585,7 @@ export default function KnowledgePage() {
                   </div>
                 )}
 
-                <div className="flex items-center gap-4 text-xs text-muted-foreground pt-4 border-t">
+                <div className="flex items-center gap-4 text-xs text-muted-foreground pt-4 border-t border-border/50">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     נוצר: {format(new Date(selectedItem.createdAt), 'dd/MM/yyyy', { locale: he })}

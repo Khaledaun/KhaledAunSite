@@ -92,7 +92,7 @@ const FirmTeamPreview = ({ locale }) => {
                   {partner.specialties[locale] || partner.specialties.en}
                 </p>
                 <Link
-                  href={`/${locale}/team/${partner.slug}`}
+                  href={`/${locale}/firm/team/${partner.slug}`}
                   className="inline-flex items-center text-brand-gold font-medium hover:text-brand-navy transition-colors"
                 >
                   {t('readMore')}
@@ -113,7 +113,7 @@ const FirmTeamPreview = ({ locale }) => {
         {/* CTA */}
         <div className="text-center mt-12">
           <Link
-            href={`/${locale}/team`}
+            href={`/${locale}/firm/team`}
             className="inline-flex items-center px-8 py-4 border-2 border-brand-navy text-brand-navy font-semibold rounded-md hover:bg-brand-navy hover:text-white transition-all duration-200"
           >
             {locale === 'he' ? 'צפה בכל הצוות' :

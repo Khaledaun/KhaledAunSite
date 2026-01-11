@@ -74,7 +74,7 @@ const FirmAbout = ({ locale }) => {
 
             {/* CTA */}
             <Link
-              href={`/${locale}/about`}
+              href={`/${locale}/firm/about`}
               className="inline-flex items-center text-brand-gold font-semibold hover:text-brand-navy transition-colors"
             >
               {locale === 'he' ? 'קרא עוד אודותינו' :

@@ -45,7 +45,7 @@ const FirmPracticeAreas = ({ locale }) => {
           {practiceAreas.map((area) => (
             <Link
               key={area.slug}
-              href={`/${locale}/practice-areas/${area.slug}`}
+              href={`/${locale}/firm/practice-areas/${area.slug}`}
               className="group p-6 bg-gray-50 rounded-lg hover:bg-brand-navy transition-all duration-300"
             >
               <div className="flex items-center">
@@ -73,7 +73,7 @@ const FirmPracticeAreas = ({ locale }) => {
         {/* CTA */}
         <div className="text-center mt-12">
           <Link
-            href={`/${locale}/practice-areas`}
+            href={`/${locale}/firm/practice-areas`}
             className="inline-flex items-center px-8 py-4 bg-brand-gold text-white font-semibold rounded-md hover:bg-brand-gold/90 transition-all duration-200"
           >
             {locale === 'he' ? 'צפה בכל תחומי העיסוק' :

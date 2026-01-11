@@ -54,7 +54,7 @@ const FirmHero = ({ locale }) => {
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4">
             <a
-              href={`/${locale}/contact`}
+              href={`/${locale}/firm/contact`}
               className="inline-flex items-center px-8 py-4 bg-brand-gold text-white font-semibold rounded-md hover:bg-brand-gold/90 transition-all duration-200"
             >
               {locale === 'he' ? 'צור קשר' : locale === 'ar' ? 'اتصل بنا' : 'Contact Us'}
@@ -73,7 +73,7 @@ const FirmHero = ({ locale }) => {
               </svg>
             </a>
             <a
-              href={`/${locale}/practice-areas`}
+              href={`/${locale}/firm/practice-areas`}
               className="inline-flex items-center px-8 py-4 border-2 border-white text-white font-semibold rounded-md hover:bg-white hover:text-brand-navy transition-all duration-200"
             >
               {locale === 'he' ? 'תחומי עיסוק' : locale === 'ar' ? 'مجالات الممارسة' : 'Practice Areas'}

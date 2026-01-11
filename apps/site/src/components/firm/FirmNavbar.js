@@ -20,12 +20,12 @@ const FirmNavbar = ({ locale }) => {
   }, []);
 
   const navLinks = [
-    { href: `/${locale}/about`, label: t('about') },
-    { href: `/${locale}/practice-areas`, label: t('practiceAreas') },
-    { href: `/${locale}/team`, label: t('team') },
-    { href: `/${locale}/news`, label: t('news') },
-    { href: `/${locale}/community`, label: t('community') },
-    { href: `/${locale}/contact`, label: t('contact') },
+    { href: `/${locale}/firm`, label: locale === 'he' ? 'אודות' : locale === 'ar' ? 'حول' : 'About' },
+    { href: `/${locale}/firm/practice-areas`, label: t('practiceAreas') },
+    { href: `/${locale}/firm/team`, label: t('team') },
+    { href: `/${locale}/firm/news`, label: t('news') },
+    { href: `/${locale}/firm/community`, label: t('community') },
+    { href: `/${locale}/firm/contact`, label: t('contact') },
   ];
 
   const localeLinks = [
@@ -45,7 +45,7 @@ const FirmNavbar = ({ locale }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href={`/${locale}`} className="flex items-center">
+          <Link href={`/${locale}/firm`} className="flex items-center">
             <div className="relative h-12 w-48">
               {/* NAS Logo - Text version for now */}
               <div className="flex items-baseline">
@@ -127,7 +127,7 @@ const FirmNavbar = ({ locale }) => {
                 {localeLinks.map((lang) => (
                   <Link
                     key={lang.code}
-                    href={`/${lang.code}`}
+                    href={`/${lang.code}/firm`}
                     className={`block px-4 py-2 text-sm hover:bg-gray-100 ${
                       locale === lang.code
                         ? 'text-brand-gold font-medium'
@@ -190,7 +190,7 @@ const FirmNavbar = ({ locale }) => {
                 {localeLinks.map((lang) => (
                   <Link
                     key={lang.code}
-                    href={`/${lang.code}`}
+                    href={`/${lang.code}/firm`}
                     className={`text-sm ${
                       locale === lang.code
                         ? 'text-brand-gold font-medium'

@@ -234,7 +234,7 @@ export default function PartnerPage({ params: { locale, slug } }) {
         <section className="py-8 bg-white border-t">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <Link
-              href={`/${locale}/team`}
+              href={`/${locale}/firm/team`}
               className="inline-flex items-center text-brand-gold font-medium hover:text-brand-navy transition-colors"
             >
               <svg

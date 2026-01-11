@@ -10,19 +10,19 @@ const FirmFooter = ({ locale }) => {
   const currentYear = new Date().getFullYear();
 
   const quickLinks = [
-    { href: `/${locale}/about`, label: t('about') },
-    { href: `/${locale}/practice-areas`, label: t('practiceAreas') },
-    { href: `/${locale}/team`, label: t('team') },
-    { href: `/${locale}/news`, label: t('news') },
-    { href: `/${locale}/contact`, label: t('contact') },
+    { href: `/${locale}/firm`, label: t('about') },
+    { href: `/${locale}/firm/practice-areas`, label: t('practiceAreas') },
+    { href: `/${locale}/firm/team`, label: t('team') },
+    { href: `/${locale}/firm/news`, label: t('news') },
+    { href: `/${locale}/firm/contact`, label: t('contact') },
   ];
 
   const practiceLinks = [
-    { href: `/${locale}/practice-areas/commercial-corporate-law`, key: 'commercialCorporate' },
-    { href: `/${locale}/practice-areas/startups-hitech-venture-capital`, key: 'startupsVC' },
-    { href: `/${locale}/practice-areas/commercial-litigation`, key: 'commercialLitigation' },
-    { href: `/${locale}/practice-areas/private-commercial-real-estate`, key: 'realEstate' },
-    { href: `/${locale}/practice-areas/construction-zoning-law`, key: 'constructionZoning' },
+    { href: `/${locale}/firm/practice-areas/commercial-corporate-law`, key: 'commercialCorporate' },
+    { href: `/${locale}/firm/practice-areas/startups-hitech-venture-capital`, key: 'startupsVC' },
+    { href: `/${locale}/firm/practice-areas/commercial-litigation`, key: 'commercialLitigation' },
+    { href: `/${locale}/firm/practice-areas/private-commercial-real-estate`, key: 'realEstate' },
+    { href: `/${locale}/firm/practice-areas/construction-zoning-law`, key: 'constructionZoning' },
   ];
 
   return (
@@ -172,10 +172,10 @@ const FirmFooter = ({ locale }) => {
               {locale === 'he' ? 'כל הזכויות שמורות.' : locale === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href={`/${locale}/privacy`} className="hover:text-white transition-colors">
+              <Link href={`/${locale}/firm/privacy`} className="hover:text-white transition-colors">
                 {locale === 'he' ? 'מדיניות פרטיות' : locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}
               </Link>
-              <Link href={`/${locale}/terms`} className="hover:text-white transition-colors">
+              <Link href={`/${locale}/firm/terms`} className="hover:text-white transition-colors">
                 {locale === 'he' ? 'תנאי שימוש' : locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service'}
               </Link>
             </div>

@@ -95,7 +95,7 @@ export default function TeamPage({ params: { locale } }) {
               {partners.map((partner) => (
                 <Link
                   key={partner.slug}
-                  href={`/${locale}/team/${partner.slug}`}
+                  href={`/${locale}/firm/team/${partner.slug}`}
                   className="group"
                 >
                   <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -163,7 +163,7 @@ export default function TeamPage({ params: { locale } }) {
                 : 'We are always looking for talented attorneys to join our firm'}
             </p>
             <Link
-              href={`/${locale}/contact`}
+              href={`/${locale}/firm/contact`}
               className="inline-flex items-center px-8 py-4 bg-brand-gold text-white font-semibold rounded-md hover:bg-brand-gold/90 transition-all"
             >
               {locale === 'he' ? 'צור קשר' : locale === 'ar' ? 'اتصل بنا' : 'Contact Us'}

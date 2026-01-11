@@ -15,14 +15,28 @@
   html[lang="ar"] {
     font-family: var(--font-cairo);
   }
-  
-  html[lang="ar"] h1, 
-  html[lang="ar"] h2, 
-  html[lang="ar"] h3, 
-  html[lang="ar"] h4, 
-  html[lang="ar"] h5, 
+
+  html[lang="ar"] h1,
+  html[lang="ar"] h2,
+  html[lang="ar"] h3,
+  html[lang="ar"] h4,
+  html[lang="ar"] h5,
   html[lang="ar"] h6 {
     font-family: var(--font-cairo);
+  }
+
+  /* Hebrew font override */
+  html[lang="he"] {
+    font-family: var(--font-heebo);
+  }
+
+  html[lang="he"] h1,
+  html[lang="he"] h2,
+  html[lang="he"] h3,
+  html[lang="he"] h4,
+  html[lang="he"] h5,
+  html[lang="he"] h6 {
+    font-family: var(--font-heebo);
   }
   
   body {

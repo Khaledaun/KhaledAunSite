@@ -58,9 +58,6 @@ export default function TeamPage({ params: { locale } }) {
     },
   ];
 
-  // Associates placeholder - will be populated later
-  const associates = [];
-
   return (
     <>
       <FirmNavbar locale={locale} />
@@ -133,17 +130,35 @@ export default function TeamPage({ params: { locale } }) {
           </div>
         </section>
 
-        {/* Associates Section - Placeholder */}
-        {associates.length > 0 && (
-          <section className="py-20 bg-white">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-              <h2 className="text-2xl font-bold text-brand-navy mb-12 text-center">
-                {locale === 'he' ? 'עורכי דין' : locale === 'ar' ? 'المحامون' : 'Associates'}
-              </h2>
-              {/* Associate cards would go here */}
-            </div>
-          </section>
-        )}
+        {/* Associates & Advisors Link */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl font-bold text-brand-navy mb-4">
+              {locale === 'he' ? 'עורכי דין ויועצים' : locale === 'ar' ? 'المحامون والمستشارون' : 'Associates & Advisors'}
+            </h2>
+            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+              {locale === 'he'
+                ? 'הכירו את צוות עורכי הדין והיועצים שלנו'
+                : locale === 'ar'
+                ? 'تعرف على فريق المحامين والمستشارين لدينا'
+                : 'Meet our team of associates and advisors'}
+            </p>
+            <Link
+              href={`/${locale}/firm/team/associates`}
+              className="inline-flex items-center px-6 py-3 border-2 border-brand-navy text-brand-navy font-medium rounded-md hover:bg-brand-navy hover:text-white transition-all"
+            >
+              {locale === 'he' ? 'צפה בצוות' : locale === 'ar' ? 'عرض الفريق' : 'View Team'}
+              <svg
+                className={`w-5 h-5 ${locale === 'he' || locale === 'ar' ? 'mr-2 rotate-180' : 'ml-2'}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </section>
 
         {/* Join Us CTA */}
         <section className="py-16 bg-brand-navy">

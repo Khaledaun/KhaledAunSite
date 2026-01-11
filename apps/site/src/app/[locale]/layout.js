@@ -1,19 +1,19 @@
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { Inter, Poppins, Cairo } from 'next/font/google';
+import { Inter, Poppins, Cairo, Heebo } from 'next/font/google';
 import { ModalProvider } from '../../context/ModalContext';
-import { locales } from '../../i18n/config';
+import { locales, rtlLocales } from '../../i18n/config';
 import '../globals.css';
 
 // Dennis theme-inspired fonts: Poppins for headings, Inter for body
-const inter = Inter({ 
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
 });
 
-const poppins = Poppins({ 
+const poppins = Poppins({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-heading',
@@ -24,6 +24,13 @@ const poppins = Poppins({
 const cairo = Cairo({
   subsets: ['arabic', 'latin'],
   variable: '--font-cairo',
+  display: 'swap',
+});
+
+// Heebo font for Hebrew
+const heebo = Heebo({
+  subsets: ['hebrew', 'latin'],
+  variable: '--font-heebo',
   display: 'swap',
 });
 
@@ -70,13 +77,23 @@ export default async function LocaleLayout({children, params: {locale}}) {
     messages = (await import(`../../messages/en.json`)).default;
   }
 
+  // Determine if locale is RTL
+  const isRTL = rtlLocales.includes(locale);
+
+  // Get the appropriate font class for the locale
+  const getFontClass = () => {
+    if (locale === 'ar') return 'font-cairo';
+    if (locale === 'he') return 'font-heebo';
+    return 'font-poppins';
+  };
+
   return (
-    <html 
-      dir={locale === 'ar' ? 'rtl' : 'ltr'} 
+    <html
+      dir={isRTL ? 'rtl' : 'ltr'}
       lang={locale}
-      className={`${inter.variable} ${poppins.variable} ${cairo.variable}`}
+      className={`${inter.variable} ${poppins.variable} ${cairo.variable} ${heebo.variable}`}
     >
-      <body className={`${locale === 'ar' ? 'font-cairo' : 'font-poppins'} text-base text-black dark:text-white dark:bg-slate-900`}>
+      <body className={`${getFontClass()} text-base text-black dark:text-white dark:bg-slate-900`}>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-brand-gold text-brand-navy px-4 py-2 rounded z-50"

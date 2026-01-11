@@ -201,10 +201,11 @@ model URLExtraction {
   @@map("url_extractions")
 }
 
-// Phase 6 Full: Locale for i18n support
+// Phase 6 Full: Locale for i18n support (trilingual)
 enum Locale {
   en
   ar
+  he
 }
 
 // Phase 6 Full: User & Role (expanded for RBAC)
@@ -264,11 +265,19 @@ model Post {
   featuredImageId String?
   featuredImage   MediaAsset? @relation("FeaturedImage", fields: [featuredImageId], references: [id])
 
+  // Firm website: Entity and Practice Area associations
+  entityId        String?
+  entity          Entity?      @relation("EntityPosts", fields: [entityId], references: [id])
+  practiceAreaId  String?
+  practiceArea    PracticeArea? @relation("PostPracticeArea", fields: [practiceAreaId], references: [id])
+
   translations    PostTranslation[] // Phase 6 Full: i18n support
   PostMedia       PostMedia[]
   aiGenerations   AIGeneration[]    @relation("PostGenerations")     // Phase 7
   linkedInPosts   LinkedInPost[]    @relation("LinkedInFromBlogPost") // LinkedIn posts generated from this blog
 
+  @@index([entityId])
+  @@index([practiceAreaId])
   @@map("posts")
 }
 
@@ -498,13 +507,21 @@ model CaseStudy {
   // Relations
   authorId      String
   author        User          @relation("UserCaseStudies", fields: [authorId], references: [id])
-  
+
+  // Firm website: Entity and Practice Area associations
+  entityId        String?
+  entity          Entity?      @relation("EntityCaseStudies", fields: [entityId], references: [id])
+  practiceAreaRefId String?
+  practiceAreaRef   PracticeArea? @relation("CaseStudyPracticeArea", fields: [practiceAreaRefId], references: [id])
+
   // Media
   featuredImageId String?
   featuredImage   MediaAsset?  @relation("CaseStudyFeaturedImage", fields: [featuredImageId], references: [id])
-  
+
   @@index([type, published])
   @@index([slug])
+  @@index([entityId])
+  @@index([practiceAreaRefId])
   @@map("case_studies")
 }
 
@@ -632,4 +649,303 @@ model LinkedInPost {
   @@index([published, isPinned])
   @@index([authorId])
   @@map("linkedin_posts")
+}
+
+// ============================================================
+// FIRM WEBSITE MODELS - Multi-Entity Law Firm Platform
+// ============================================================
+
+// Entity type for firm and partners
+enum EntityType {
+  FIRM
+  PARTNER
+  ASSOCIATE
+  ADVISOR
+}
+
+// Entity model for firm + partners + associates + advisors
+model Entity {
+  id          String     @id @default(cuid())
+  type        EntityType
+
+  // Basic Info
+  name        String
+  nameAr      String?    // Arabic name
+  nameHe      String?    // Hebrew name
+  slug        String     @unique
+
+  // Titles
+  title       String?    // e.g., "Managing Partner", "Partner", "Senior Associate"
+  titleAr     String?
+  titleHe     String?
+
+  // Contact
+  email       String?
+  phone       String?
+
+  // Bio (multilingual)
+  bio         String?    @db.Text
+  bioAr       String?    @db.Text
+  bioHe       String?    @db.Text
+
+  // Quote (personal motto)
+  quote       String?    @db.Text
+  quoteAr     String?    @db.Text
+  quoteHe     String?    @db.Text
+
+  // Photos
+  photo       String?    // Main profile photo URL
+  photoAlt    String?    // Alternative/secondary photo
+
+  // Social Links
+  linkedinUrl   String?
+  linkedinPageId String? // For firm: company page ID; for partners: personal profile ID
+
+  // Display
+  order       Int        @default(0)
+  isActive    Boolean    @default(true)
+  showOnTeamPage Boolean @default(true)
+
+  // Timestamps
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  practiceAreas     EntityPracticeArea[]
+  education         Education[]
+  experiences       EntityExperience[]
+  posts             Post[]           @relation("EntityPosts")
+  caseStudies       CaseStudy[]      @relation("EntityCaseStudies")
+  linkedInAccount   LinkedInAccount?
+
+  @@index([type, isActive])
+  @@index([slug])
+  @@map("entities")
+}
+
+// Practice areas for the firm
+model PracticeArea {
+  id            String   @id @default(cuid())
+
+  // Name (multilingual)
+  name          String
+  nameAr        String?
+  nameHe        String?
+
+  slug          String   @unique
+
+  // Description (multilingual)
+  description   String?  @db.Text
+  descriptionAr String?  @db.Text
+  descriptionHe String?  @db.Text
+
+  // Icon (for display)
+  icon          String?  // Icon name or URL
+
+  // Display
+  order         Int      @default(0)
+  isActive      Boolean  @default(true)
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  entities      EntityPracticeArea[]
+  caseStudies   CaseStudy[]          @relation("CaseStudyPracticeArea")
+  posts         Post[]               @relation("PostPracticeArea")
+
+  @@index([isActive, order])
+  @@map("practice_areas")
+}
+
+// Many-to-many for Entity-PracticeArea
+model EntityPracticeArea {
+  id             String       @id @default(cuid())
+  entityId       String
+  practiceAreaId String
+  isPrimary      Boolean      @default(false)
+
+  entity         Entity       @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  practiceArea   PracticeArea @relation(fields: [practiceAreaId], references: [id], onDelete: Cascade)
+
+  @@unique([entityId, practiceAreaId])
+  @@map("entity_practice_areas")
+}
+
+// Education for partners/associates
+model Education {
+  id          String   @id @default(cuid())
+  entityId    String
+
+  // Institution (multilingual)
+  institution   String
+  institutionAr String?
+  institutionHe String?
+
+  // Degree (multilingual)
+  degree        String
+  degreeAr      String?
+  degreeHe      String?
+
+  // Field of study
+  field         String?
+  fieldAr       String?
+  fieldHe       String?
+
+  // Year
+  year          Int?
+
+  // Display order
+  order         Int      @default(0)
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  entity        Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityId])
+  @@map("education")
+}
+
+// Experience entries for partners (separate from main Experience model for personal site)
+model EntityExperience {
+  id          String   @id @default(cuid())
+  entityId    String
+
+  // Company (multilingual)
+  company       String
+  companyAr     String?
+  companyHe     String?
+
+  // Role (multilingual)
+  role          String
+  roleAr        String?
+  roleHe        String?
+
+  // Description (multilingual)
+  description   String?  @db.Text
+  descriptionAr String?  @db.Text
+  descriptionHe String?  @db.Text
+
+  // Dates
+  startYear     Int?
+  endYear       Int?     // null for "Present"
+
+  // Display
+  order         Int      @default(0)
+
+  // Timestamps
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  entity        Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityId])
+  @@map("entity_experiences")
+}
+
+// LinkedIn accounts for multi-account management
+model LinkedInAccount {
+  id              String   @id @default(cuid())
+  entityId        String   @unique
+
+  // OAuth tokens (encrypted)
+  accessToken     String   @db.Text
+  refreshToken    String?  @db.Text
+  tokenExpiresAt  DateTime
+
+  // LinkedIn identifiers
+  linkedinUserId  String?  // For personal profiles
+  linkedinPageId  String?  // For company pages
+  profileUrl      String?
+
+  // Status
+  isActive        Boolean  @default(true)
+  lastSyncAt      DateTime?
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  entity          Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  scheduledPosts  ScheduledLinkedInPost[]
+
+  @@map("linkedin_accounts")
+}
+
+// Scheduled LinkedIn posts for multi-account posting
+model ScheduledLinkedInPost {
+  id              String   @id @default(cuid())
+  accountId       String
+
+  // Content
+  content         String   @db.Text
+  mediaUrls       String[] // Array of media URLs
+
+  // Scheduling
+  scheduledAt     DateTime
+  publishedAt     DateTime?
+
+  // LinkedIn response
+  linkedinPostId  String?
+  linkedinPostUrl String?
+
+  // Engagement (updated after publish)
+  engagement      Json?    // { likes, comments, shares, impressions }
+
+  // Status
+  status          ScheduledPostStatus @default(DRAFT)
+  error           String?
+
+  // Source (if generated from blog post)
+  sourcePostId    String?
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  account         LinkedInAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, status])
+  @@index([scheduledAt])
+  @@map("scheduled_linkedin_posts")
+}
+
+enum ScheduledPostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+// Site configuration for switching between personal and firm modes
+model SiteConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String   @db.Text
+  description String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("site_config")
+}
+
+// Hero titles for firm (extending existing HeroTitle for multi-entity)
+model FirmHeroTitle {
+  id        String   @id @default(cuid())
+  titleEn   String
+  titleAr   String?
+  titleHe   String?
+  order     Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("firm_hero_titles")
 }

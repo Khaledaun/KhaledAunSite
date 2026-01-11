@@ -109,3 +109,6 @@ export * from './roles';
 
 // Re-export permission utilities
 export * from './permissions';
+
+// Re-export firm-specific permissions
+export * from './firm-permissions';
